@@ -1,0 +1,451 @@
+[
+  {
+    "recipeId": "epic-59a0c86d02da42e8ba6444cb171e61bf",
+    "assertions": [
+      {
+        "kind": "registry",
+        "description": "Sets Oblivion installed path registry key",
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\Bethesda Softworks\\Oblivion",
+        "name": "Installed Path",
+        "expected": "<InstallPath>"
+      }
+    ]
+  },
+  {
+    "recipeId": "epic-864c7bc2c2394f7dbd1b534aa068ff56",
+    "assertions": [
+      {
+        "kind": "cleanup",
+        "path": "ProgramData/Hogwarts Legacy",
+        "description": "Wipes Hogwarts Legacy ProgramData folder on every boot to clear stale Denuvo/EOS cache"
+      }
+    ]
+  },
+  {
+    "recipeId": "epic-b1b4e0b67a044575820cb5e63028dcae",
+    "assertions": [
+      {
+        "kind": "registry",
+        "description": "Set Fallout 3 registry Installed Path to game installation directory",
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\Bethesda Softworks\\Fallout3",
+        "name": "Installed Path",
+        "expected": "<InstallPath>"
+      }
+    ]
+  },
+  {
+    "recipeId": "epic-dabb52e328834da7bbe99691e374cb84",
+    "assertions": [
+      {
+        "kind": "registry",
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\Bethesda Softworks\\FalloutNV",
+        "name": "Installed Path",
+        "expected": "<InstallPath>",
+        "description": "Registry entry for Fallout: New Vegas install path in Bethesda Softworks hive"
+      }
+    ]
+  },
+  {
+    "recipeId": "epic-e345fdb9186645a48d30c3f85a8951dc",
+    "assertions": [
+      {
+        "kind": "dllOverride",
+        "dll": "mf",
+        "mode": "n",
+        "description": "Disable mf (Media Foundation) using native mode"
+      },
+      {
+        "kind": "dllOverride",
+        "dll": "mfmediaengine",
+        "mode": "n",
+        "description": "Disable mfmediaengine (Media Foundation Media Engine) using native mode"
+      }
+    ]
+  },
+  {
+    "recipeId": "gog-1129934535",
+    "assertions": [
+      {
+        "kind": "launchArg",
+        "expected": "-lang=eng",
+        "description": "Launch args should be set to -lang=eng for English language"
+      }
+    ]
+  },
+  {
+    "recipeId": "gog-1141086411",
+    "assertions": [
+      {
+        "kind": "registry",
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\KONAMI\\SILENT HILL 4\\1.00.000",
+        "name": "Install Language",
+        "expected": "English",
+        "description": "Sets Silent Hill 4 install language to English"
+      },
+      {
+        "kind": "registry",
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\KONAMI\\SILENT HILL 4\\1.00.000",
+        "name": "Install Path",
+        "expected": "<InstallPath>",
+        "description": "Sets Silent Hill 4 install path registry entry"
+      },
+      {
+        "kind": "registry",
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\KONAMI\\SILENT HILL 4\\1.00.000",
+        "name": "Movie Install",
+        "expected": "<InstallPath>",
+        "description": "Sets Silent Hill 4 movie install path registry entry"
+      },
+      {
+        "kind": "registry",
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\KONAMI\\SILENT HILL 4\\1.00.000",
+        "name": "Uninstall Path",
+        "expected": "<InstallPath>",
+        "description": "Sets Silent Hill 4 uninstall path registry entry"
+      }
+    ]
+  },
+  {
+    "recipeId": "gog-1177610018",
+    "assertions": [
+      {
+        "kind": "launchArg",
+        "expected": "-lang=eng",
+        "description": "Launch argument sets language to English"
+      }
+    ]
+  },
+  {
+    "recipeId": "gog-1453375253",
+    "assertions": [
+      {
+        "kind": "dllOverride",
+        "dll": "icu",
+        "mode": "n",
+        "description": "Set icu DLL override to native mode"
+      }
+    ]
+  },
+  {
+    "recipeId": "gog-1454315831",
+    "assertions": [
+      {
+        "kind": "registry",
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\Bethesda Softworks\\Fallout3",
+        "name": "Installed Path",
+        "expected": "<InstallPath>",
+        "description": "Registry entry sets Installed Path for Fallout 3"
+      }
+    ]
+  },
+  {
+    "recipeId": "gog-1454587428",
+    "assertions": [
+      {
+        "kind": "registry",
+        "description": "Sets FalloutNV install path in registry",
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\Bethesda Softworks\\FalloutNV",
+        "name": "Installed Path",
+        "expected": "<InstallPath>"
+      }
+    ]
+  },
+  {
+    "recipeId": "gog-1458058109",
+    "assertions": [
+      {
+        "kind": "registry",
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\Bethesda Softworks\\Oblivion",
+        "name": "Installed Path",
+        "expected": "<InstallPath>",
+        "description": "Registry entry for The Elder Scrolls IV: Oblivion installation path"
+      }
+    ]
+  },
+  {
+    "recipeId": "gog-1589319779",
+    "assertions": [
+      {
+        "kind": "dependency",
+        "verb": "MSVC2017",
+        "description": "MSVC 2017 runtime is declared as a dependency"
+      },
+      {
+        "kind": "dependency",
+        "verb": "MSVC2017_x64",
+        "description": "MSVC 2017 x64 runtime is declared as a dependency"
+      }
+    ]
+  },
+  {
+    "recipeId": "gog-1635627436",
+    "assertions": [
+      {
+        "kind": "launchArg",
+        "expected": "--rendering-driver vulkan",
+        "description": "Launch arguments set to use Vulkan rendering driver"
+      }
+    ]
+  },
+  {
+    "recipeId": "gog-1787707874",
+    "assertions": [
+      {
+        "kind": "launchArg",
+        "expected": "-lang=eng",
+        "description": "Launch arguments set to enforce English language"
+      }
+    ]
+  },
+  {
+    "recipeId": "gog-1808582759",
+    "assertions": [
+      {
+        "kind": "launchArg",
+        "expected": "-conf \"..\\\\dosbox_jazz.conf\" -conf \"..\\\\dosbox_jazz_single.conf\" -noconsole -c \"exit\"",
+        "description": "Launch arguments for DOSBox configuration files and console settings"
+      }
+    ]
+  },
+  {
+    "recipeId": "gog-2147483047",
+    "assertions": [
+      {
+        "kind": "dependency",
+        "verb": "MSVC2017",
+        "description": "Declare MSVC2017 runtime dependency for Moonlighter"
+      },
+      {
+        "kind": "dependency",
+        "verb": "MSVC2017_x64",
+        "description": "Declare MSVC2017_x64 runtime dependency for Moonlighter"
+      }
+    ]
+  },
+  {
+    "recipeId": "steam-1637320",
+    "assertions": [
+      {
+        "kind": "launchArg",
+        "expected": "--rendering-driver vulkan",
+        "description": "Set rendering driver to vulkan for Dome Keeper"
+      }
+    ]
+  },
+  {
+    "recipeId": "steam-1962700",
+    "assertions": [
+      {
+        "kind": "file",
+        "path": "users/xuser/AppData/Local/Subnautica2/Saved/Config/Windows/Engine.ini",
+        "contains": "[SectionsToSave]",
+        "description": "Engine.ini configuration file is written to the Subnautica 2 config directory"
+      },
+      {
+        "kind": "file",
+        "path": "users/xuser/AppData/Local/Subnautica2/Saved/Config/Windows/Engine.ini",
+        "contains": "r.Nanite=0",
+        "description": "Nanite rendering is disabled in Engine.ini"
+      },
+      {
+        "kind": "file",
+        "path": "users/xuser/AppData/Local/Subnautica2/Saved/Config/Windows/Engine.ini",
+        "contains": "[/Script/Engine.RendererSettings]",
+        "description": "Renderer settings section is present in Engine.ini"
+      },
+      {
+        "kind": "file",
+        "path": "users/xuser/AppData/Local/Subnautica2/Saved/Config/Windows/Engine.ini",
+        "contains": "[/Script/WindowsTargetPlatform.WindowsTargetSettings]",
+        "description": "Windows target platform settings section is present in Engine.ini"
+      }
+    ]
+  },
+  {
+    "recipeId": "steam-22300",
+    "assertions": [
+      {
+        "kind": "registry",
+        "description": "Sets Fallout 3 installed path in registry for 32-bit Windows emulation",
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\Bethesda Softworks\\Fallout3",
+        "name": "Installed Path",
+        "expected": "<InstallPath>"
+      }
+    ]
+  },
+  {
+    "recipeId": "steam-22330",
+    "assertions": [
+      {
+        "kind": "registry",
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\Bethesda Softworks\\Oblivion",
+        "name": "Installed Path",
+        "expected": "<InstallPath>",
+        "description": "Registry key for Oblivion install path is set in system hive"
+      }
+    ]
+  },
+  {
+    "recipeId": "steam-22370",
+    "assertions": [
+      {
+        "kind": "registry",
+        "description": "Registry key set for Fallout 3 installation path",
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\Bethesda Softworks\\Fallout3",
+        "name": "Installed Path",
+        "expected": "<InstallPath>"
+      }
+    ]
+  },
+  {
+    "recipeId": "steam-22380",
+    "assertions": [
+      {
+        "kind": "registry",
+        "description": "Set FalloutNV registry key with install path",
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\Bethesda Softworks\\FalloutNV",
+        "name": "Installed Path",
+        "expected": "<InstallPath>"
+      }
+    ]
+  },
+  {
+    "recipeId": "steam-22490",
+    "assertions": [
+      {
+        "kind": "registry",
+        "description": "Sets the FalloutNV installed path registry value to the game installation directory",
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\Bethesda Softworks\\FalloutNV",
+        "name": "Installed Path",
+        "expected": "<InstallPath>"
+      }
+    ]
+  },
+  {
+    "recipeId": "steam-2868840",
+    "assertions": [
+      {
+        "kind": "launchArg",
+        "expected": "--rendering-driver vulkan",
+        "description": "Launch arguments set for Vulkan rendering driver"
+      },
+      {
+        "kind": "dllOverride",
+        "dll": "icu",
+        "mode": "d",
+        "description": "ICU DLL override set to native mode"
+      },
+      {
+        "kind": "env",
+        "key": "DOTNET_EnableWriteXorExecute",
+        "expected": "0",
+        "description": "DOTNET_EnableWriteXorExecute disabled for .NET compatibility"
+      },
+      {
+        "kind": "env",
+        "key": "DOTNET_GCHeapHardLimit",
+        "expected": "0x400000000",
+        "description": "DOTNET_GCHeapHardLimit set to 1GB for memory management"
+      }
+    ]
+  },
+  {
+    "recipeId": "steam-3373660",
+    "assertions": [
+      {
+        "kind": "launchArg",
+        "expected": "--no-sandbox",
+        "description": "Sets launch arguments to disable sandbox mode"
+      }
+    ]
+  },
+  {
+    "recipeId": "steam-400",
+    "assertions": [
+      {
+        "kind": "launchArg",
+        "expected": "-game portal",
+        "description": "Set launch arguments to -game portal for Portal"
+      }
+    ]
+  },
+  {
+    "recipeId": "steam-413150",
+    "assertions": [
+      {
+        "kind": "dllOverride",
+        "dll": "icu",
+        "mode": "n",
+        "description": "Set ICU library to native mode for Stardew Valley"
+      }
+    ]
+  },
+  {
+    "recipeId": "steam-413420",
+    "assertions": [
+      {
+        "kind": "dllOverride",
+        "dll": "d3dx9_43",
+        "mode": "native,builtin",
+        "description": "Force d3dx9_43 to use native then builtin to bypass vkd3d-shader E5017 crash"
+      },
+      {
+        "kind": "dllOverride",
+        "dll": "d3dcompiler_43",
+        "mode": "native,builtin",
+        "description": "Force d3dcompiler_43 to use native then builtin for shader compilation"
+      }
+    ]
+  },
+  {
+    "recipeId": "steam-752580",
+    "assertions": [
+      {
+        "kind": "iniPatch",
+        "description": "Set Music key to 0 in Settings.ini",
+        "path": "Settings.ini",
+        "iniKey": "Music",
+        "expected": "0"
+      },
+      {
+        "kind": "iniPatch",
+        "description": "Set SoundFX key to 1 in Settings.ini",
+        "path": "Settings.ini",
+        "iniKey": "SoundFX",
+        "expected": "1"
+      },
+      {
+        "kind": "iniPatch",
+        "description": "Set Speech key to 1 in Settings.ini",
+        "path": "Settings.ini",
+        "iniKey": "Speech",
+        "expected": "1"
+      }
+    ]
+  },
+  {
+    "recipeId": "steam-990080",
+    "assertions": [
+      {
+        "kind": "cleanup",
+        "path": "ProgramData/Hogwarts Legacy",
+        "description": "Declares deletion of Hogwarts Legacy ProgramData folder on every launch"
+      }
+    ]
+  }
+]

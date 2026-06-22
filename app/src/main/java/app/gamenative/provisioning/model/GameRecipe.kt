@@ -33,6 +33,7 @@ data class GameRecipe(
     val registry: List<RegistryPatch> = emptyList(),
     val dependencies: List<String> = emptyList(),
     val files: List<PrefixFile> = emptyList(),
+    val iniPatches: List<IniPatch> = emptyList(),
     val cleanup: Cleanup = Cleanup(),
     val launch: LaunchSpec = LaunchSpec(),
     val deviceOverrides: List<DeviceOverride> = emptyList(),
@@ -166,6 +167,17 @@ data class PrefixFile(
     val driveCRelativePath: String,
     val content: String? = null,
     val iniMerge: Map<String, Map<String, String>>? = null,
+)
+
+/**
+ * A flat `key=value` patch applied to an INI file inside the game's install directory (not the
+ * prefix), mirroring the existing IniFileFix. Existing keys are updated in place; missing keys are
+ * appended.
+ */
+@Serializable
+data class IniPatch(
+    val relativePath: String,
+    val values: Map<String, String> = emptyMap(),
 )
 
 /** Paths (relative to `drive_c`) to delete before launch, e.g. stale DRM/bootstrap state. */

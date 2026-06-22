@@ -16,7 +16,10 @@ import timber.log.Timber
  * Buffered changes (env, extras, launch args) are flushed on [commit] via `Container.saveData()`;
  * registry and file writes are applied immediately.
  */
-class FilePrefixState(private val container: Container) : PrefixState {
+class FilePrefixState(
+    private val container: Container,
+    private val gameInstallDir: File? = null,
+) : PrefixState {
 
     private val env = EnvVars(container.envVars)
     private val wineDir = File(container.rootDir, ".wine")
@@ -70,6 +73,27 @@ class FilePrefixState(private val container: Container) : PrefixState {
 
     override fun deletePath(driveCRelativePath: String) {
         File(driveC, driveCRelativePath).deleteRecursively()
+    }
+
+    override fun patchGameIni(relativePath: String, values: Map<String, String>) {
+        val dir = gameInstallDir
+        if (dir == null) {
+            Timber.tag(TAG).d("patchGameIni skipped: game install dir unknown (%s)", relativePath)
+            return
+        }
+        val ini = File(dir, relativePath)
+        if (!ini.isFile) return
+        var content = ini.readText()
+        for ((key, value) in values) {
+            val regex = Regex("(?im)^(${Regex.escape(key)}\\s*=\\s*).*$")
+            content = if (regex.containsMatchIn(content)) {
+                content.replace(regex, "$1$value")
+            } else {
+                val suffix = if (content.endsWith("\n") || content.isEmpty()) "" else "\n"
+                content + suffix + "$key=$value\n"
+            }
+        }
+        ini.writeText(content)
     }
 
     override fun getLaunchArgs(): String? = container.execArgs

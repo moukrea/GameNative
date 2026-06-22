@@ -41,6 +41,12 @@ interface PrefixState {
     fun readText(driveCRelativePath: String): String? = readFile(driveCRelativePath)?.decodeToString()
     fun writeText(driveCRelativePath: String, text: String) = writeFile(driveCRelativePath, text.encodeToByteArray())
 
+    /**
+     * Applies flat `key=value` updates to an INI file in the game's install directory (not the
+     * prefix). No-op when the game directory is unknown (e.g. the game is not installed).
+     */
+    fun patchGameIni(relativePath: String, values: Map<String, String>)
+
     // --- Launch args (container.execArgs) ---
     fun getLaunchArgs(): String?
     fun setLaunchArgs(args: String)

@@ -86,6 +86,12 @@ class ProvisioningEngine(
                 steps += "file ${file.driveCRelativePath}"
             }
 
+            step = "iniPatches"
+            for (patch in effective.iniPatches) {
+                state.patchGameIni(patch.relativePath, patch.values)
+                steps += "iniPatch ${patch.relativePath}"
+            }
+
             step = "cleanup"
             for (path in effective.cleanup.deletePaths) {
                 state.deletePath(path)

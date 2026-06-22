@@ -64,6 +64,10 @@ object RecipeValidator {
             }
         }
 
+        recipe.iniPatches.forEachIndexed { i, patch ->
+            if (patch.relativePath.isBlank()) errors += "iniPatches[$i].relativePath must not be blank"
+        }
+
         recipe.cleanup.deletePaths.forEachIndexed { i, p ->
             if (p.isBlank()) errors += "cleanup.deletePaths[$i] must not be blank"
         }

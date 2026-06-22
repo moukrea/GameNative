@@ -1,0 +1,616 @@
+[
+  {
+    "schemaVersion": 1,
+    "id": "epic-59a0c86d02da42e8ba6444cb171e61bf",
+    "match": {
+      "source": "EPIC",
+      "appId": "59a0c86d02da42e8ba6444cb171e61bf"
+    },
+    "registry": [
+      {
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\Bethesda Softworks\\Oblivion",
+        "name": "Installed Path",
+        "type": "string",
+        "value": "<InstallPath>"
+      }
+    ],
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "epic-864c7bc2c2394f7dbd1b534aa068ff56",
+    "match": {
+      "source": "EPIC",
+      "appId": "864c7bc2c2394f7dbd1b534aa068ff56"
+    },
+    "cleanup": {
+      "deletePaths": [
+        "ProgramData/Hogwarts Legacy"
+      ]
+    },
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "epic-b1b4e0b67a044575820cb5e63028dcae",
+    "match": {
+      "source": "EPIC",
+      "appId": "b1b4e0b67a044575820cb5e63028dcae"
+    },
+    "registry": [
+      {
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\Bethesda Softworks\\Fallout3",
+        "name": "Installed Path",
+        "type": "string",
+        "value": "<InstallPath>"
+      }
+    ],
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "epic-dabb52e328834da7bbe99691e374cb84",
+    "match": {
+      "source": "EPIC",
+      "appId": "dabb52e328834da7bbe99691e374cb84"
+    },
+    "registry": [
+      {
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\Bethesda Softworks\\FalloutNV",
+        "name": "Installed Path",
+        "type": "string",
+        "value": "<InstallPath>"
+      }
+    ],
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "epic-e345fdb9186645a48d30c3f85a8951dc",
+    "match": {
+      "source": "EPIC",
+      "appId": "e345fdb9186645a48d30c3f85a8951dc"
+    },
+    "dllOverrides": {
+      "mf": "n",
+      "mfmediaengine": "n"
+    },
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "gog-1129934535",
+    "match": {
+      "source": "GOG",
+      "appId": "1129934535"
+    },
+    "launch": {
+      "args": "-lang=eng"
+    },
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "gog-1141086411",
+    "match": {
+      "source": "GOG",
+      "appId": "1141086411"
+    },
+    "registry": [
+      {
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\KONAMI\\SILENT HILL 4\\1.00.000",
+        "name": "Install Language",
+        "type": "string",
+        "value": "English"
+      },
+      {
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\KONAMI\\SILENT HILL 4\\1.00.000",
+        "name": "Install Path",
+        "type": "string",
+        "value": "<InstallPath>"
+      },
+      {
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\KONAMI\\SILENT HILL 4\\1.00.000",
+        "name": "Movie Install",
+        "type": "string",
+        "value": "<InstallPath>"
+      },
+      {
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\KONAMI\\SILENT HILL 4\\1.00.000",
+        "name": "Uninstall Path",
+        "type": "string",
+        "value": "<InstallPath>"
+      }
+    ],
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "gog-1177610018",
+    "match": {
+      "source": "GOG",
+      "appId": "1177610018"
+    },
+    "launch": {
+      "args": "-lang=eng"
+    },
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "gog-1453375253",
+    "match": {
+      "source": "GOG",
+      "appId": "1453375253"
+    },
+    "dllOverrides": {
+      "icu": "n"
+    },
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "gog-1454315831",
+    "match": {
+      "source": "GOG",
+      "appId": "1454315831"
+    },
+    "registry": [
+      {
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\Bethesda Softworks\\Fallout3",
+        "name": "Installed Path",
+        "type": "string",
+        "value": "<InstallPath>"
+      }
+    ],
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "gog-1454587428",
+    "match": {
+      "source": "GOG",
+      "appId": "1454587428"
+    },
+    "registry": [
+      {
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\Bethesda Softworks\\FalloutNV",
+        "name": "Installed Path",
+        "type": "string",
+        "value": "<InstallPath>"
+      }
+    ],
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "gog-1458058109",
+    "match": {
+      "source": "GOG",
+      "appId": "1458058109"
+    },
+    "registry": [
+      {
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\Bethesda Softworks\\Oblivion",
+        "name": "Installed Path",
+        "type": "string",
+        "value": "<InstallPath>"
+      }
+    ],
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "gog-1589319779",
+    "match": {
+      "source": "GOG",
+      "appId": "1589319779"
+    },
+    "dependencies": [
+      "MSVC2017",
+      "MSVC2017_x64"
+    ],
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "gog-1635627436",
+    "match": {
+      "source": "GOG",
+      "appId": "1635627436"
+    },
+    "launch": {
+      "args": "--rendering-driver vulkan"
+    },
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "gog-1787707874",
+    "match": {
+      "source": "GOG",
+      "appId": "1787707874"
+    },
+    "launch": {
+      "args": "-lang=eng"
+    },
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "gog-1808582759",
+    "match": {
+      "source": "GOG",
+      "appId": "1808582759"
+    },
+    "launch": {
+      "args": "-conf \"..\\\\dosbox_jazz.conf\" -conf \"..\\\\dosbox_jazz_single.conf\" -noconsole -c \"exit\""
+    },
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "gog-2147483047",
+    "match": {
+      "source": "GOG",
+      "appId": "2147483047"
+    },
+    "dependencies": [
+      "MSVC2017",
+      "MSVC2017_x64"
+    ],
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "steam-1637320",
+    "match": {
+      "source": "STEAM",
+      "appId": "1637320"
+    },
+    "launch": {
+      "args": "--rendering-driver vulkan"
+    },
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "steam-1962700",
+    "match": {
+      "source": "STEAM",
+      "appId": "1962700"
+    },
+    "files": [
+      {
+        "driveCRelativePath": "users/xuser/AppData/Local/Subnautica2/Saved/Config/Windows/Engine.ini",
+        "content": "[SectionsToSave]\nbCanSaveAllSections=true\n+Section=CurrentIniVersion\n\n[/Script/Engine.RendererSettings]\nr.Nanite=0\nr.DynamicGlobalIlluminationMethod=0\nr.ReflectionMethod=0\nr.ShadowQuality=0\nr.Shadow.CSM.MaxCascades=1\nr.Shadow.Virtual.Enable=0\nr.VolumetricFog=0\nr.GPUCrashDebugging=0\nr.BufferPool.FreeUnusedVariables=1\nr.D3D12.ZeroBufferAllocations=1\n\n[/Script/WindowsTargetPlatform.WindowsTargetSettings]\nr.D3D12.GlobalViewHeapSize=500000\nr.D3D12.LocalViewHeapSize=16384\nr.D3D12.MaxGraphicsResourceViewHeapSize=500000\nd3d12.MaxDescriptorHeaps=4096\n"
+      }
+    ],
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "steam-22300",
+    "match": {
+      "source": "STEAM",
+      "appId": "22300"
+    },
+    "registry": [
+      {
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\Bethesda Softworks\\Fallout3",
+        "name": "Installed Path",
+        "type": "string",
+        "value": "<InstallPath>"
+      }
+    ],
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "steam-22330",
+    "match": {
+      "source": "STEAM",
+      "appId": "22330"
+    },
+    "registry": [
+      {
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\Bethesda Softworks\\Oblivion",
+        "name": "Installed Path",
+        "type": "string",
+        "value": "<InstallPath>"
+      }
+    ],
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "steam-22370",
+    "match": {
+      "source": "STEAM",
+      "appId": "22370"
+    },
+    "registry": [
+      {
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\Bethesda Softworks\\Fallout3",
+        "name": "Installed Path",
+        "type": "string",
+        "value": "<InstallPath>"
+      }
+    ],
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "steam-22380",
+    "match": {
+      "source": "STEAM",
+      "appId": "22380"
+    },
+    "registry": [
+      {
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\Bethesda Softworks\\FalloutNV",
+        "name": "Installed Path",
+        "type": "string",
+        "value": "<InstallPath>"
+      }
+    ],
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "steam-22490",
+    "match": {
+      "source": "STEAM",
+      "appId": "22490"
+    },
+    "registry": [
+      {
+        "hive": "system",
+        "key": "Software\\Wow6432Node\\Bethesda Softworks\\FalloutNV",
+        "name": "Installed Path",
+        "type": "string",
+        "value": "<InstallPath>"
+      }
+    ],
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "steam-2868840",
+    "match": {
+      "source": "STEAM",
+      "appId": "2868840"
+    },
+    "dllOverrides": {
+      "icu": "d"
+    },
+    "env": {
+      "DOTNET_EnableWriteXorExecute": "0",
+      "DOTNET_GCHeapHardLimit": "0x400000000"
+    },
+    "launch": {
+      "args": "--rendering-driver vulkan"
+    },
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "steam-3373660",
+    "match": {
+      "source": "STEAM",
+      "appId": "3373660"
+    },
+    "launch": {
+      "args": "--no-sandbox"
+    },
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "steam-400",
+    "match": {
+      "source": "STEAM",
+      "appId": "400"
+    },
+    "launch": {
+      "args": "-game portal"
+    },
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "steam-413150",
+    "match": {
+      "source": "STEAM",
+      "appId": "413150"
+    },
+    "dllOverrides": {
+      "icu": "n"
+    },
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "steam-413420",
+    "match": {
+      "source": "STEAM",
+      "appId": "413420"
+    },
+    "dllOverrides": {
+      "d3dx9_43": "native,builtin",
+      "d3dcompiler_43": "native,builtin"
+    },
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "steam-752580",
+    "match": {
+      "source": "STEAM",
+      "appId": "752580"
+    },
+    "iniPatches": [
+      {
+        "relativePath": "Settings.ini",
+        "values": {
+          "Music": "0",
+          "SoundFX": "1",
+          "Speech": "1"
+        }
+      }
+    ],
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "steam-990080",
+    "match": {
+      "source": "STEAM",
+      "appId": "990080"
+    },
+    "cleanup": {
+      "deletePaths": [
+        "ProgramData/Hogwarts Legacy"
+      ]
+    },
+    "provenance": {
+      "source": "builtin",
+      "confidence": "verified",
+      "contributor": "migrated-from-gamefixes"
+    }
+  }
+]

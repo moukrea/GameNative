@@ -12,6 +12,7 @@ open class InMemoryPrefixState : PrefixState {
     val pins = LinkedHashMap<ComponentKind, String>()
     val registry = LinkedHashMap<String, String>()
     val files = LinkedHashMap<String, ByteArray>()
+    val gameIni = LinkedHashMap<String, LinkedHashMap<String, String>>()
     private var launchArgsStore: String? = null
     val markers = LinkedHashSet<String>()
     var commits = 0
@@ -50,6 +51,10 @@ open class InMemoryPrefixState : PrefixState {
     override fun deletePath(driveCRelativePath: String) {
         files.remove(driveCRelativePath)
         files.keys.toList().filter { it.startsWith("$driveCRelativePath/") }.forEach { files.remove(it) }
+    }
+
+    override fun patchGameIni(relativePath: String, values: Map<String, String>) {
+        gameIni.getOrPut(relativePath) { LinkedHashMap() }.putAll(values)
     }
 
     override fun getLaunchArgs(): String? = launchArgsStore
