@@ -80,6 +80,7 @@ import app.gamenative.PrefManager
 import app.gamenative.SteamBootstrap
 import app.gamenative.data.GameSource
 import app.gamenative.gamefixes.GameFixesRegistry
+import app.gamenative.provisioning.PerGameProvisioning
 import app.gamenative.data.LaunchInfo
 import app.gamenative.data.LibraryItem
 import app.gamenative.data.SteamApp
@@ -3165,7 +3166,13 @@ private fun setupXEnvironment(
 
     if (container != null) {
         try {
-            GameFixesRegistry.applyFor(context, appId, container)
+            if (PrefManager.enablePerGameProvisioning) {
+                // Opt-in declarative pipeline: resolve + apply the per-game recipe (falls back to
+                // the legacy registry internally when no recipe matches).
+                PerGameProvisioning.applyAtLaunch(context, appId, container)
+            } else {
+                GameFixesRegistry.applyFor(context, appId, container)
+            }
         } catch (e: Exception) {
             Timber.tag("GameFixes").w(e, "Game fixes failed before launch")
         }

@@ -5,6 +5,7 @@ import app.gamenative.provisioning.model.GameRecipe
 import app.gamenative.provisioning.model.PrefixFile
 import app.gamenative.provisioning.model.RecipeCodec
 import app.gamenative.provisioning.model.matches
+import app.gamenative.provisioning.verbs.NoopVerbContext
 import app.gamenative.provisioning.verbs.VerbContext
 import app.gamenative.provisioning.verbs.VerbOutcome
 import app.gamenative.provisioning.verbs.VerbRegistry
@@ -27,8 +28,34 @@ const val RECIPE_MARKER_PREFIX: String = "provisioning.recipe."
  */
 class ProvisioningEngine(
     private val verbRegistry: VerbRegistry = VerbRegistry.builtin(),
-    private val verbContext: VerbContext,
+    private val verbContext: VerbContext = NoopVerbContext,
 ) {
+
+    /**
+     * Applies the recipe's declarative state only (components/env/DLL overrides/registry/files/ini
+     * patches/cleanup/launch) — no dependency verbs, no downloads. Synchronous and safe to call on
+     * the launch path. Dependency verbs are handled by [apply] (which needs network/extraction).
+     */
+    fun applyDeclarative(recipe: GameRecipe, device: DeviceProfile, state: PrefixState): ProvisioningResult {
+        val effective = effectiveRecipe(recipe, device)
+        val hash = recipeHash(effective)
+        val marker = "$RECIPE_MARKER_PREFIX$hash"
+        if (state.isMarked(marker)) return ProvisioningResult.AlreadyApplied(hash)
+
+        val journal = Journal()
+        val steps = mutableListOf<String>()
+        val stepRef = arrayOf("start")
+        return try {
+            applyDeclarativeSteps(effective, state, journal, steps, stepRef)
+            state.mark(marker)
+            state.commit()
+            ProvisioningResult.Applied(hash, steps, emptyList(), emptyList(), complete = true)
+        } catch (e: Exception) {
+            journal.rollback()
+            state.commit()
+            ProvisioningResult.Failed(hash, stepRef[0], e.message ?: e.toString(), rolledBack = true)
+        }
+    }
 
     suspend fun apply(recipe: GameRecipe, device: DeviceProfile, state: PrefixState): ProvisioningResult {
         val effective = effectiveRecipe(recipe, device)
@@ -38,79 +65,13 @@ class ProvisioningEngine(
 
         val journal = Journal()
         val steps = mutableListOf<String>()
-        var step = "start"
+        val stepRef = arrayOf("start")
         return try {
-            step = "components"
-            for ((kind, id) in effective.components.asMap()) {
-                val old = state.getComponentPin(kind)
-                state.setComponentPin(kind, id)
-                journal.record { old?.let { state.setComponentPin(kind, it) } }
-                steps += "pin ${kind.manifestKey}=$id"
-            }
-
-            step = "env"
-            for ((key, value) in effective.env) {
-                val had = state.getEnv(key)
-                state.setEnv(key, value)
-                journal.record { if (had != null) state.setEnv(key, had) else state.removeEnv(key) }
-                steps += "env $key"
-            }
-
-            step = "dllOverrides"
-            for ((dll, mode) in effective.dllOverrides) {
-                val had = state.getEnv(WINE_DLL_OVERRIDES_ENV)
-                DllOverrides.apply(state, dll, mode)
-                journal.record {
-                    if (had != null) state.setEnv(WINE_DLL_OVERRIDES_ENV, had) else state.removeEnv(WINE_DLL_OVERRIDES_ENV)
-                }
-            }
-            if (effective.dllOverrides.isNotEmpty()) steps += "dllOverrides(${effective.dllOverrides.size})"
-
-            step = "registry"
-            for (patch in effective.registry) {
-                val had = state.getRegistryString(patch.hive, patch.key, patch.name)
-                applyRegistryPatch(state, patch)
-                journal.record {
-                    if (had != null) {
-                        state.setRegistryString(patch.hive, patch.key, patch.name, had)
-                    } else {
-                        state.removeRegistryValue(patch.hive, patch.key, patch.name)
-                    }
-                }
-            }
-            if (effective.registry.isNotEmpty()) steps += "registry(${effective.registry.size})"
-
-            step = "files"
-            for (file in effective.files) {
-                applyFile(state, file, journal)
-                steps += "file ${file.driveCRelativePath}"
-            }
-
-            step = "iniPatches"
-            for (patch in effective.iniPatches) {
-                state.patchGameIni(patch.relativePath, patch.values)
-                steps += "iniPatch ${patch.relativePath}"
-            }
-
-            step = "cleanup"
-            for (path in effective.cleanup.deletePaths) {
-                state.deletePath(path)
-                steps += "delete $path"
-            }
-
-            step = "launch"
-            effective.launch.args?.let { args ->
-                val had = state.getLaunchArgs()
-                if (had.isNullOrBlank()) {
-                    state.setLaunchArgs(args)
-                    journal.record { state.setLaunchArgs(had ?: "") }
-                    steps += "launchArgs"
-                }
-            }
+            applyDeclarativeSteps(effective, state, journal, steps, stepRef)
 
             // Dependency verbs are applied leniently: a verb that cannot install (e.g. offline)
             // is recorded but does NOT abort the launch and does NOT mark the recipe complete.
-            step = "dependencies"
+            stepRef[0] = "dependencies"
             val outcomes = mutableListOf<VerbOutcome>()
             for (dep in effective.dependencies) {
                 val verb = verbRegistry.get(dep)
@@ -129,7 +90,84 @@ class ProvisioningEngine(
         } catch (e: Exception) {
             journal.rollback()
             state.commit()
-            ProvisioningResult.Failed(hash, step, e.message ?: e.toString(), rolledBack = true)
+            ProvisioningResult.Failed(hash, stepRef[0], e.message ?: e.toString(), rolledBack = true)
+        }
+    }
+
+    /** Applies components, env, DLL overrides, registry, files, INI patches, cleanup and launch. */
+    private fun applyDeclarativeSteps(
+        effective: GameRecipe,
+        state: PrefixState,
+        journal: Journal,
+        steps: MutableList<String>,
+        stepRef: Array<String>,
+    ) {
+        stepRef[0] = "components"
+        for ((kind, id) in effective.components.asMap()) {
+            val old = state.getComponentPin(kind)
+            state.setComponentPin(kind, id)
+            journal.record { old?.let { state.setComponentPin(kind, it) } }
+            steps += "pin ${kind.manifestKey}=$id"
+        }
+
+        stepRef[0] = "env"
+        for ((key, value) in effective.env) {
+            val had = state.getEnv(key)
+            state.setEnv(key, value)
+            journal.record { if (had != null) state.setEnv(key, had) else state.removeEnv(key) }
+            steps += "env $key"
+        }
+
+        stepRef[0] = "dllOverrides"
+        for ((dll, mode) in effective.dllOverrides) {
+            val had = state.getEnv(WINE_DLL_OVERRIDES_ENV)
+            DllOverrides.apply(state, dll, mode)
+            journal.record {
+                if (had != null) state.setEnv(WINE_DLL_OVERRIDES_ENV, had) else state.removeEnv(WINE_DLL_OVERRIDES_ENV)
+            }
+        }
+        if (effective.dllOverrides.isNotEmpty()) steps += "dllOverrides(${effective.dllOverrides.size})"
+
+        stepRef[0] = "registry"
+        for (patch in effective.registry) {
+            val had = state.getRegistryString(patch.hive, patch.key, patch.name)
+            applyRegistryPatch(state, patch)
+            journal.record {
+                if (had != null) {
+                    state.setRegistryString(patch.hive, patch.key, patch.name, had)
+                } else {
+                    state.removeRegistryValue(patch.hive, patch.key, patch.name)
+                }
+            }
+        }
+        if (effective.registry.isNotEmpty()) steps += "registry(${effective.registry.size})"
+
+        stepRef[0] = "files"
+        for (file in effective.files) {
+            applyFile(state, file, journal)
+            steps += "file ${file.driveCRelativePath}"
+        }
+
+        stepRef[0] = "iniPatches"
+        for (patch in effective.iniPatches) {
+            state.patchGameIni(patch.relativePath, patch.values)
+            steps += "iniPatch ${patch.relativePath}"
+        }
+
+        stepRef[0] = "cleanup"
+        for (path in effective.cleanup.deletePaths) {
+            state.deletePath(path)
+            steps += "delete $path"
+        }
+
+        stepRef[0] = "launch"
+        effective.launch.args?.let { args ->
+            val had = state.getLaunchArgs()
+            if (had.isNullOrBlank()) {
+                state.setLaunchArgs(args)
+                journal.record { state.setLaunchArgs(had ?: "") }
+                steps += "launchArgs"
+            }
         }
     }
 

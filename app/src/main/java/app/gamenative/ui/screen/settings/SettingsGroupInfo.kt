@@ -90,5 +90,22 @@ fun SettingsGroupInfo() {
                 PrefManager.usageAnalyticsEnabled = it
             },
         )
+
+        var perGameProvisioning by rememberSaveable { mutableStateOf(PrefManager.enablePerGameProvisioning) }
+        SettingsSwitch(
+            colors = settingsTileColorsAlt(),
+            state = perGameProvisioning,
+            title = { Text("Per-game provisioning (experimental)") },
+            subtitle = {
+                Text(
+                    "Apply declarative per-game recipes (pinned components, env vars, DLL overrides, " +
+                        "registry patches) at launch. When off, the built-in game fixes are used unchanged.",
+                )
+            },
+            onCheckedChange = {
+                perGameProvisioning = it
+                PrefManager.enablePerGameProvisioning = it
+            },
+        )
     }
 }

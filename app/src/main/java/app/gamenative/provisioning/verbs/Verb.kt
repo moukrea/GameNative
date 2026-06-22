@@ -20,6 +20,14 @@ interface VerbContext {
     suspend fun extract(archive: ByteArray, entries: List<String>): Map<String, ByteArray>
 }
 
+/** A [VerbContext] that performs no I/O; used when only the declarative (no-verb) path runs. */
+object NoopVerbContext : VerbContext {
+    override suspend fun fetch(download: VerbDownload): ByteArray =
+        error("NoopVerbContext cannot fetch ${download.fileName}; provide a real VerbContext to install verbs")
+
+    override suspend fun extract(archive: ByteArray, entries: List<String>): Map<String, ByteArray> = emptyMap()
+}
+
 /**
  * A winetricks-style dependency verb: declares how to make a Windows redistributable present in the
  * prefix (place DLLs, set overrides, write registry keys, or run an installer).
