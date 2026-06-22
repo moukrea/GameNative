@@ -342,3 +342,31 @@ for more details.
 
 Full license text: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
 
+---
+
+## Per-Game Provisioning Pipeline — Dependency Verbs
+
+The declarative per-game provisioning pipeline can install Windows redistributables
+("verbs") into a game's Wine prefix on demand. GameNative does **not** bundle or
+redistribute any of these proprietary redistributables. Each verb only records a
+**reference** to the official vendor download (and, where known, a checksum); the file
+is fetched at runtime, on the user's device, directly from the vendor when a recipe
+requests it. Examples of referenced vendor downloads:
+
+- Microsoft Visual C++ 2015-2022 Redistributable — https://aka.ms/vs/17/release/vc_redist.x64.exe
+- Microsoft .NET Framework 4.8 — https://go.microsoft.com/fwlink/?linkid=2088631
+- Microsoft DirectX End-User Runtime (d3dx9) — https://www.microsoft.com/download/details.aspx?id=8109
+- OpenAL (oalinst) — https://openal.org/downloads/
+
+These components are owned by their respective vendors and are subject to their own
+licenses; their installers are run inside the guest Wine prefix exactly as on Windows.
+
+The verb catalog's *facts* (which redistributable a game needs, the download URL, the
+target DLLs and DLL-override flags) are reimplemented from the open-source
+[winetricks](https://github.com/Winetricks/winetricks) project, used as an oracle of
+*what* to install and *how*. No winetricks code is copied; the executor is original.
+Likewise, the per-game recipe catalog stores only facts (component versions, env, DLL
+overrides, registry keys, dependency lists) and references to open-source component
+builds (DXVK, VKD3D, Proton/Wine, Box64, FEXCore, Turnip) already listed in
+`manifest.json`; it never embeds or redistributes a proprietary third-party binary.
+
