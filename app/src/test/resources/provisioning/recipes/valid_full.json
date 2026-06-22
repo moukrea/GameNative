@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "steam-413420",
+  "match": { "source": "STEAM", "appId": "413420", "exeNameContains": "game" },
+  "prefixArch": "win64",
+  "components": { "proton": "proton-10.0-arm64ec-2", "dxvk": "2.4.1" },
+  "env": { "DXVK_FRAME_RATE": "60", "BOX64_DYNAREC_BIGBLOCK": "0" },
+  "dllOverrides": { "d3dx9_43": "native,builtin", "d3dcompiler_43": "n,b", "icu": "d", "mscoree": "" },
+  "registry": [
+    { "hive": "system", "key": "Software\\Wine\\Direct3D", "name": "csmt", "type": "dword", "value": "0" },
+    { "hive": "user", "key": "Software\\Foo", "name": "Bar", "type": "string", "value": "baz" }
+  ],
+  "dependencies": ["d3dx9_43", "vcrun2019"],
+  "files": [
+    { "driveCRelativePath": "users/Public/Documents/cfg.ini", "iniMerge": { "Render": { "vsync": "0" } } }
+  ],
+  "cleanup": { "deletePaths": ["ProgramData/Foo"] },
+  "launch": { "args": "--rendering-driver vulkan" },
+  "deviceOverrides": [
+    {
+      "when": { "gpuFamily": "adreno6xx" },
+      "set": { "components": { "dxvk": "1.10.3" }, "env": { "MESA_VK_VERSION_OVERRIDE": "1.1" } }
+    }
+  ],
+  "provenance": {
+    "source": "community",
+    "confidence": "verified",
+    "contributor": "emuready:user/123",
+    "verifiedOn": "2026-06-01",
+    "device": "Snapdragon 8 Gen 2"
+  }
+}

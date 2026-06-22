@@ -1,0 +1,7 @@
+{
+  "id": "bad-dword",
+  "match": { "source": "STEAM", "appId": "1" },
+  "registry": [
+    { "hive": "system", "key": "Software\\Wine\\Direct3D", "name": "csmt", "type": "dword", "value": "notanumber" }
+  ]
+}

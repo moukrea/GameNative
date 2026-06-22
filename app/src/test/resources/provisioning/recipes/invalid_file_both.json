@@ -1,0 +1,7 @@
+{
+  "id": "file-both",
+  "match": { "source": "STEAM", "appId": "1" },
+  "files": [
+    { "driveCRelativePath": "users/Public/cfg.ini", "content": "x", "iniMerge": { "S": { "k": "v" } } }
+  ]
+}

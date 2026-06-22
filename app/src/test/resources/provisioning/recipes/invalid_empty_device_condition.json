@@ -1,0 +1,7 @@
+{
+  "id": "empty-cond",
+  "match": { "source": "STEAM", "appId": "1" },
+  "deviceOverrides": [
+    { "when": {}, "set": { "env": { "A": "B" } } }
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "id": "bad-dll",
+  "match": { "source": "STEAM", "appId": "1" },
+  "dllOverrides": { "d3d11": "garbage,native" }
+}

@@ -1,0 +1,4 @@
+{
+  "id": "steam-1",
+  "match": { "source": "STEAM", "appId": "1" }
+}

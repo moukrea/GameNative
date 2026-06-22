@@ -1,0 +1,5 @@
+{
+  "schemaVersion": 999,
+  "id": "future",
+  "match": { "source": "STEAM", "appId": "1" }
+}
