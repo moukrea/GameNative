@@ -1293,6 +1293,13 @@ object PrefManager {
         get() = getPref(AUTO_APPLY_KNOWN_CONFIG, true)
         set(value) = setPref(AUTO_APPLY_KNOWN_CONFIG, value)
 
+    // Opt-in: apply declarative per-game provisioning recipes at launch (WIP, off by default).
+    // When off, the legacy GameFixesRegistry path is used unchanged (zero regression).
+    private val ENABLE_PER_GAME_PROVISIONING = booleanPreferencesKey("enable_per_game_provisioning")
+    var enablePerGameProvisioning: Boolean
+        get() = getPref(ENABLE_PER_GAME_PROVISIONING, false)
+        set(value) = setPref(ENABLE_PER_GAME_PROVISIONING, value)
+
     // Game compatibility cache (JSON string)
     private val GAME_COMPATIBILITY_CACHE = stringPreferencesKey("game_compatibility_cache")
     var gameCompatibilityCache: String
