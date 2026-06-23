@@ -76,23 +76,27 @@ out of scope to replicate. But **GameNative already bundles the open-source answ
 defaults to the cold-client path, and for a 2008 title like Mirror's Edge the stub survives.
 
 This work adds that appid-keying declaratively: a recipe's optional **`steamDrm`** block
-(`SteamDrmStrategy` = `legacy_goldberg` | `cold_client` | `real_steam` | `auto`, plus `unpack`) is
-applied by `PerGameProvisioning` to the container's *existing* DRM toggles
-(`setUseLegacyDRM`/`setUnpackFiles`/`setLaunchRealSteam`). It selects an already-shipped mechanism —
-nothing new is bundled, no third-party code is copied (it mirrors only the *semantics* of GameHub's
-per-game `fakeSteamClient`/`offlineMode` flags). It is set once per container (respecting later manual
-changes) and re-applied immediately by the "Re-apply provisioning" menu action.
+(`SteamDrmStrategy` = `bionic_steam` | `real_steam` | `legacy_goldberg` | `cold_client` | `auto`) is
+applied by `PerGameProvisioning.applyRecommendedDrmOnce()` to the container's *existing* DRM toggles,
+**set-once** and **before** `MainViewModel.launchApp` chooses its DRM path — so the user's own
+container DRM settings win on every subsequent launch (the earlier version overrode them every launch,
+which is why changing the container options "did nothing"). Nothing new is bundled.
 
-The Mirror's Edge recipe (`gamehub-recipes.json`, appid 17410) selects **`real_steam`**. Mirror's Edge
-is **Steam CEG** (Custom Executable Generation — Valve's per-user AES-256 executable encryption), *not*
-SteamStub or SecuROM. CEG can only be decrypted by the **real, logged-in Steam client that owns the
-game**: Goldberg only emulates the Steamworks API (it can't decrypt a CEG exe) and Steamless explicitly
-never strips CEG. So the only path that works is GameNative's real-Steam mode, which runs
-`steam.exe -applaunch <id>` and logs in non-interactively with the stored Steam token
-(`SteamTokenLogin`) — architecturally the same thing GameHub does with its real-client
-`libsteamkit_core`. This also required fixing a latent crash: `SteamUtils.restoreSteamApi` force-unwrapped
-`userSteamId` and NPE'd on every real-Steam launch when offline/token-only; it now uses the null-safe
-`getSteam3AccountId()`. On-device confirmation of the boot is still the final step.
+**Mirror's Edge (`gamehub-recipes.json`, appid 17410) → `bionic_steam`.** Mirror's Edge is **Steam CEG**
+(Custom Executable Generation — Valve's per-user AES-256 executable encryption), *not* SteamStub or
+SecuROM. CEG can only be decrypted by a **genuine, logged-in Valve client that owns the game** —
+Goldberg only emulates the Steamworks API (it can't decrypt a CEG exe) and Steamless explicitly never
+strips CEG. The key realization: **GameNative already has the GameHub-equivalent of a headless Steam
+client — its `bionic-Steam` path** runs the genuine Android `libsteamclient.so` in-process, logs in via
+the user's JavaSteam token, and shows **no Steam window**. (GameHub had to build this from scratch in
+11 MB of Rust, `libsteamkit_core`; GameNative already ships it.) Routing CEG titles to `bionic_steam`
+is the headless, GameHub-style fix — not the heavy visible `real_steam` (full `steam.exe`) path, which
+remains the fallback. A latent crash on the real/bionic path was also fixed: `restoreSteamApi`
+force-unwrapped `userSteamId` and NPE'd offline/token-only; now null-safe via `getSteam3AccountId()`.
+
+**Honest hard limit:** CEG *decryption itself* is performed by Valve's closed `steamclient`. Both
+GameHub and GameNative run a genuine client for it; neither reimplements CEG crypto. `bionic_steam`
+depends on the device's own `libsteamclient.so` (per-device), so `real_steam` is the portable fallback.
 
 ## How the dependency install works (the boot-maker)
 

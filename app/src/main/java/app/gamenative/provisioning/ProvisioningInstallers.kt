@@ -30,14 +30,19 @@ object ProvisioningInstallers {
         // NVIDIA PhysX System Software is a 7-Zip/NSIS self-extractor: its silent switch is `/s`
         // (it does not understand the InstallShield-style /quiet /norestart switches).
         "physx" to "/s",
-        // .NET Framework 4.8 offline installer: winetricks-faithful silent switch.
+        // .NET 4.0 full bootstrapper — prerequisite for dotnet48 and xna40 (must run first).
+        "dotnet40" to "/q /norestart",
+        // .NET Framework 4.8: winetricks-faithful silent switch (run with fusion=b override; see below).
         "dotnet48" to "/sfxlang:1027 /q /norestart",
         "xna31" to "/quiet /norestart",
         "xna40" to "/quiet /norestart",
-        // NOTE: dotnet40/45/46 are intentionally absent. Their full bootstrappers need a wrapped
-        // /c:"...\\install.exe /q" switch and are notoriously unstable on Wine/Box64; auto-running
-        // them with a bare /q would hang or show UI. They are deferred pending on-device validation.
+        // DirectX June 2010 redist self-extractor (covers the whole d3dx9 / d3dcompiler_43 / xact /
+        // dsound family). Handled specially in guestCommand: extract then run DXSETUP.
+        "d3dx9" to "/silent",
     )
+
+    /** Verbs whose staged payload is the DirectX June 2010 redist (extract + DXSETUP). */
+    private val DIRECTX_REDIST_VERBS = setOf("d3dx9")
 
     /** A downloaded, staged installer file ready to run in the guest. */
     data class Staged(val verb: String, val fileName: String, val guestPath: String)
@@ -59,6 +64,19 @@ object ProvisioningInstallers {
      * mid-flight — the installers never finished, so nothing landed in the prefix.
      */
     fun guestCommand(staged: Staged): String {
+        // DirectX family: extract the redist's cabs then run DXSETUP (no Kotlin .cab extraction).
+        if (staged.verb in DIRECTX_REDIST_VERBS) {
+            val dir = staged.guestPath.substringBeforeLast('\\')
+            val extract = "$dir\\dxextract"
+            return "start \"\" /wait ${staged.guestPath} /Q /T:$extract & " +
+                "start \"\" /wait $extract\\DXSETUP.exe /silent"
+        }
+        // .NET 4.8 needs the fusion DLL forced to builtin during install, or it hangs under Wine.
+        // Set it in the cmd session (no nested quotes — those would break the outer cmd /c "...").
+        if (staged.verb == "dotnet48") {
+            return "set WINEDLLOVERRIDES=fusion=b& " +
+                "start \"\" /wait ${staged.guestPath} /sfxlang:1027 /q /norestart"
+        }
         val flags = INSTALL_FLAGS[staged.verb] ?: "/quiet /norestart"
         return if (staged.fileName.substringAfterLast('.', "").equals("msi", ignoreCase = true)) {
             "start \"\" /wait msiexec /i ${staged.guestPath} $flags"

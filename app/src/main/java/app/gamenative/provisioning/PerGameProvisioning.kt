@@ -274,7 +274,8 @@ object PerGameProvisioning {
         "vcrun2019" to listOf("msvcp140.dll", "vcruntime140.dll"),
         "vcrun2022" to listOf("msvcp140.dll", "vcruntime140.dll"),
         "physx" to listOf("PhysXLoader.dll", "physxcudart_20.dll"),
-        // dotnet48 / xna40 install to the GAC/registry, not a checkable system32 DLL — omitted.
+        "d3dx9" to listOf("d3dx9_43.dll", "d3dx9_42.dll"),
+        // dotnet40/48 / xna40 install to the GAC/registry, not a checkable system32 DLL — omitted.
     )
 
     /**

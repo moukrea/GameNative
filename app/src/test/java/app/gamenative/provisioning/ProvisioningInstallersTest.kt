@@ -15,8 +15,32 @@ class ProvisioningInstallersTest {
     fun installerVerbsFiltersToKnownAndDeduplicatesPreservingOrder() {
         val deps = listOf("vcrun2010", "d3dx9", "vcrun2010", "physx", "gdiplus", "xna40", "unknownverb")
         val verbs = ProvisioningInstallers.installerVerbs(deps)
-        // d3dx9/gdiplus are DLL-drop or override-only (not installers); unknownverb is dropped.
-        assertEquals(listOf("vcrun2010", "physx", "xna40"), verbs)
+        // d3dx9 is now handled (DirectX redist + DXSETUP); gdiplus is override-only; unknownverb dropped.
+        assertEquals(listOf("vcrun2010", "d3dx9", "physx", "xna40"), verbs)
+    }
+
+    @Test
+    fun directXVerbExtractsRedistThenRunsDxsetup() {
+        val cmd = ProvisioningInstallers.guestCommand(
+            Staged("d3dx9", "directx_Jun2010_redist.exe", "C:\\.gnprov\\d3dx9\\directx_Jun2010_redist.exe"),
+        )
+        assertEquals(
+            "start \"\" /wait C:\\.gnprov\\d3dx9\\directx_Jun2010_redist.exe /Q /T:C:\\.gnprov\\d3dx9\\dxextract & " +
+                "start \"\" /wait C:\\.gnprov\\d3dx9\\dxextract\\DXSETUP.exe /silent",
+            cmd,
+        )
+    }
+
+    @Test
+    fun dotnet48RunsWithFusionOverride() {
+        val cmd = ProvisioningInstallers.guestCommand(
+            Staged("dotnet48", "ndp48-x86-x64-allos-enu.exe", "C:\\.gnprov\\dotnet48\\ndp48-x86-x64-allos-enu.exe"),
+        )
+        assertEquals(
+            "set WINEDLLOVERRIDES=fusion=b& " +
+                "start \"\" /wait C:\\.gnprov\\dotnet48\\ndp48-x86-x64-allos-enu.exe /sfxlang:1027 /q /norestart",
+            cmd,
+        )
     }
 
     @Test
