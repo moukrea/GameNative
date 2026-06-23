@@ -50,13 +50,20 @@ object ProvisioningInstallers {
     fun installerVerbs(deps: List<String>): List<String> =
         deps.asSequence().filter { INSTALL_FLAGS.containsKey(it) }.distinct().toList()
 
-    /** The silent guest command for one staged installer file. */
+    /**
+     * The silent guest command for one staged installer file.
+     *
+     * Wrapped in `start "" /wait` so the surrounding `cmd /c "... & taskkill explorer & wineserver -k"`
+     * BLOCKS until the installer (and the child process the bootstrapper spawns) actually exits.
+     * Without this, the `&` chain returned immediately and `wineserver -k` tore the installer down
+     * mid-flight — the installers never finished, so nothing landed in the prefix.
+     */
     fun guestCommand(staged: Staged): String {
         val flags = INSTALL_FLAGS[staged.verb] ?: "/quiet /norestart"
         return if (staged.fileName.substringAfterLast('.', "").equals("msi", ignoreCase = true)) {
-            "msiexec /i ${staged.guestPath} $flags"
+            "start \"\" /wait msiexec /i ${staged.guestPath} $flags"
         } else {
-            "${staged.guestPath} $flags"
+            "start \"\" /wait ${staged.guestPath} $flags"
         }
     }
 

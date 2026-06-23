@@ -28,16 +28,17 @@ class ProvisioningInstallersTest {
     }
 
     @Test
-    fun exeRunsDirectlyAndMsiRunsViaMsiexecWithSilentFlags() {
+    fun exeRunsViaStartWaitAndMsiRunsViaMsiexecWithSilentFlags() {
+        // start "" /wait makes the cmd chain block until the installer exits (not torn down early).
         val exe = ProvisioningInstallers.guestCommand(
             Staged("vcrun2010", "vcredist_x86.exe", "C:\\.gnprov\\vcrun2010\\vcredist_x86.exe"),
         )
-        assertEquals("C:\\.gnprov\\vcrun2010\\vcredist_x86.exe /q /norestart", exe)
+        assertEquals("start \"\" /wait C:\\.gnprov\\vcrun2010\\vcredist_x86.exe /q /norestart", exe)
 
         val msi = ProvisioningInstallers.guestCommand(
             Staged("xna40", "xnafx40_redist.msi", "C:\\.gnprov\\xna40\\xnafx40_redist.msi"),
         )
-        assertEquals("msiexec /i C:\\.gnprov\\xna40\\xnafx40_redist.msi /quiet /norestart", msi)
+        assertEquals("start \"\" /wait msiexec /i C:\\.gnprov\\xna40\\xnafx40_redist.msi /quiet /norestart", msi)
     }
 
     @Test
@@ -50,8 +51,8 @@ class ProvisioningInstallersTest {
             ),
         )
         assertEquals(
-            "C:\\.gnprov\\vcrun2022\\vc_redist.x86.exe /install /quiet /norestart & " +
-                "C:\\.gnprov\\vcrun2022\\vc_redist.x64.exe /install /quiet /norestart",
+            "start \"\" /wait C:\\.gnprov\\vcrun2022\\vc_redist.x86.exe /install /quiet /norestart & " +
+                "start \"\" /wait C:\\.gnprov\\vcrun2022\\vc_redist.x64.exe /install /quiet /norestart",
             chain,
         )
     }

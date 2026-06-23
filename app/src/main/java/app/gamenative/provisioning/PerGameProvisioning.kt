@@ -9,8 +9,6 @@ import app.gamenative.provisioning.engine.GameHubBaseline
 import app.gamenative.provisioning.engine.ProvisioningEngine
 import app.gamenative.provisioning.engine.ProvisioningResult
 import app.gamenative.provisioning.model.DeviceProfile
-import app.gamenative.provisioning.model.SteamDrmSpec
-import app.gamenative.provisioning.model.SteamDrmStrategy
 import app.gamenative.provisioning.resolver.GameHubCatalogSource
 import app.gamenative.provisioning.resolver.MigratedFixCatalogSource
 import app.gamenative.provisioning.resolver.PrefixRecipeCache
@@ -77,17 +75,10 @@ object PerGameProvisioning {
         val result = engine.applyDeclarative(resolved.recipe, DeviceProfile.UNKNOWN, state)
         Timber.tag(TAG).i("Applied recipe '${resolved.recipe.id}' from ${resolved.sourceName}: $result")
 
-        // Apply the recipe's Steam DRM strategy ONCE per container (set-if-not-yet-applied), so a
-        // known DRM title auto-selects the right path on its first provisioned launch without
-        // clobbering a mode the user later changes manually.
-        resolved.recipe.steamDrm?.let { spec ->
-            if (container.getExtra(DRM_APPLIED_EXTRA, "").isEmpty()) {
-                val desc = applySteamDrm(container, spec)
-                container.putExtra(DRM_APPLIED_EXTRA, spec.strategy.name)
-                container.saveData()
-                Timber.tag(TAG).i("Applied Steam DRM strategy ($desc) for '$appId'")
-            }
-        }
+        // NOTE: we intentionally do NOT touch the container's Steam-DRM toggles here. GameNative
+        // already owns DRM via its container settings (Use Legacy DRM / Unpack Files / real Steam),
+        // and overriding them from the recipe made those settings appear to "do nothing". DRM is the
+        // user's to choose; provisioning only handles runtimes/config/tuning.
     }
 
     /**
@@ -134,15 +125,7 @@ object PerGameProvisioning {
             parts += "no per-game recipe"
         }
 
-        // Explicitly (re)apply the recipe's Steam DRM strategy — the user asked for it.
-        resolved?.recipe?.steamDrm?.let { spec ->
-            parts += applySteamDrm(container, spec)
-            container.putExtra(DRM_APPLIED_EXTRA, spec.strategy.name)
-            container.saveData()
-        }
-
-        // Clear the dependency marker so the runtime installers re-run on the next launch.
-        PreInstallSteps.clearProvisioningDepsMarker(container)
+        // DRM is intentionally NOT touched here — it's owned by GameNative's container settings.
 
         val deps = LinkedHashSet<String>()
         baseline?.dependencies?.let { deps += it }
@@ -150,10 +133,9 @@ object PerGameProvisioning {
         val installers = ProvisioningInstallers.installerVerbs(deps.toList())
         Timber.tag(TAG).i("Re-apply '$appId': ${parts.joinToString("; ")}; installers=$installers")
 
-        // Download the runtimes NOW (watchable proof, on demand) into the shared staging dir the
-        // launch-time installer reads. This is purely additive: ProvisioningDepsStep is unchanged and
-        // simply finds the files already present (skips re-download). Lets the user SEE it work
-        // without launching a game.
+        // Download the runtimes NOW (watchable, on demand) into the shared staging dir the launch
+        // installer reads, then clear the marker so the install actually re-runs next launch. This is
+        // additive: ProvisioningDepsStep finds the files already staged.
         val staged = prefetchRuntimes(container, installers, onProgress)
         PreInstallSteps.clearProvisioningDepsMarker(container)
 
@@ -162,9 +144,8 @@ object PerGameProvisioning {
             append(parts.joinToString(" · "))
             append("). ")
             if (installers.isNotEmpty()) {
-                append("Runtimes downloaded $staged/${installers.size} (")
-                append(installers.joinToString(", "))
-                append("); they install on next launch.")
+                append("Downloaded $staged/${installers.size} runtime installer(s). They run on the next ")
+                append("launch — then open 'Provisioning status' to confirm what actually landed in the prefix.")
             } else {
                 append("No runtime installers required.")
             }
@@ -244,60 +225,55 @@ object PerGameProvisioning {
         val installers = ProvisioningInstallers.installerVerbs(deps.toList())
 
         val stagingRoot = File(container.rootDir, ".wine/drive_c/.gnprov")
-        val staged = installers.count { verb ->
+        val downloaded = installers.count { verb ->
             File(stagingRoot, verb).listFiles()?.any { it.isFile && it.length() > 0 } == true
         }
-        val installed = PreInstallSteps.isProvisioningMarked(container)
-        val drm = resolved?.recipe?.steamDrm?.strategy?.name?.lowercase()
-            ?: if (container.isUseLegacyDRM) "legacy (manual toggle)" else "default (cold-client)"
+
+        // GROUND TRUTH: don't trust the completion marker (it's written even if the install failed).
+        // Check whether each runtime's signature DLL is actually present in the prefix system dirs.
+        val sys32 = File(container.rootDir, ".wine/drive_c/windows/system32")
+        val syswow = File(container.rootDir, ".wine/drive_c/windows/syswow64")
+        fun present(dll: String) = File(sys32, dll).isFile || File(syswow, dll).isFile
+        val checks = installers.mapNotNull { verb ->
+            RUNTIME_SIGNATURE[verb]?.let { sig -> verb to sig.any { present(it) } }
+        }
+        val verifiedPresent = checks.count { it.second }
+        val verifiable = checks.size
 
         return buildString {
-            append("Provisioning ON. ")
-            append("Recipe: ${resolved?.recipe?.id ?: "baseline only"}. ")
-            append("Runtimes downloaded: $staged/${installers.size}. ")
-            append("Installed in prefix: ${if (installed) "yes" else "not yet"}. ")
-            append("DRM: $drm. ")
+            append(if (resolved != null) "Recipe '${resolved.recipe.id}'" else "Baseline only")
+            append(" · ${installers.size} runtime installer(s) configured · downloaded $downloaded/${installers.size}. ")
+            if (verifiable > 0) {
+                val presentNames = checks.filter { it.second }.joinToString(", ") { it.first }
+                append("Actually present in the prefix: $verifiedPresent/$verifiable")
+                if (verifiedPresent > 0) append(" ($presentNames)")
+                append(". ")
+            }
+            append("DRM is controlled by the container's own settings (provisioning no longer changes it). ")
             append(
-                when {
-                    installed -> "Looks provisioned — see drive_c/.gnprov/."
-                    staged > 0 -> "Downloaded; relaunch to finish installing."
-                    else -> "Nothing yet — launch the game or tap 'Re-apply provisioning'."
+                if (verifiedPresent == 0) {
+                    "No runtimes detected in the prefix yet — launch the game once (or tap Re-apply provisioning), then check again."
+                } else {
+                    "(.NET/XNA aren't DLL-verifiable here; staged under drive_c/.gnprov/.)"
                 },
             )
         }
     }
 
-    /**
-     * Selects the existing GameNative Steam-DRM path the recipe asks for, by setting the container's
-     * own DRM toggles (no new mechanism — Goldberg `steam_api`, the cold-client loader and Steamless
-     * are all already shipped). Returns a short human description for the snackbar/log. The DRM
-     * replace itself happens later, in the launch path, which reads these container fields.
-     */
-    private fun applySteamDrm(container: Container, spec: SteamDrmSpec): String = when (spec.strategy) {
-        SteamDrmStrategy.AUTO -> "DRM: unchanged"
-        SteamDrmStrategy.LEGACY_GOLDBERG -> {
-            container.setLaunchRealSteam(false)
-            container.setUseLegacyDRM(true)
-            container.setUnpackFiles(spec.unpack)
-            "DRM: legacy Goldberg steam_api" + if (spec.unpack) " + unpack" else ""
-        }
-        SteamDrmStrategy.COLD_CLIENT -> {
-            container.setLaunchRealSteam(false)
-            container.setUseLegacyDRM(false)
-            container.setUnpackFiles(spec.unpack)
-            "DRM: cold-client steamclient" + if (spec.unpack) " + unpack" else ""
-        }
-        SteamDrmStrategy.REAL_STEAM -> {
-            // CEG-protected games (e.g. Mirror's Edge) can only be decrypted by a real logged-in
-            // Steam client; clear the emulator/de-stub flags so the real-Steam path is taken cleanly.
-            container.setUseLegacyDRM(false)
-            container.setUnpackFiles(false)
-            container.setLaunchRealSteam(true)
-            "DRM: real Steam client (decrypts CEG)"
-        }
-    }
-
-    private const val DRM_APPLIED_EXTRA = "provisioning.drmApplied"
+    /** Signature DLLs proving a runtime is actually installed in the prefix (system32/syswow64). */
+    private val RUNTIME_SIGNATURE: Map<String, List<String>> = mapOf(
+        "vcrun2005" to listOf("msvcr80.dll", "msvcp80.dll"),
+        "vcrun2008" to listOf("msvcr90.dll", "msvcp90.dll"),
+        "vcrun2010" to listOf("msvcr100.dll", "msvcp100.dll"),
+        "vcrun2012" to listOf("msvcr110.dll", "msvcp110.dll"),
+        "vcrun2013" to listOf("msvcr120.dll", "msvcp120.dll"),
+        "vcrun2015" to listOf("msvcp140.dll", "vcruntime140.dll"),
+        "vcrun2017" to listOf("msvcp140.dll", "vcruntime140.dll"),
+        "vcrun2019" to listOf("msvcp140.dll", "vcruntime140.dll"),
+        "vcrun2022" to listOf("msvcp140.dll", "vcruntime140.dll"),
+        "physx" to listOf("PhysXLoader.dll", "physxcudart_20.dll"),
+        // dotnet48 / xna40 install to the GAC/registry, not a checkable system32 DLL — omitted.
+    )
 
     /** Per-runtime download budget for the on-demand prefetch. */
     private const val DOWNLOAD_TIMEOUT_MS = 180_000L
