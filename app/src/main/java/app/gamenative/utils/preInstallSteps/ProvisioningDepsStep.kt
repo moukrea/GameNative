@@ -1,8 +1,10 @@
 package app.gamenative.utils
 
+import app.gamenative.PluviaApp
 import app.gamenative.PrefManager
 import app.gamenative.data.GameSource
 import app.gamenative.enums.Marker
+import app.gamenative.events.AndroidEvent
 import app.gamenative.provisioning.ProvisioningInstallers
 import app.gamenative.provisioning.engine.GameHubBaseline
 import app.gamenative.provisioning.resolver.GameHubCatalogSource
@@ -64,15 +66,19 @@ object ProvisioningDepsStep : PreInstallStep {
         val staged = mutableListOf<ProvisioningInstallers.Staged>()
 
         var allStaged = true
-        for (verb in verbs) {
+        verbs.forEachIndexed { index, verb ->
             val def = (registry.get(verb) as? DataDrivenVerb)?.definition
             if (def == null) {
                 Timber.tag(TAG).w("Verb '%s' is not installable in the registry; skipping", verb)
                 allStaged = false
-                continue
+                return@forEachIndexed
             }
             val runnable = def.downloads.filter { ProvisioningInstallers.isRunnable(it.fileName) }
-            if (runnable.isEmpty()) continue
+            if (runnable.isEmpty()) return@forEachIndexed
+
+            // Visible feedback: downloads are synchronous and can be large, so surface progress on
+            // the boot splash instead of leaving the screen looking frozen.
+            splash("Preparing dependencies: $verb (${index + 1}/${verbs.size})…")
 
             val verbDir = File(stagingRoot, verb).apply { mkdirs() }
             val verbStaged = mutableListOf<ProvisioningInstallers.Staged>()
@@ -154,6 +160,11 @@ object ProvisioningDepsStep : PreInstallStep {
     private fun verifies(file: File, sha256: String?): Boolean {
         if (sha256.isNullOrBlank()) return file.isFile && file.length() > 0
         return sha256Hex(file).equals(sha256, ignoreCase = true)
+    }
+
+    /** Surfaces provisioning progress on the boot splash (never fatal). */
+    private fun splash(text: String) {
+        runCatching { PluviaApp.events.emit(AndroidEvent.SetBootingSplashText(text)) }
     }
 
     private fun sha256Hex(file: File): String {
