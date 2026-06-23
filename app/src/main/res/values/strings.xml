@@ -1519,6 +1519,7 @@
     <string name="option_get_support">Get support</string>
     <string name="option_submit_feedback">Submit feedback</string>
     <string name="option_reset_drm">Reset DRM</string>
+    <string name="option_reapply_provisioning">Re-apply provisioning</string>
     <string name="option_use_known_config">Use known config</string>
     <string name="option_import_saves">Import saves</string>
     <string name="option_export_saves">Export saves</string>

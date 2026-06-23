@@ -1,5 +1,6 @@
 package app.gamenative.provisioning.engine
 
+import app.gamenative.provisioning.ProvisioningAssets
 import app.gamenative.provisioning.model.GameRecipe
 import app.gamenative.provisioning.model.RecipeCodec
 
@@ -11,13 +12,12 @@ import app.gamenative.provisioning.model.RecipeCodec
  * when the per-game provisioning flag is on.
  */
 object GameHubBaseline {
-    private const val RESOURCE = "provisioning/gamehub-baseline.json"
+    private const val RESOURCE = "gamehub-baseline.json"
 
     val recipe: GameRecipe? by lazy { load() }
 
     private fun load(): GameRecipe? {
-        val stream = javaClass.classLoader?.getResourceAsStream(RESOURCE) ?: return null
-        val text = stream.bufferedReader().use { it.readText() }
+        val text = ProvisioningAssets.readText(RESOURCE) ?: return null
         return runCatching { RecipeCodec.decode(text) }.getOrNull()
     }
 }

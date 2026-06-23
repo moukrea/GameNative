@@ -1,6 +1,7 @@
 package app.gamenative.provisioning.engine
 
 import app.gamenative.data.GameSource
+import app.gamenative.provisioning.ProvisioningAssets
 import app.gamenative.provisioning.model.GameRecipe
 import app.gamenative.provisioning.model.RecipeCodec
 
@@ -14,13 +15,13 @@ import app.gamenative.provisioning.model.RecipeCodec
  * Only facts are stored: no GameHub code and no proprietary binaries. See `THIRD_PARTY_NOTICES`.
  */
 object GameHubCatalog {
-    private const val RESOURCE = "provisioning/gamehub-recipes.json"
+    private const val RESOURCE = "gamehub-recipes.json"
 
     val recipes: List<GameRecipe> by lazy { load() }
 
     private fun load(): List<GameRecipe> {
-        val stream = javaClass.classLoader?.getResourceAsStream(RESOURCE) ?: return emptyList()
-        return stream.bufferedReader().use { RecipeCodec.decodeList(it.readText()) }
+        val text = ProvisioningAssets.readText(RESOURCE) ?: return emptyList()
+        return runCatching { RecipeCodec.decodeList(text) }.getOrDefault(emptyList())
     }
 
     fun forGame(source: GameSource, appId: String): GameRecipe? =

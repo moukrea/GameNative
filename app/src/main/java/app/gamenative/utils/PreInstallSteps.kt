@@ -98,6 +98,12 @@ object PreInstallSteps {
         MarkerUtils.addMarker(gameDirPath, marker)
     }
 
+    /** Clears the provisioning-deps marker so [ProvisioningDepsStep] re-runs on the next launch. */
+    fun clearProvisioningDepsMarker(container: Container) {
+        val gameDir = getGameDir(container) ?: return
+        MarkerUtils.removeMarker(gameDir.absolutePath, Marker.PROVISIONING_DEPS_INSTALLED)
+    }
+
     private fun resetMarkers(gameDirPath: String) {
         for (marker in allMarkers()) {
             MarkerUtils.removeMarker(gameDirPath, marker)

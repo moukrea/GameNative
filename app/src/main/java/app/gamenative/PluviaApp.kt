@@ -75,6 +75,8 @@ class PluviaApp : SplitCompatApplication() {
 
         // Init our datastore preferences.
         PrefManager.init(this)
+        // Provisioning JSON is loaded from assets via the app context (not the classpath).
+        app.gamenative.provisioning.ProvisioningAssets.init(this)
         FrontendSyncManager.init(this)
 
         // Initialize GOGConstants

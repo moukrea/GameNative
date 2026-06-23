@@ -47,6 +47,7 @@ import app.gamenative.enums.Marker
 import app.gamenative.enums.PathType
 import app.gamenative.enums.SyncResult
 import app.gamenative.events.AndroidEvent
+import app.gamenative.provisioning.PerGameProvisioning
 import app.gamenative.service.DownloadService
 import app.gamenative.service.SteamService
 import app.gamenative.service.SteamService.Companion.getAppDirPath
@@ -847,6 +848,20 @@ class SteamAppScreen : BaseAppScreen() {
                 },
             ),
         )
+
+        // Per-game provisioning controls (opt-in): let the user force a re-apply and confirm exactly
+        // what the GameHub-style provisioning will do (baseline + recipe + runtime installers).
+        if (PrefManager.enablePerGameProvisioning) {
+            options += AppMenuOption(
+                AppOptionMenuType.ReapplyProvisioning,
+                onClick = {
+                    scope.launch(Dispatchers.IO) {
+                        val summary = PerGameProvisioning.reapplyNow(context, appId)
+                        SnackbarManager.show(summary)
+                    }
+                },
+            )
+        }
 
         return options
     }

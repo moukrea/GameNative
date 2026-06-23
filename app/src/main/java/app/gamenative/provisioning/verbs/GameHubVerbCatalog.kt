@@ -1,5 +1,6 @@
 package app.gamenative.provisioning.verbs
 
+import app.gamenative.provisioning.ProvisioningAssets
 import app.gamenative.provisioning.model.Provenance
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -13,7 +14,7 @@ import kotlinx.serialization.json.Json
  * downloaded at runtime from their official vendors, never bundled. See `THIRD_PARTY_NOTICES`.
  */
 object GameHubVerbCatalog {
-    private const val RESOURCE = "provisioning/gamehub-verbs.json"
+    private const val RESOURCE = "gamehub-verbs.json"
 
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -30,8 +31,7 @@ object GameHubVerbCatalog {
     val definitions: List<VerbDefinition> by lazy { load() }
 
     private fun load(): List<VerbDefinition> {
-        val stream = GameHubVerbCatalog::class.java.classLoader?.getResourceAsStream(RESOURCE) ?: return emptyList()
-        val text = stream.bufferedReader().use { it.readText() }
+        val text = ProvisioningAssets.readText(RESOURCE) ?: return emptyList()
         val verbs = json.decodeFromString(kotlinx.serialization.builtins.ListSerializer(CatalogVerb.serializer()), text)
         val provenance = Provenance(source = "winetricks", confidence = "reported", contributor = "gamehub-component-catalog")
         return verbs.map { v ->

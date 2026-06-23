@@ -254,6 +254,11 @@ android {
         getByName("debug") {
             assets.srcDir(copyDebugManifest)
         }
+        // Provisioning JSON lives in assets (loaded via the app context on-device). Put the same
+        // dir on the unit-test classpath so the pure-JVM tests' classpath fallback can read it.
+        getByName("test") {
+            resources.srcDir("src/main/assets")
+        }
     }
 
     kotlinter {

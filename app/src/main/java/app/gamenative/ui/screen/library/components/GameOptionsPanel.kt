@@ -36,6 +36,7 @@ import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.AltRoute
 import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Build
@@ -346,6 +347,7 @@ private fun getIconForOption(type: AppOptionMenuType): ImageVector {
         AppOptionMenuType.ManageGameContent -> Icons.Default.Apps
         AppOptionMenuType.ManageWorkshop -> Icons.Default.Build
         AppOptionMenuType.ChangeBranch -> Icons.AutoMirrored.Filled.CallSplit
+        AppOptionMenuType.ReapplyProvisioning -> Icons.Default.AutoFixHigh
     }
 }
 
@@ -377,6 +379,7 @@ private fun groupOptions(options: List<AppMenuOption>): Map<OptionCategory, List
             // Container Settings
             AppOptionMenuType.ResetToDefaults,
             AppOptionMenuType.ResetDrm,
+            AppOptionMenuType.ReapplyProvisioning,
             AppOptionMenuType.UseKnownConfig,
             AppOptionMenuType.ImportConfig,
             AppOptionMenuType.ExportConfig,

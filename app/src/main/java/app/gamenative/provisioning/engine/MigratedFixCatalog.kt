@@ -1,6 +1,7 @@
 package app.gamenative.provisioning.engine
 
 import app.gamenative.data.GameSource
+import app.gamenative.provisioning.ProvisioningAssets
 import app.gamenative.provisioning.model.GameRecipe
 import app.gamenative.provisioning.model.RecipeCodec
 
@@ -13,13 +14,13 @@ import app.gamenative.provisioning.model.RecipeCodec
  * fallback while the flag is off.
  */
 object MigratedFixCatalog {
-    private const val RESOURCE = "provisioning/migrated-fixes.json"
+    private const val RESOURCE = "migrated-fixes.json"
 
     val recipes: List<GameRecipe> by lazy { load() }
 
     private fun load(): List<GameRecipe> {
-        val stream = javaClass.classLoader?.getResourceAsStream(RESOURCE) ?: return emptyList()
-        return stream.bufferedReader().use { RecipeCodec.decodeList(it.readText()) }
+        val text = ProvisioningAssets.readText(RESOURCE) ?: return emptyList()
+        return runCatching { RecipeCodec.decodeList(text) }.getOrDefault(emptyList())
     }
 
     fun forGame(source: GameSource, appId: String): GameRecipe? =
