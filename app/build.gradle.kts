@@ -64,7 +64,7 @@ android {
         buildConfigField("boolean", "XR_BUILD", "false")
         buildConfigField("boolean", "MODERN_XR", "false")
 
-        versionCode = 14
+        versionCode = 28
         versionName = "1.1.0"
 
         buildConfigField("boolean", "GOLD", "false")
@@ -167,6 +167,8 @@ android {
             isMinifyEnabled = false
             isShrinkResources = false
             signingConfig = signingConfigs.getByName("debug")
+            applicationIdSuffix = ".provtest"
+            versionNameSuffix = "-provtest"
         }
         release {
             isMinifyEnabled = true
