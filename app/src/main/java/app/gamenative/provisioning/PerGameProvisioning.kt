@@ -6,6 +6,7 @@ import app.gamenative.gamefixes.GameFixesRegistry
 import app.gamenative.provisioning.engine.FilePrefixState
 import app.gamenative.provisioning.engine.ProvisioningEngine
 import app.gamenative.provisioning.model.DeviceProfile
+import app.gamenative.provisioning.resolver.GameHubCatalogSource
 import app.gamenative.provisioning.resolver.MigratedFixCatalogSource
 import app.gamenative.provisioning.resolver.PrefixRecipeCache
 import app.gamenative.provisioning.resolver.RecipeResolver
@@ -38,7 +39,7 @@ object PerGameProvisioning {
         }
 
         val resolver = RecipeResolver(
-            sources = listOf(UserRecipeSource(context), MigratedFixCatalogSource),
+            sources = listOf(UserRecipeSource(context), GameHubCatalogSource, MigratedFixCatalogSource),
             cache = PrefixRecipeCache(container),
         )
         val resolved = resolver.resolve(source, matchId)

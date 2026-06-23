@@ -128,6 +128,25 @@ class ProvisioningEngineTest {
     }
 
     @Test
+    fun passiveApplyRespectsUserConfigButForceOverwrites() {
+        val recipe = GameRecipe(
+            id = "respect",
+            match = RecipeMatch(GameSource.STEAM, "9"),
+            env = linkedMapOf("DXVK_FRAME_RATE" to "30"),
+        )
+        val state = InMemoryPrefixState()
+        state.setEnv("DXVK_FRAME_RATE", "60") // user's existing value
+
+        val passive = engine.applyDeclarative(recipe, DeviceProfile.UNKNOWN, state)
+        assertTrue(passive is ProvisioningResult.Applied)
+        assertEquals("60", state.env["DXVK_FRAME_RATE"]) // not overwritten
+
+        val forced = engine.applyDeclarative(recipe, DeviceProfile.UNKNOWN, state, force = true)
+        assertTrue(forced is ProvisioningResult.Applied)
+        assertEquals("30", state.env["DXVK_FRAME_RATE"]) // force overwrites (and bypasses the marker)
+    }
+
+    @Test
     fun verbFailureLeavesRecipeUnmarkedButBootsOffline() = runBlocking {
         val offline = RecordingVerbContext(failFor = setOf("d3dcompiler_47_32.dll"))
         val offlineEngine = ProvisioningEngine(VerbRegistry.builtin(), offline)

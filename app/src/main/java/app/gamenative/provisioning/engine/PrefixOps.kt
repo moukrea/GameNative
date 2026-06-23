@@ -34,24 +34,25 @@ object DllOverrides {
         overrides.entries.joinToString(";") { "${it.key}=${it.value}" }
 
     /**
-     * Adds `dll=mode` to the prefix's `WINEDLLOVERRIDES`, preserving any pre-existing entry for that
-     * DLL (so user/earlier choices win). Idempotent: re-applying the same override is a no-op.
+     * Adds `dll=mode` to the prefix's `WINEDLLOVERRIDES`. By default preserves any pre-existing entry
+     * for that DLL (so user/earlier choices win); pass [force] to overwrite. Idempotent.
      */
-    fun apply(state: PrefixState, dll: String, mode: String) {
+    fun apply(state: PrefixState, dll: String, mode: String, force: Boolean = false) {
         val current = parse(state.getEnv(WINE_DLL_OVERRIDES_ENV))
-        if (current.containsKey(dll)) return
+        if (!force && current.containsKey(dll)) return
         current[dll] = mode
         state.setEnv(WINE_DLL_OVERRIDES_ENV, serialize(current))
     }
 }
 
 /**
- * Applies a single [RegistryPatch] to the prefix, only when the target value is currently absent or
- * empty — mirroring the idempotent, user-respecting behaviour of the existing `RegistryKeyFix`.
+ * Applies a single [RegistryPatch] to the prefix. By default only sets the value when it is absent
+ * or empty — mirroring the user-respecting behaviour of the existing `RegistryKeyFix`; pass [force]
+ * to overwrite an existing value.
  */
-fun applyRegistryPatch(state: PrefixState, patch: RegistryPatch) {
+fun applyRegistryPatch(state: PrefixState, patch: RegistryPatch, force: Boolean = false) {
     val existing = state.getRegistryString(patch.hive, patch.key, patch.name)
-    if (!existing.isNullOrEmpty()) return
+    if (!force && !existing.isNullOrEmpty()) return
     when (patch.type) {
         RegistryValueType.STRING -> state.setRegistryString(patch.hive, patch.key, patch.name, patch.value)
         RegistryValueType.DWORD -> state.setRegistryDword(patch.hive, patch.key, patch.name, parseDword(patch.value))
