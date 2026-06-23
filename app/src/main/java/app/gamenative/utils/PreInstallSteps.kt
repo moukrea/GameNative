@@ -104,6 +104,12 @@ object PreInstallSteps {
         MarkerUtils.removeMarker(gameDir.absolutePath, Marker.PROVISIONING_DEPS_INSTALLED)
     }
 
+    /** True once [ProvisioningDepsStep] has completed for this game (its installers ran in-guest). */
+    fun isProvisioningMarked(container: Container): Boolean {
+        val gameDir = getGameDir(container) ?: return false
+        return MarkerUtils.hasMarker(gameDir.absolutePath, Marker.PROVISIONING_DEPS_INSTALLED)
+    }
+
     private fun resetMarkers(gameDirPath: String) {
         for (marker in allMarkers()) {
             MarkerUtils.removeMarker(gameDirPath, marker)

@@ -33,4 +33,5 @@ enum class AppOptionMenuType(@StringRes val title: Int) {
     ManageWorkshop(R.string.option_manage_workshop),
     ChangeBranch(R.string.change_branch),
     ReapplyProvisioning(R.string.option_reapply_provisioning),
+    ProvisioningStatus(R.string.option_provisioning_status),
 }

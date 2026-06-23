@@ -853,6 +853,14 @@ class SteamAppScreen : BaseAppScreen() {
         // what the GameHub-style provisioning will do (baseline + recipe + runtime installers).
         if (PrefManager.enablePerGameProvisioning) {
             options += AppMenuOption(
+                AppOptionMenuType.ProvisioningStatus,
+                onClick = {
+                    scope.launch(Dispatchers.IO) {
+                        SnackbarManager.show(PerGameProvisioning.statusSummary(context, appId))
+                    }
+                },
+            )
+            options += AppMenuOption(
                 AppOptionMenuType.ReapplyProvisioning,
                 onClick = {
                     scope.launch(Dispatchers.IO) {

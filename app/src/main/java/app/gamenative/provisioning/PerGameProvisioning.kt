@@ -21,6 +21,7 @@ import app.gamenative.utils.ContainerUtils
 import app.gamenative.utils.PreInstallSteps
 import com.winlator.container.Container
 import timber.log.Timber
+import java.io.File
 
 /**
  * Launch-time entry point for the declarative per-game provisioning pipeline (opt-in).
@@ -155,6 +156,58 @@ object PerGameProvisioning {
             } else {
                 append("No runtime installers required.")
             }
+        }
+    }
+
+    /**
+     * Read-only status for the per-game menu ("Provisioning status"). Reports GROUND TRUTH from disk
+     * — which runtimes are actually staged under `drive_c/.gnprov/`, whether the install marker is
+     * set, the resolved recipe and DRM mode — so the user can confirm what really happened rather
+     * than rely on catching a launch-time splash.
+     */
+    fun statusSummary(context: Context, appId: String): String {
+        if (!PrefManager.enablePerGameProvisioning) {
+            return "Per-game provisioning is OFF — enable it in Settings, then 'Re-apply provisioning'."
+        }
+        val source = ContainerUtils.extractGameSourceFromContainerId(appId)
+        val gameId = ContainerUtils.extractGameIdFromContainerId(appId)?.toString()
+            ?: return "Provisioning: could not identify this game."
+        val matchId = when (source) {
+            GameSource.EPIC -> EpicService.getEpicGameOf(gameId.toInt())?.catalogId ?: gameId
+            else -> gameId
+        }
+        val container = ContainerUtils.getOrCreateContainer(context, appId)
+        val resolved = RecipeResolver(
+            sources = listOf(UserRecipeSource(context), GameHubCatalogSource, MigratedFixCatalogSource),
+            cache = PrefixRecipeCache(container),
+        ).resolve(source, matchId)
+
+        val deps = LinkedHashSet<String>()
+        GameHubBaseline.recipe?.dependencies?.let { deps += it }
+        resolved?.recipe?.dependencies?.let { deps += it }
+        val installers = ProvisioningInstallers.installerVerbs(deps.toList())
+
+        val stagingRoot = File(container.rootDir, ".wine/drive_c/.gnprov")
+        val staged = installers.count { verb ->
+            File(stagingRoot, verb).listFiles()?.any { it.isFile && it.length() > 0 } == true
+        }
+        val installed = PreInstallSteps.isProvisioningMarked(container)
+        val drm = resolved?.recipe?.steamDrm?.strategy?.name?.lowercase()
+            ?: if (container.isUseLegacyDRM) "legacy (manual toggle)" else "default (cold-client)"
+
+        return buildString {
+            append("Provisioning ON. ")
+            append("Recipe: ${resolved?.recipe?.id ?: "baseline only"}. ")
+            append("Runtimes downloaded: $staged/${installers.size}. ")
+            append("Installed in prefix: ${if (installed) "yes" else "not yet"}. ")
+            append("DRM: $drm. ")
+            append(
+                when {
+                    installed -> "Looks provisioned — see drive_c/.gnprov/."
+                    staged > 0 -> "Downloaded; relaunch to finish installing."
+                    else -> "Nothing yet — launch the game or tap 'Re-apply provisioning'."
+                },
+            )
         }
     }
 

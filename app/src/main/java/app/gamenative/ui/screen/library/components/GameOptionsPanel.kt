@@ -45,6 +45,7 @@ import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.RestartAlt
@@ -348,6 +349,7 @@ private fun getIconForOption(type: AppOptionMenuType): ImageVector {
         AppOptionMenuType.ManageWorkshop -> Icons.Default.Build
         AppOptionMenuType.ChangeBranch -> Icons.AutoMirrored.Filled.CallSplit
         AppOptionMenuType.ReapplyProvisioning -> Icons.Default.AutoFixHigh
+        AppOptionMenuType.ProvisioningStatus -> Icons.Default.Info
     }
 }
 
@@ -380,6 +382,7 @@ private fun groupOptions(options: List<AppMenuOption>): Map<OptionCategory, List
             AppOptionMenuType.ResetToDefaults,
             AppOptionMenuType.ResetDrm,
             AppOptionMenuType.ReapplyProvisioning,
+            AppOptionMenuType.ProvisioningStatus,
             AppOptionMenuType.UseKnownConfig,
             AppOptionMenuType.ImportConfig,
             AppOptionMenuType.ExportConfig,
