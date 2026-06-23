@@ -440,8 +440,8 @@
       "appId": "17410"
     },
     "steamDrm": {
-      "strategy": "real_steam",
-      "note": "Mirror's Edge (2008) is Steam CEG (Custom Executable Generation) — Valve's per-user AES-256 exe encryption, not SteamStub/SecuROM. CEG can ONLY be decrypted by the real logged-in Steam client that owns the game; Goldberg (steam_api emu) and Steamless both cannot handle CEG. So we select GameNative's real-Steam path (steam.exe -applaunch via the stored Steam token). Otherwise: 'Application load error 3:0000065432'. Confirm on-device."
+      "strategy": "bionic_steam",
+      "note": "Mirror's Edge (2008) is Steam CEG (per-user AES-256 encrypted exe). CEG can only be decrypted by a genuine logged-in Valve client; Goldberg/Steamless cannot. Route to GameNative's HEADLESS bionic-Steam path (real libsteamclient.so + JavaSteam token, no Steam window) — the GameHub-equivalent. Applied set-once; the container's DRM settings still win afterward. Falls back to real_steam if bionic is unavailable on the device."
     },
     "provenance": {
       "source": "gamehub-mechanism",

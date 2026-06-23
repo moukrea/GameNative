@@ -9,6 +9,8 @@ import app.gamenative.provisioning.engine.GameHubBaseline
 import app.gamenative.provisioning.engine.ProvisioningEngine
 import app.gamenative.provisioning.engine.ProvisioningResult
 import app.gamenative.provisioning.model.DeviceProfile
+import app.gamenative.provisioning.model.SteamDrmSpec
+import app.gamenative.provisioning.model.SteamDrmStrategy
 import app.gamenative.provisioning.resolver.GameHubCatalogSource
 import app.gamenative.provisioning.resolver.MigratedFixCatalogSource
 import app.gamenative.provisioning.resolver.PrefixRecipeCache
@@ -274,6 +276,59 @@ object PerGameProvisioning {
         "physx" to listOf("PhysXLoader.dll", "physxcudart_20.dll"),
         // dotnet48 / xna40 install to the GAC/registry, not a checkable system32 DLL — omitted.
     )
+
+    /**
+     * Applies a per-game recipe's recommended Steam DRM mode to the container ONCE, called from the
+     * launch entry point BEFORE GameNative chooses its DRM path. Set-once (tracked via an extra) so
+     * the user's later manual changes in the container DRM settings are fully respected — this is the
+     * opposite of the earlier bug where the recipe overrode the UI every launch. CEG titles route to
+     * the headless bionic-Steam path (the only GameNative path that decrypts CEG, GameHub-style).
+     */
+    fun applyRecommendedDrmOnce(context: Context, appId: String, container: Container) {
+        if (!PrefManager.enablePerGameProvisioning) return
+        if (container.getExtra(DRM_APPLIED_EXTRA, "").isNotEmpty()) return // already set — respect the user
+        val source = ContainerUtils.extractGameSourceFromContainerId(appId)
+        val gameId = ContainerUtils.extractGameIdFromContainerId(appId)?.toString() ?: return
+        val matchId = when (source) {
+            GameSource.EPIC -> EpicService.getEpicGameOf(gameId.toInt())?.catalogId ?: return
+            else -> gameId
+        }
+        val resolved = RecipeResolver(
+            sources = listOf(UserRecipeSource(context), GameHubCatalogSource, MigratedFixCatalogSource),
+            cache = PrefixRecipeCache(container),
+        ).resolve(source, matchId) ?: return
+        val spec = resolved.recipe.steamDrm ?: return
+        if (spec.strategy == SteamDrmStrategy.AUTO) return
+        applyDrmStrategy(container, spec)
+        container.putExtra(DRM_APPLIED_EXTRA, spec.strategy.name)
+        container.saveData()
+        Timber.tag(TAG).i("Applied recommended DRM '${spec.strategy}' once for '$appId'")
+    }
+
+    /** Maps a recipe DRM strategy onto the container's mutually-exclusive DRM toggles. */
+    private fun applyDrmStrategy(container: Container, spec: SteamDrmSpec) {
+        when (spec.strategy) {
+            SteamDrmStrategy.AUTO -> Unit
+            SteamDrmStrategy.LEGACY_GOLDBERG -> {
+                container.setLaunchRealSteam(false); container.setLaunchBionicSteam(false)
+                container.setUseLegacyDRM(true); container.setUnpackFiles(spec.unpack)
+            }
+            SteamDrmStrategy.COLD_CLIENT -> {
+                container.setLaunchRealSteam(false); container.setLaunchBionicSteam(false)
+                container.setUseLegacyDRM(false); container.setUnpackFiles(spec.unpack)
+            }
+            SteamDrmStrategy.REAL_STEAM -> {
+                container.setLaunchBionicSteam(false); container.setUseLegacyDRM(false)
+                container.setUnpackFiles(false); container.setLaunchRealSteam(true)
+            }
+            SteamDrmStrategy.BIONIC_STEAM -> {
+                container.setLaunchRealSteam(false); container.setUseLegacyDRM(false)
+                container.setUnpackFiles(false); container.setLaunchBionicSteam(true)
+            }
+        }
+    }
+
+    private const val DRM_APPLIED_EXTRA = "provisioning.drmApplied"
 
     /** Per-runtime download budget for the on-demand prefetch. */
     private const val DOWNLOAD_TIMEOUT_MS = 180_000L

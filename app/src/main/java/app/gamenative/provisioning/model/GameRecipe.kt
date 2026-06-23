@@ -63,9 +63,17 @@ enum class SteamDrmStrategy {
     @SerialName("cold_client")
     COLD_CLIENT,
 
-    /** Run the user's real Steam client in the prefix. */
+    /** Run the genuine Valve Steam client (full steam.exe) in the prefix. Heavy; CEG-capable. */
     @SerialName("real_steam")
     REAL_STEAM,
+
+    /**
+     * Headless genuine Valve client via GameNative's bionic-Steam path (in-process
+     * `libsteamclient.so`, token login, no window). The GameHub-equivalent for CEG titles — the only
+     * GameNative path that decrypts Steam CEG without a visible Steam client.
+     */
+    @SerialName("bionic_steam")
+    BIONIC_STEAM,
 }
 
 /**

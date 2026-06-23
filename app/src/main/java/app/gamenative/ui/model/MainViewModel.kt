@@ -501,6 +501,10 @@ class MainViewModel @Inject constructor(
                 val container = ContainerUtils.getOrCreateContainer(context, appId)
                 val gameSource = ContainerUtils.extractGameSourceFromContainerId(appId)
                 if (gameSource == GameSource.STEAM) {
+                    // Opt-in: a per-game recipe may recommend a DRM mode (e.g. CEG titles -> headless
+                    // bionic-Steam) BEFORE we choose the DRM path below. Set-once, so the user's own
+                    // container DRM settings still win on every subsequent launch.
+                    app.gamenative.provisioning.PerGameProvisioning.applyRecommendedDrmOnce(context, appId, container)
                     if (container.isLaunchRealSteam() || container.isLaunchBionicSteam()) {
                         SteamUtils.restoreSteamApi(context, appId)
                     } else {
