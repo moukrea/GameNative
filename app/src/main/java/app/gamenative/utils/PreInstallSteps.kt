@@ -131,4 +131,7 @@ object PreInstallSteps {
     internal fun setStepsProviderForTests(provider: (() -> List<PreInstallStep>)?) {
         stepsProvider = provider ?: { steps }
     }
+
+    /** Test-only: the default registered pre-install steps (to assert wiring). */
+    internal fun registeredStepsForTest(): List<PreInstallStep> = steps
 }
