@@ -127,7 +127,16 @@ object PerGameProvisioning {
             parts += "no per-game recipe"
         }
 
-        // DRM is intentionally NOT touched here — it's owned by GameNative's container settings.
+        // Explicit user action: force-apply the recipe's recommended DRM mode now (variant-aware),
+        // so "Re-apply provisioning" reliably sets it even when the set-once launch path was skipped
+        // (e.g. an older build already wrote a different strategy to the container).
+        resolveDrmSpec(context, appId, container)?.takeIf { it.strategy != SteamDrmStrategy.AUTO }?.let { spec ->
+            val effective = effectiveStrategy(container, spec.strategy)
+            applyDrmStrategy(container, effective, spec.unpack)
+            container.putExtra(DRM_APPLIED_EXTRA, effective.name)
+            container.saveData()
+            parts += "DRM ${effective.name.lowercase()}"
+        }
 
         val deps = LinkedHashSet<String>()
         baseline?.dependencies?.let { deps += it }
@@ -279,44 +288,64 @@ object PerGameProvisioning {
     )
 
     /**
-     * Applies a per-game recipe's recommended Steam DRM mode to the container ONCE, called from the
-     * launch entry point BEFORE GameNative chooses its DRM path. Set-once (tracked via an extra) so
-     * the user's later manual changes in the container DRM settings are fully respected — this is the
-     * opposite of the earlier bug where the recipe overrode the UI every launch. CEG titles route to
-     * the headless bionic-Steam path (the only GameNative path that decrypts CEG, GameHub-style).
+     * Applies a per-game recipe's recommended Steam DRM mode to the container, called from the launch
+     * entry point BEFORE GameNative chooses its DRM path. Re-applies only when the recommendation
+     * CHANGES (tracked via an extra holding the last-applied strategy): on a fresh container, or when
+     * an older build wrote a different strategy, it (re)applies; once the current recommendation is in
+     * place it never touches the container again, so the user's manual DRM choices are respected.
+     * CEG titles route to the headless bionic-Steam path (variant-aware — see [effectiveStrategy]).
      */
     fun applyRecommendedDrmOnce(context: Context, appId: String, container: Container) {
         if (!PrefManager.enablePerGameProvisioning) return
-        if (container.getExtra(DRM_APPLIED_EXTRA, "").isNotEmpty()) return // already set — respect the user
-        val source = ContainerUtils.extractGameSourceFromContainerId(appId)
-        val gameId = ContainerUtils.extractGameIdFromContainerId(appId)?.toString() ?: return
-        val matchId = when (source) {
-            GameSource.EPIC -> EpicService.getEpicGameOf(gameId.toInt())?.catalogId ?: return
-            else -> gameId
-        }
-        val resolved = RecipeResolver(
-            sources = listOf(UserRecipeSource(context), GameHubCatalogSource, MigratedFixCatalogSource),
-            cache = PrefixRecipeCache(container),
-        ).resolve(source, matchId) ?: return
-        val spec = resolved.recipe.steamDrm ?: return
+        val spec = resolveDrmSpec(context, appId, container) ?: return
         if (spec.strategy == SteamDrmStrategy.AUTO) return
-        applyDrmStrategy(container, spec)
-        container.putExtra(DRM_APPLIED_EXTRA, spec.strategy.name)
+        val effective = effectiveStrategy(container, spec.strategy)
+        if (container.getExtra(DRM_APPLIED_EXTRA, "") == effective.name) return // recommendation already applied
+        applyDrmStrategy(container, effective, spec.unpack)
+        container.putExtra(DRM_APPLIED_EXTRA, effective.name)
         container.saveData()
-        Timber.tag(TAG).i("Applied recommended DRM '${spec.strategy}' once for '$appId'")
+        Timber.tag(TAG).i("Applied DRM '$effective' for '$appId' (recipe recommended ${spec.strategy})")
     }
 
-    /** Maps a recipe DRM strategy onto the container's mutually-exclusive DRM toggles. */
-    private fun applyDrmStrategy(container: Container, spec: SteamDrmSpec) {
-        when (spec.strategy) {
+    /** Resolves the recipe's Steam DRM spec for a launched Steam/Epic game (null if none). */
+    private fun resolveDrmSpec(context: Context, appId: String, container: Container): SteamDrmSpec? {
+        val source = ContainerUtils.extractGameSourceFromContainerId(appId)
+        val gameId = ContainerUtils.extractGameIdFromContainerId(appId)?.toString() ?: return null
+        val matchId = when (source) {
+            GameSource.EPIC -> EpicService.getEpicGameOf(gameId.toInt())?.catalogId ?: return null
+            else -> gameId
+        }
+        return RecipeResolver(
+            sources = listOf(UserRecipeSource(context), GameHubCatalogSource, MigratedFixCatalogSource),
+            cache = PrefixRecipeCache(container),
+        ).resolve(source, matchId)?.recipe?.steamDrm
+    }
+
+    /**
+     * bionic-Steam only works on a BIONIC-variant container (the toggle is hidden otherwise and the
+     * launch path ignores it). On a GLIBC container, fall back to real-Steam — also a genuine,
+     * CEG-capable Valve client, just with a window.
+     */
+    private fun effectiveStrategy(container: Container, strategy: SteamDrmStrategy): SteamDrmStrategy =
+        if (strategy == SteamDrmStrategy.BIONIC_STEAM &&
+            !container.containerVariant.equals(Container.BIONIC, ignoreCase = true)
+        ) {
+            SteamDrmStrategy.REAL_STEAM
+        } else {
+            strategy
+        }
+
+    /** Maps a (already variant-resolved) DRM strategy onto the container's mutually-exclusive toggles. */
+    private fun applyDrmStrategy(container: Container, strategy: SteamDrmStrategy, unpack: Boolean) {
+        when (strategy) {
             SteamDrmStrategy.AUTO -> Unit
             SteamDrmStrategy.LEGACY_GOLDBERG -> {
                 container.setLaunchRealSteam(false); container.setLaunchBionicSteam(false)
-                container.setUseLegacyDRM(true); container.setUnpackFiles(spec.unpack)
+                container.setUseLegacyDRM(true); container.setUnpackFiles(unpack)
             }
             SteamDrmStrategy.COLD_CLIENT -> {
                 container.setLaunchRealSteam(false); container.setLaunchBionicSteam(false)
-                container.setUseLegacyDRM(false); container.setUnpackFiles(spec.unpack)
+                container.setUseLegacyDRM(false); container.setUnpackFiles(unpack)
             }
             SteamDrmStrategy.REAL_STEAM -> {
                 container.setLaunchBionicSteam(false); container.setUseLegacyDRM(false)
