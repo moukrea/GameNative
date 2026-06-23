@@ -16,10 +16,14 @@ import app.gamenative.provisioning.resolver.MigratedFixCatalogSource
 import app.gamenative.provisioning.resolver.PrefixRecipeCache
 import app.gamenative.provisioning.resolver.RecipeResolver
 import app.gamenative.provisioning.resolver.UserRecipeSource
+import app.gamenative.provisioning.verbs.DataDrivenVerb
+import app.gamenative.provisioning.verbs.VerbRegistry
+import app.gamenative.service.SteamService
 import app.gamenative.service.epic.EpicService
 import app.gamenative.utils.ContainerUtils
 import app.gamenative.utils.PreInstallSteps
 import com.winlator.container.Container
+import kotlinx.coroutines.withTimeoutOrNull
 import timber.log.Timber
 import java.io.File
 
@@ -93,7 +97,7 @@ object PerGameProvisioning {
      * marker so the Windows-runtime installers re-run on the next launch. Returns a human-readable
      * summary for a snackbar so the user can confirm exactly what provisioning will do.
      */
-    fun reapplyNow(context: Context, appId: String): String {
+    suspend fun reapplyNow(context: Context, appId: String, onProgress: (String) -> Unit = {}): String {
         if (!PrefManager.enablePerGameProvisioning) {
             return "Per-game provisioning is off — enable it in Settings first."
         }
@@ -146,17 +150,69 @@ object PerGameProvisioning {
         val installers = ProvisioningInstallers.installerVerbs(deps.toList())
         Timber.tag(TAG).i("Re-apply '$appId': ${parts.joinToString("; ")}; installers=$installers")
 
+        // Download the runtimes NOW (watchable proof, on demand) into the shared staging dir the
+        // launch-time installer reads. This is purely additive: ProvisioningDepsStep is unchanged and
+        // simply finds the files already present (skips re-download). Lets the user SEE it work
+        // without launching a game.
+        val staged = prefetchRuntimes(container, installers, onProgress)
+        PreInstallSteps.clearProvisioningDepsMarker(container)
+
         return buildString {
             append("Provisioning applied (")
             append(parts.joinToString(" · "))
             append("). ")
             if (installers.isNotEmpty()) {
-                append("${installers.size} runtime(s) install on next launch: ")
+                append("Runtimes downloaded $staged/${installers.size} (")
                 append(installers.joinToString(", "))
+                append("); they install on next launch.")
             } else {
                 append("No runtime installers required.")
             }
         }
+    }
+
+    /**
+     * Downloads the resolved installer runtimes into the shared per-prefix staging dir, reporting
+     * per-runtime progress. Integrity is (re)checked by [app.gamenative.utils.ProvisioningDepsStep]
+     * at launch, so this is a best-effort accelerator + on-demand "it works" proof. Returns how many
+     * runtimes are fully staged.
+     */
+    private suspend fun prefetchRuntimes(
+        container: Container,
+        installers: List<String>,
+        onProgress: (String) -> Unit,
+    ): Int {
+        if (installers.isEmpty()) return 0
+        val registry = VerbRegistry.builtin()
+        val stagingRoot = File(container.rootDir, ".wine/drive_c/.gnprov")
+        var staged = 0
+        installers.forEachIndexed { index, verb ->
+            onProgress("Downloading runtime ${index + 1}/${installers.size}: $verb…")
+            val def = (registry.get(verb) as? DataDrivenVerb)?.definition ?: return@forEachIndexed
+            val files = def.downloads.filter { ProvisioningInstallers.isRunnable(it.fileName) }
+            if (files.isEmpty()) return@forEachIndexed
+            val verbDir = File(stagingRoot, verb).apply { mkdirs() }
+            val ok = files.all { dl ->
+                val dest = File(verbDir, dl.fileName)
+                if (dest.isFile && dest.length() > 0) {
+                    true
+                } else {
+                    runCatching {
+                        withTimeoutOrNull(DOWNLOAD_TIMEOUT_MS) {
+                            SteamService.fetchFile(dl.url, dest) { }
+                            true
+                        } ?: false
+                    }.getOrElse {
+                        Timber.tag(TAG).w(it, "prefetch failed for %s", dl.url)
+                        dest.delete()
+                        false
+                    }
+                }
+            }
+            if (ok) staged++
+        }
+        onProgress("Runtimes downloaded: $staged/${installers.size}.")
+        return staged
     }
 
     /**
@@ -238,4 +294,7 @@ object PerGameProvisioning {
     }
 
     private const val DRM_APPLIED_EXTRA = "provisioning.drmApplied"
+
+    /** Per-runtime download budget for the on-demand prefetch. */
+    private const val DOWNLOAD_TIMEOUT_MS = 180_000L
 }

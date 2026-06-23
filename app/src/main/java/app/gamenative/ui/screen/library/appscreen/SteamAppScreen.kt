@@ -864,7 +864,10 @@ class SteamAppScreen : BaseAppScreen() {
                 AppOptionMenuType.ReapplyProvisioning,
                 onClick = {
                     scope.launch(Dispatchers.IO) {
-                        val summary = PerGameProvisioning.reapplyNow(context, appId)
+                        // Live progress while the runtimes download, then the final summary.
+                        val summary = PerGameProvisioning.reapplyNow(context, appId) { progress ->
+                            SnackbarManager.show(progress)
+                        }
                         SnackbarManager.show(summary)
                     }
                 },
