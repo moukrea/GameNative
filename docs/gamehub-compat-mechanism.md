@@ -58,14 +58,38 @@ All behind the opt-in `PrefManager.enablePerGameProvisioning` flag; zero regress
 | 70 per-game config patches | **`gamehub-recipes.json`** — 19 per-game config-file recipes (the ones with meaningful, Steam-matched configs), path-normalized to GameNative's `xuser`. |
 | Device branching (Adreno/generic) | the recipe `deviceOverrides` + `DeviceProfile`; resolver applies the matching overlay. |
 | 3-stage launch (config → components → deps) | the `RecipeResolver` (precedence: user > GameHub > migrated) + `ProvisioningEngine` (idempotent, transactional) at the `XServerScreen` pre-launch hook. |
+| Just-in-time dependency install (`IEmuContainer.installDependency`) | **`ProvisioningDepsStep`** — a `PreInstallStep` that downloads the resolved installer verbs (VC++ 2005-2022, PhysX, .NET 4.8, XNA) from their official vendors (SHA-256-verified) into `C:\.gnprov\<verb>\` and runs them silently in the Wine guest via the existing pre-install chain. |
+
+## How the dependency install works (the boot-maker)
+
+GameHub bakes the common Windows runtimes into its base `imagefs`. GameNative ships no such image, so
+`ProvisioningDepsStep` provisions the prefix **at launch** instead, reusing the same pre-install chain
+that already installs a game's bundled VC++/PhysX redists:
+
+1. **Resolve** — baseline deps (always) + the per-game recipe's deps, de-duplicated. Only verbs whose
+   payload is a directly-runnable installer (`.exe`/`.msi`) are run here (`ProvisioningInstallers.INSTALL_FLAGS`);
+   DLL-drop verbs (d3dx9, d3dcompiler, xact) are handled declaratively, not by a guest installer.
+2. **Download** — each redistributable from its official vendor URL via the app's own `SteamService.fetchFile`,
+   SHA-256-verified, staged once per prefix under `drive_c/.gnprov/<verb>/` (so VC++ isn't re-downloaded per
+   game). Each download is bounded by a 180 s timeout; a stuck transfer is dropped, never wedging launch.
+3. **Install** — the staged installers run silently in the guest (`/q`, `/install /quiet /norestart`,
+   PhysX `/s`, `msiexec /i` for MSIs), chained through `chainPreInstallSteps` (markers, `wineserver -k`
+   between steps, "Installing prerequisites…" splash).
+4. **Idempotent + recoverable** — a per-game marker means each game provisions at most once; if *any* verb
+   fails to download/stage, the marker is **withheld** so the whole step retries next launch (cached
+   downloads make the retry cheap). "Verify Files" clears the marker to force a clean re-provision.
+
+Fully opt-in (`PrefManager.enablePerGameProvisioning`, default off): when off, `appliesTo` returns false and
+there is zero behavior change.
 
 ## What still needs on-device validation (human handoff)
 
-The **dependency runtime-install** path (download each verb's redistributable + run its installer in the
-Wine guest, or extract its DLLs) reuses GameNative's existing async download + pre-launch guest-command
-machinery, but the actual install + the resulting boot can only be confirmed on hardware. See
-`docs/device-validation-protocol.md`. The Box64/FEX tuning and the config-file recipes apply
-declaratively and need no install step.
+The pipeline compiles, unit-tests green, and is wired end-to-end, but the **silent installs + the resulting
+boot** can only be confirmed on hardware: the per-verb silent flags are winetricks-faithful facts but are
+best-effort on Wine/Box64, and a few runtimes (legacy .NET full installers — `dotnet40/45/46` — deliberately
+excluded from auto-run for this reason) are historically fragile under emulation. The Box64/FEX tuning and the
+config-file recipes apply declaratively and need no install step.
 
-Concretely, to validate Mirror's Edge (Steam 17410): enable the flag, launch it, and confirm the
-baseline installs PhysX + VC++ + d3dx9 into the container and the game boots — versus flag-off.
+Concretely, to validate Mirror's Edge (Steam 17410): enable the flag, launch it, and confirm the baseline
+installs PhysX + VC++ into the container (watch the "Installing prerequisites…" splash, then check
+`drive_c/.gnprov/` and the game's marker) and the game boots — versus flag-off.

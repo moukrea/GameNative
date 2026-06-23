@@ -23,8 +23,7 @@
     "FEXCORE_Multiblock": "1"
   },
   "dependencies": [
-    "vcrun2005", "vcrun2008", "vcrun2010", "vcrun2012", "vcrun2013",
-    "vcrun2015", "vcrun2019", "vcrun2022",
+    "vcrun2005", "vcrun2008", "vcrun2010", "vcrun2012", "vcrun2013", "vcrun2022",
     "d3dx9", "d3dcompiler_43", "d3dcompiler_47",
     "dotnet48", "physx", "xact", "gdiplus", "dsound", "xna40", "openal"
   ],

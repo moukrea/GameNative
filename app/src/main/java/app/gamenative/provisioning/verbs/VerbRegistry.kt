@@ -24,9 +24,11 @@ class VerbRegistry private constructor(private val verbs: Map<String, Verb>) {
             VerbRegistry(definitions.associate { it.name to DataDrivenVerb(it) })
 
         /**
-         * The built-in registry = the full GameHub/winetricks dependency catalog (~99 verbs)
-         * plus the hand-curated definitions, which take precedence for the few verbs where we
-         * ship explicit binary placement (e.g. d3dcompiler_47).
+         * The built-in registry = the full GameHub/winetricks dependency catalog (~99 verbs, with
+         * SHA-256-pinned official downloads) plus the hand-curated definitions, which take
+         * precedence ONLY for the few verbs where we ship explicit DLL placement (d3dcompiler_47,
+         * d3dx9_43). The catalog entries win for everything else, so installer verbs keep their
+         * pinned hashes and direct vendor URLs.
          */
         fun builtin(): VerbRegistry {
             val merged = LinkedHashMap<String, VerbDefinition>()
@@ -54,29 +56,6 @@ object BuiltinVerbs {
             VerbDownload("https://aka.ms/vs/17/release/vc_redist.x64.exe", "vc_redist.x64.exe"),
         ),
         installerCommand = "wine vc_redist.x86.exe /quiet /norestart & wine vc_redist.x64.exe /quiet /norestart",
-        provenance = WINETRICKS,
-    )
-
-    /** Microsoft .NET Framework 4.8 (offline installer). */
-    val DOTNET48 = VerbDefinition(
-        name = "dotnet48",
-        description = "Microsoft .NET Framework 4.8 offline installer",
-        downloads = listOf(
-            VerbDownload("https://go.microsoft.com/fwlink/?linkid=2088631", "dotnet48-offline.exe"),
-        ),
-        dllOverrides = mapOf("mscoree" to "native"),
-        installerCommand = "wine dotnet48-offline.exe /sfxlang:1027 /q /norestart",
-        provenance = WINETRICKS,
-    )
-
-    /** OpenAL runtime (oalinst). */
-    val OPENAL = VerbDefinition(
-        name = "openal",
-        description = "OpenAL runtime (oalinst)",
-        downloads = listOf(
-            VerbDownload("https://openal.org/downloads/oalinst.zip", "oalinst.zip"),
-        ),
-        installerCommand = "wine oalinst.exe /s",
         provenance = WINETRICKS,
     )
 
@@ -123,19 +102,11 @@ object BuiltinVerbs {
         provenance = WINETRICKS,
     )
 
-    // The VC++ 2015-2022 runtimes are binary-compatible and ship as one redist, so the older
-    // verb names are aliases of the same definition.
-    val VCRUN2015 = VCRUN2022.copy(name = "vcrun2015")
-    val VCRUN2017 = VCRUN2022.copy(name = "vcrun2017")
-    val VCRUN2019 = VCRUN2022.copy(name = "vcrun2019")
-
+    // Only the DLL-placement verbs override the catalog: they materialize specific native DLLs the
+    // catalog (which is override-only for these) does not. Installer verbs (vcrun*, dotnet48,
+    // openal, physx, xna*) deliberately resolve to the SHA-256-pinned gamehub-verbs.json entries.
+    // VCRUN2022 is retained for unit tests but is intentionally NOT registered here.
     val DEFINITIONS: List<VerbDefinition> = listOf(
-        VCRUN2022,
-        VCRUN2019,
-        VCRUN2017,
-        VCRUN2015,
-        DOTNET48,
-        OPENAL,
         D3DCOMPILER_47,
         D3DX9_43,
     )

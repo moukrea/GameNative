@@ -25,8 +25,11 @@ import timber.log.Timber
  * DLL overrides, registry, files, INI patches, cleanup, launch args) to the container/prefix. Falls
  * back to the legacy [GameFixesRegistry] when no recipe matches, so nothing regresses.
  *
- * Dependency verbs (which download redistributables / run guest installers) are intentionally NOT
- * run on this synchronous launch path; that is a follow-up using the asynchronous verb engine.
+ * This synchronous path applies only the declarative state (config/env/overrides/registry/files).
+ * The dependency *installers* (download each redistributable + run its silent installer in the Wine
+ * guest — the core of GameHub's compatibility) are run separately by
+ * [app.gamenative.utils.ProvisioningDepsStep] through the existing pre-install chain, which can run
+ * guest programs before the game starts.
  */
 object PerGameProvisioning {
     private const val TAG = "Provisioning"

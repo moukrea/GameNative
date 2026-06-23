@@ -24,6 +24,9 @@ object PreInstallSteps {
     )
 
     private val steps: List<PreInstallStep> = listOf(
+        // Opt-in: provisions the prefix with the common Windows runtimes (GameHub's mechanism)
+        // before the game-shipped redists. No-op unless the per-game provisioning flag is on.
+        ProvisioningDepsStep,
         VcRedistStep,
         PhysXStep,
         OpenALStep,
