@@ -370,3 +370,18 @@ overrides, registry keys, dependency lists) and references to open-source compon
 builds (DXVK, VKD3D, Proton/Wine, Box64, FEXCore, Turnip) already listed in
 `manifest.json`; it never embeds or redistributes a proprietary third-party binary.
 
+### GameHub-derived compatibility facts
+
+Some recipe/verb data is reverse-engineered, clean-room, from XiaoJi **GameHub**'s
+compatibility model as openly re-published by the **GameHub Lite / BannerHub** project
+([`The412Banner/bannerhub-api`](https://github.com/The412Banner/bannerhub-api), which
+mirrors `landscape-api-*.vgabc.com`). Only *facts* are reused — which Windows runtime a
+game needs, the winetricks verb set GameHub uses for dependencies, the Box64/FEX tuning
+values, and per-game configuration-file contents. No GameHub code is copied and no GameHub
+binary is redistributed. The winetricks verb install definitions (`gamehub-verbs.json`) are
+reimplemented from the open-source
+[winetricks](https://github.com/Winetricks/winetricks) project (GPL/LGPL components are
+fetched from their upstreams at runtime, not bundled). Per-game configuration files in
+`gamehub-recipes.json` are functional settings (resolution, renderer, quality), reproduced
+as facts.
+

@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "gamehub-baseline",
+  "match": { "source": "STEAM", "appId": "0" },
+  "env": {
+    "BOX64_DYNAREC": "1",
+    "BOX64_DYNAREC_BIGBLOCK": "2",
+    "BOX64_DYNAREC_STRONGMEM": "0",
+    "BOX64_DYNAREC_WEAKBARRIER": "1",
+    "BOX64_DYNAREC_SAFEFLAGS": "0",
+    "BOX64_DYNAREC_FASTROUND": "1",
+    "BOX64_DYNAREC_FASTNAN": "1",
+    "BOX64_DYNAREC_NATIVEFLAGS": "1",
+    "BOX64_DYNAREC_CALLRET": "0",
+    "BOX64_DYNAREC_DF": "1",
+    "BOX64_DYNAREC_ALIGNED_ATOMICS": "0",
+    "BOX64_DYNAREC_PAUSE": "0",
+    "BOX64_DYNAREC_WAIT": "1",
+    "FEXCORE_TSOEnabled": "1",
+    "FEXCORE_HalfBarrierTSOEnabled": "1",
+    "FEXCORE_MemcpySetTSOEnabled": "0",
+    "FEXCORE_VectorTSOEnabled": "0",
+    "FEXCORE_Multiblock": "1"
+  },
+  "dependencies": [
+    "vcrun2005", "vcrun2008", "vcrun2010", "vcrun2012", "vcrun2013",
+    "vcrun2015", "vcrun2019", "vcrun2022",
+    "d3dx9", "d3dcompiler_43", "d3dcompiler_47",
+    "dotnet48", "physx", "xact", "gdiplus", "dsound", "xna40", "openal"
+  ],
+  "provenance": {
+    "source": "gamehub-mechanism",
+    "confidence": "reported",
+    "contributor": "GameHub default-prefix provisioning (winetricks-seeded deps + Box64/FEX tuning)"
+  }
+}

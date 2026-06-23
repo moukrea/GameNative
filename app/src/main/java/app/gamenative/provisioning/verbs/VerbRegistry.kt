@@ -23,7 +23,17 @@ class VerbRegistry private constructor(private val verbs: Map<String, Verb>) {
         fun fromDefinitions(definitions: List<VerbDefinition>): VerbRegistry =
             VerbRegistry(definitions.associate { it.name to DataDrivenVerb(it) })
 
-        fun builtin(): VerbRegistry = fromDefinitions(BuiltinVerbs.DEFINITIONS)
+        /**
+         * The built-in registry = the full GameHub/winetricks dependency catalog (~99 verbs)
+         * plus the hand-curated definitions, which take precedence for the few verbs where we
+         * ship explicit binary placement (e.g. d3dcompiler_47).
+         */
+        fun builtin(): VerbRegistry {
+            val merged = LinkedHashMap<String, VerbDefinition>()
+            GameHubVerbCatalog.definitions.forEach { merged[it.name] = it }
+            BuiltinVerbs.DEFINITIONS.forEach { merged[it.name] = it }
+            return fromDefinitions(merged.values.toList())
+        }
     }
 }
 

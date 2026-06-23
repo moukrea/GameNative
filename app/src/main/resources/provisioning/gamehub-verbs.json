@@ -1,0 +1,2019 @@
+[
+ {
+  "name": "amstream",
+  "installKind": "dll-copy",
+  "downloads": [
+   {
+    "url": "http://download.windowsupdate.com/msdownload/update/software/svpk/2011/02/windows6.1-kb976932-x86_c3516bc5c9e69fee6d9ac4f981f5b95977a8a2fa.exe",
+    "sha256": "e5449839955a22fc4dd596291aff1433b998f9797e1c784232226aba1f8abd97",
+    "fileName": "windows6.1-KB976932-X86.exe"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {
+   "amstream": "native,builtin"
+  },
+  "placedDlls": [
+   "amstream.dll"
+  ]
+ },
+ {
+  "name": "art2k7min",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://www.fmsinc.com/microsoftaccess/runtime/AccessRuntime2007.exe",
+    "sha256": "a00a92fdc4ddc0dcf5d1964214a8d7e4c61bb036908a4b43b3700063eda9f4fb",
+    "fileName": "AccessRuntime.exe"
+   }
+  ],
+  "installerCommands": [
+   "AccessRuntime.exe /q"
+  ],
+  "dllOverrides": {},
+  "placedDlls": []
+ },
+ {
+  "name": "art2kmin",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "http://download.microsoft.com/download/office2000dev/art2kmin/1/win98/en-us/art2kmin.exe",
+    "sha256": "c6bf34dfac8d22b5d4ba8a4b14256dc25215f1ce769049c7f25c40850b5e5b81",
+    "fileName": "art2kmin.exe"
+   }
+  ],
+  "installerCommands": [
+   "Setup.exe INSTALLPFILES=1 /wait /q"
+  ],
+  "dllOverrides": {},
+  "placedDlls": []
+ },
+ {
+  "name": "atmlib",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "http://x3270.bgp.nu/download/specials/W2KSP4_EN.EXE",
+    "sha256": "167bb78d4adc957cc39fb4902517e1f32b1e62092353be5f8fb9ee647642de7e",
+    "fileName": "W2KSP4_EN.EXE"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {},
+  "placedDlls": [
+   "atmlib.dll"
+  ]
+ },
+ {
+  "name": "cjkfonts",
+  "installKind": "font",
+  "downloads": [],
+  "installerCommands": [],
+  "dllOverrides": {},
+  "placedDlls": []
+ },
+ {
+  "name": "cnc-ddraw",
+  "installKind": "dll-copy",
+  "downloads": [
+   {
+    "url": "https://github.com/FunkyFr3sh/cnc-ddraw/releases/download/v7.0.0.0/cnc-ddraw.zip",
+    "sha256": "f9640f69c2b8c012b97720ce0a9aac483989563908fc19446b9d1ba16e7239d6",
+    "fileName": "cnc-ddraw-v7.0.0.0.zip"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {},
+  "placedDlls": [
+   "ddraw.dll"
+  ]
+ },
+ {
+  "name": "d3dcompiler_42",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "https://files.holarse-linuxgaming.de/mirrors/microsoft/directx_Jun2010_redist.exe",
+    "sha256": "8746ee1a84a083a90e37899d71d50d5c7c015e69688a466aa80447f011780c0d",
+    "fileName": "directx_Jun2010_redist.exe"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {
+   "d3dcompiler_42": "native"
+  },
+  "placedDlls": [
+   "d3dcompiler_42.dll"
+  ]
+ },
+ {
+  "name": "d3dcompiler_43",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "https://files.holarse-linuxgaming.de/mirrors/microsoft/directx_Jun2010_redist.exe",
+    "sha256": "8746ee1a84a083a90e37899d71d50d5c7c015e69688a466aa80447f011780c0d",
+    "fileName": "directx_Jun2010_redist.exe"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {
+   "d3dcompiler_43": "native"
+  },
+  "placedDlls": [
+   "d3dcompiler_43.dll"
+  ]
+ },
+ {
+  "name": "d3dcompiler_46",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "https://download.microsoft.com/download/F/1/3/F1300C9C-A120-4341-90DF-8A52509B23AC/standalonesdk/Installers/2630bae9681db6a9f6722366f47d055c.cab",
+    "sha256": null,
+    "fileName": "2630bae9681db6a9f6722366f47d055c.cab"
+   },
+   {
+    "url": "https://download.microsoft.com/download/F/1/3/F1300C9C-A120-4341-90DF-8A52509B23AC/standalonesdk/Installers/61d57a7a82309cd161a854a6f4619e52.cab",
+    "sha256": null,
+    "fileName": "61d57a7a82309cd161a854a6f4619e52.cab"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {
+   "d3dcompiler_46": "native"
+  },
+  "placedDlls": [
+   "d3dcompiler_46.dll"
+  ]
+ },
+ {
+  "name": "d3dcompiler_47",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "https://download.microsoft.com/download/B/0/C/B0C80BA3-8AD6-4958-810B-6882485230B5/standalonesdk/Installers/2630bae9681db6a9f6722366f47d055c.cab",
+    "sha256": null,
+    "fileName": "2630bae9681db6a9f6722366f47d055c.cab"
+   },
+   {
+    "url": "https://download.microsoft.com/download/B/0/C/B0C80BA3-8AD6-4958-810B-6882485230B5/standalonesdk/Installers/61d57a7a82309cd161a854a6f4619e52.cab",
+    "sha256": null,
+    "fileName": "61d57a7a82309cd161a854a6f4619e52.cab"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {
+   "d3dcompiler_47": "native"
+  },
+  "placedDlls": [
+   "d3dcompiler_47.dll"
+  ]
+ },
+ {
+  "name": "d3dx11_43",
+  "installKind": "cabextract-dll",
+  "downloads": [],
+  "installerCommands": [],
+  "dllOverrides": {},
+  "placedDlls": []
+ },
+ {
+  "name": "d3dx9",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "https://files.holarse-linuxgaming.de/mirrors/microsoft/directx_Jun2010_redist.exe",
+    "sha256": "8746ee1a84a083a90e37899d71d50d5c7c015e69688a466aa80447f011780c0d",
+    "fileName": "directx_Jun2010_redist.exe"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {
+   "d3dx9_24": "native",
+   "d3dx9_25": "native",
+   "d3dx9_26": "native",
+   "d3dx9_27": "native",
+   "d3dx9_28": "native",
+   "d3dx9_29": "native",
+   "d3dx9_30": "native",
+   "d3dx9_31": "native",
+   "d3dx9_32": "native",
+   "d3dx9_33": "native",
+   "d3dx9_34": "native",
+   "d3dx9_35": "native",
+   "d3dx9_36": "native",
+   "d3dx9_37": "native",
+   "d3dx9_38": "native",
+   "d3dx9_39": "native",
+   "d3dx9_40": "native",
+   "d3dx9_41": "native",
+   "d3dx9_42": "native",
+   "d3dx9_43": "native"
+  },
+  "placedDlls": [
+   "d3dx9_24.dll",
+   "d3dx9_25.dll",
+   "d3dx9_26.dll",
+   "d3dx9_27.dll",
+   "d3dx9_28.dll",
+   "d3dx9_29.dll",
+   "d3dx9_30.dll",
+   "d3dx9_31.dll",
+   "d3dx9_32.dll",
+   "d3dx9_33.dll",
+   "d3dx9_34.dll",
+   "d3dx9_35.dll",
+   "d3dx9_36.dll",
+   "d3dx9_37.dll",
+   "d3dx9_38.dll",
+   "d3dx9_39.dll",
+   "d3dx9_40.dll",
+   "d3dx9_41.dll",
+   "d3dx9_42.dll",
+   "d3dx9_43.dll"
+  ]
+ },
+ {
+  "name": "devenum",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "https://files.holarse-linuxgaming.de/mirrors/microsoft/directx_feb2010_redist.exe",
+    "sha256": "f6d191e89a963d7cca34f169d30f49eab99c1ed3bb92da73ec43617caaa1e93f",
+    "fileName": "directx_feb2010_redist.exe"
+   }
+  ],
+  "installerCommands": [
+   "regsvr32 devenum.dll"
+  ],
+  "dllOverrides": {
+   "devenum": "native"
+  },
+  "placedDlls": [
+   "devenum.dll"
+  ]
+ },
+ {
+  "name": "dirac",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://downloads.sourceforge.net/dirac/DiracDirectShowFilter-1.0.2.exe",
+    "sha256": "7257de4be940405637bb5d11c1179f7db86f165f21fc0ba24f42a9ecbc55fe20",
+    "fileName": "DiracDirectShowFilter-1.0.2.exe"
+   }
+  ],
+  "installerCommands": [
+   "DiracDirectShowFilter-1.0.2.exe"
+  ],
+  "dllOverrides": {},
+  "placedDlls": []
+ },
+ {
+  "name": "directmusic",
+  "installKind": "other",
+  "downloads": [],
+  "installerCommands": [],
+  "dllOverrides": {
+   "streamci": "native"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "directplay",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "https://files.holarse-linuxgaming.de/mirrors/microsoft/directx_feb2010_redist.exe",
+    "sha256": "f6d191e89a963d7cca34f169d30f49eab99c1ed3bb92da73ec43617caaa1e93f",
+    "fileName": "directx_feb2010_redist.exe"
+   }
+  ],
+  "installerCommands": [
+   "regsvr32 dplayx.dll",
+   "regsvr32 dpnet.dll",
+   "regsvr32 dpnhpast.dll",
+   "regsvr32 dpnhupnp.dll"
+  ],
+  "dllOverrides": {
+   "dplaysvr.exe": "native",
+   "dplayx": "native",
+   "dpmodemx": "native",
+   "dpnet": "native",
+   "dpnhpast": "native",
+   "dpnhupnp": "native",
+   "dpnsvr.exe": "native",
+   "dpwsockx": "native"
+  },
+  "placedDlls": [
+   "dplaysvr.exe",
+   "dplayx.dll",
+   "dpmodemx.dll",
+   "dpnet.dll",
+   "dpnhpast.dll",
+   "dpnhupnp.dll",
+   "dpnsvr.exe",
+   "dpwsockx.dll"
+  ]
+ },
+ {
+  "name": "directshow",
+  "installKind": "other",
+  "downloads": [],
+  "installerCommands": [],
+  "dllOverrides": {},
+  "placedDlls": []
+ },
+ {
+  "name": "dmband",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "https://files.holarse-linuxgaming.de/mirrors/microsoft/directx_feb2010_redist.exe",
+    "sha256": "f6d191e89a963d7cca34f169d30f49eab99c1ed3bb92da73ec43617caaa1e93f",
+    "fileName": "directx_feb2010_redist.exe"
+   }
+  ],
+  "installerCommands": [
+   "regsvr32.exe dmband.dll"
+  ],
+  "dllOverrides": {
+   "dmband": "native"
+  },
+  "placedDlls": [
+   "dmband.dll"
+  ]
+ },
+ {
+  "name": "dmcompos",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "https://files.holarse-linuxgaming.de/mirrors/microsoft/directx_feb2010_redist.exe",
+    "sha256": "f6d191e89a963d7cca34f169d30f49eab99c1ed3bb92da73ec43617caaa1e93f",
+    "fileName": "directx_feb2010_redist.exe"
+   }
+  ],
+  "installerCommands": [
+   "regsvr32.exe dmcompos.dll"
+  ],
+  "dllOverrides": {
+   "dmcompos": "native"
+  },
+  "placedDlls": [
+   "dmcompos.dll"
+  ]
+ },
+ {
+  "name": "dmime",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "https://files.holarse-linuxgaming.de/mirrors/microsoft/directx_feb2010_redist.exe",
+    "sha256": "f6d191e89a963d7cca34f169d30f49eab99c1ed3bb92da73ec43617caaa1e93f",
+    "fileName": "directx_feb2010_redist.exe"
+   }
+  ],
+  "installerCommands": [
+   "regsvr32.exe dmime.dll"
+  ],
+  "dllOverrides": {
+   "dmime": "native"
+  },
+  "placedDlls": [
+   "dmime.dll"
+  ]
+ },
+ {
+  "name": "dmloader",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "https://files.holarse-linuxgaming.de/mirrors/microsoft/directx_feb2010_redist.exe",
+    "sha256": "f6d191e89a963d7cca34f169d30f49eab99c1ed3bb92da73ec43617caaa1e93f",
+    "fileName": "directx_feb2010_redist.exe"
+   }
+  ],
+  "installerCommands": [
+   "regsvr32.exe dmloader.dll"
+  ],
+  "dllOverrides": {
+   "dmloader": "native"
+  },
+  "placedDlls": [
+   "dmloader.dll"
+  ]
+ },
+ {
+  "name": "dmscript",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "https://files.holarse-linuxgaming.de/mirrors/microsoft/directx_feb2010_redist.exe",
+    "sha256": "f6d191e89a963d7cca34f169d30f49eab99c1ed3bb92da73ec43617caaa1e93f",
+    "fileName": "directx_feb2010_redist.exe"
+   }
+  ],
+  "installerCommands": [
+   "regsvr32.exe dmscript.dll"
+  ],
+  "dllOverrides": {
+   "dmscript": "native"
+  },
+  "placedDlls": [
+   "dmscript.dll"
+  ]
+ },
+ {
+  "name": "dmstyle",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "https://files.holarse-linuxgaming.de/mirrors/microsoft/directx_feb2010_redist.exe",
+    "sha256": "f6d191e89a963d7cca34f169d30f49eab99c1ed3bb92da73ec43617caaa1e93f",
+    "fileName": "directx_feb2010_redist.exe"
+   }
+  ],
+  "installerCommands": [
+   "regsvr32.exe dmstyle.dll"
+  ],
+  "dllOverrides": {
+   "dmstyle": "native"
+  },
+  "placedDlls": [
+   "dmstyle.dll"
+  ]
+ },
+ {
+  "name": "dmsynth",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "https://files.holarse-linuxgaming.de/mirrors/microsoft/directx_feb2010_redist.exe",
+    "sha256": "f6d191e89a963d7cca34f169d30f49eab99c1ed3bb92da73ec43617caaa1e93f",
+    "fileName": "directx_feb2010_redist.exe"
+   }
+  ],
+  "installerCommands": [
+   "regsvr32.exe dmsynth.dll"
+  ],
+  "dllOverrides": {
+   "dmsynth": "native"
+  },
+  "placedDlls": [
+   "dmsynth.dll"
+  ]
+ },
+ {
+  "name": "dmusic",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "https://files.holarse-linuxgaming.de/mirrors/microsoft/directx_feb2010_redist.exe",
+    "sha256": "f6d191e89a963d7cca34f169d30f49eab99c1ed3bb92da73ec43617caaa1e93f",
+    "fileName": "directx_feb2010_redist.exe"
+   }
+  ],
+  "installerCommands": [
+   "regsvr32.exe dmusic.dll"
+  ],
+  "dllOverrides": {
+   "dmusic": "native"
+  },
+  "placedDlls": [
+   "dmusic.dll"
+  ]
+ },
+ {
+  "name": "dmusic32",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "https://web.archive.org/web/20100920035904/https://download.microsoft.com/download/3/9/7/3972f80c-5711-4e14-9483-959d48a2d03b/directx_apr2006_redist.exe",
+    "sha256": "dd8c3d401efe4561b67bd88475201b2f62f43cd23e4acc947bb34a659fa74952",
+    "fileName": "directx_apr2006_redist.exe"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {
+   "dmusic32": "native"
+  },
+  "placedDlls": [
+   "dmusic32.dll"
+  ]
+ },
+ {
+  "name": "dotnet20",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://download.lenovo.com/ibmdl/pub/pc/pccbbs/thinkvantage_en/dotnetfx.exe",
+    "sha256": "46693d9b74d12454d117cc61ff2e9481cabb100b4d74eb5367d3cf88b89a0e71",
+    "fileName": "dotnetfx.exe"
+   },
+   {
+    "url": "https://web.archive.org/web/20060509045320/https://download.microsoft.com/download/a/3/f/a3f1bf98-18f3-4036-9b68-8e6de530ce0a/NetFx64.exe",
+    "sha256": "7ea86dca8eeaedcaa4a17370547ca2cea9e9b6774972b8e03d2cb1fb0e798669",
+    "fileName": "NetFx64.exe"
+   }
+  ],
+  "installerCommands": [
+   "dotnetfx.exe /q /c:\"install.exe /q\"",
+   "NetFx64.exe /q /c:\"install.exe /q\""
+  ],
+  "dllOverrides": {
+   "mscorwks": "native"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "dotnet20sp1",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://download.microsoft.com/download/0/8/c/08c19fa4-4c4f-4ffb-9d6c-150906578c9e/NetFx20SP1_x86.exe",
+    "sha256": "c36c3a1d074de32d53f371c665243196a7608652a2fc6be9520312d5ce560871",
+    "fileName": "NetFx20SP1_x86.exe"
+   },
+   {
+    "url": "https://download.microsoft.com/download/9/8/6/98610406-c2b7-45a4-bdc3-9db1b1c5f7e2/NetFx20SP1_x64.exe",
+    "sha256": "1731e53de5f48baae0963677257660df1329549e81c48b4d7db7f7f3f2329aab",
+    "fileName": "NetFx20SP1_x64.exe"
+   }
+  ],
+  "installerCommands": [
+   "NetFx20SP1_x86.exe /q",
+   "NetFx20SP1_x64.exe /q"
+  ],
+  "dllOverrides": {
+   "mscorwks": "native"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "dotnet35",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://download.microsoft.com/download/6/0/f/60fc5854-3cb8-4892-b6db-bd4f42510f28/dotnetfx35.exe",
+    "sha256": "3e3a4104bad9a0c270ed5cbe8abb986de9afaf0281a98998bdbdc8eaab85c3b6",
+    "fileName": "dotnetfx35.exe"
+   }
+  ],
+  "installerCommands": [
+   "dotnetfx35.exe /lang:ENU /q"
+  ],
+  "dllOverrides": {
+   "mscoree": "native",
+   "mscorwks": "native"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "dotnet35sp1",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://download.microsoft.com/download/2/0/e/20e90413-712f-438c-988e-fdaa79a8ac3d/dotnetfx35.exe",
+    "sha256": "0582515bde321e072f8673e829e175ed2e7a53e803127c50253af76528e66bc1",
+    "fileName": "dotnetfx35.exe"
+   }
+  ],
+  "installerCommands": [
+   "dotnetfx35.exe /lang:ENU /q"
+  ],
+  "dllOverrides": {
+   "mscoree": "native",
+   "mscorwks": "native"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "dotnet40",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://download.microsoft.com/download/9/5/A/95A9616B-7A37-4AF6-BC36-D6EA96C8DAAE/dotNetFx40_Full_x86_x64.exe",
+    "sha256": "65e064258f2e418816b304f646ff9e87af101e4c9552ab064bb74d281c38659f",
+    "fileName": "dotNetFx40_Full_x86_x64.exe"
+   }
+  ],
+  "installerCommands": [
+   "dotNetFx40_Full_x86_x64.exe /q /c:\"install.exe /q\""
+  ],
+  "dllOverrides": {
+   "mscoree": "native",
+   "fusion": "builtin"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "dotnet45",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://download.microsoft.com/download/b/a/4/ba4a7e71-2906-4b2d-a0e1-80cf16844f5f/dotnetfx45_full_x86_x64.exe",
+    "sha256": "a04d40e217b97326d46117d961ec4eda455e087b90637cb33dd6cc4a2c228d83",
+    "fileName": "dotnetfx45_full_x86_x64.exe"
+   }
+  ],
+  "installerCommands": [
+   "dotnetfx45_full_x86_x64.exe /q /c:\"install.exe /q\""
+  ],
+  "dllOverrides": {
+   "mscoree": "native",
+   "fusion": "builtin"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "dotnet452",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://download.microsoft.com/download/E/2/1/E21644B5-2DF2-47C2-91BD-63C560427900/NDP452-KB2901907-x86-x64-AllOS-ENU.exe",
+    "sha256": "6c2c589132e830a185c5f40f82042bee3022e721a216680bd9b3995ba86f3781",
+    "fileName": "NDP452-KB2901907-x86-x64-AllOS-ENU.exe"
+   }
+  ],
+  "installerCommands": [
+   "NDP452-KB2901907-x86-x64-AllOS-ENU.exe /q /c:\"install.exe /q\""
+  ],
+  "dllOverrides": {
+   "mscoree": "native",
+   "fusion": "builtin"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "dotnet46",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://download.microsoft.com/download/6/F/9/6F9673B1-87D1-46C4-BF04-95F24C3EB9DA/enu_netfx/NDP46-KB3045557-x86-x64-AllOS-ENU_exe/NDP46-KB3045557-x86-x64-AllOS-ENU.exe",
+    "sha256": "b21d33135e67e3486b154b11f7961d8e1cfd7a603267fb60febb4a6feab5cf87",
+    "fileName": "NDP46-KB3045557-x86-x64-AllOS-ENU.exe"
+   }
+  ],
+  "installerCommands": [
+   "NDP46-KB3045557-x86-x64-AllOS-ENU.exe /q /c:\"install.exe /q\""
+  ],
+  "dllOverrides": {
+   "mscoree": "native",
+   "fusion": "builtin"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "dotnet461",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://download.microsoft.com/download/E/4/1/E4173890-A24A-4936-9FC9-AF930FE3FA40/NDP461-KB3102436-x86-x64-AllOS-ENU.exe",
+    "sha256": "beaa901e07347d056efe04e8961d5546c7518fab9246892178505a7ba631c301",
+    "fileName": "NDP461-KB3102436-x86-x64-AllOS-ENU.exe"
+   }
+  ],
+  "installerCommands": [
+   "NDP461-KB3102436-x86-x64-AllOS-ENU.exe /sfxlang:1027 /q /norestart"
+  ],
+  "dllOverrides": {
+   "mscoree": "native",
+   "fusion": "builtin"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "dotnet462",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://download.visualstudio.microsoft.com/download/pr/8e396c75-4d0d-41d3-aea8-848babc2736a/80b431456d8866ebe053eb8b81a168b3/NDP462-KB3151800-x86-x64-AllOS-ENU.exe",
+    "sha256": "b4cbb4bc9a3983ec3be9f80447e0d619d15256a9ce66ff414ae6e3856705e237",
+    "fileName": "NDP462-KB3151800-x86-x64-AllOS-ENU.exe"
+   }
+  ],
+  "installerCommands": [
+   "NDP462-KB3151800-x86-x64-AllOS-ENU.exe /sfxlang:1027 /q /norestart"
+  ],
+  "dllOverrides": {
+   "mscoree": "native",
+   "fusion": "builtin"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "dotnet472",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://download.visualstudio.microsoft.com/download/pr/1f5af042-d0e4-4002-9c59-9ba66bcf15f6/089f837de42708daacaae7c04b7494db/NDP472-KB4054530-x86-x64-AllOS-ENU.exe",
+    "sha256": "5cb624b97f9fd6d3895644c52231c9471cd88aacb57d6e198d3024a1839139f6",
+    "fileName": "NDP472-KB4054530-x86-x64-AllOS-ENU.exe"
+   }
+  ],
+  "installerCommands": [
+   "NDP472-KB4054530-x86-x64-AllOS-ENU.exe /sfxlang:1027 /q /norestart"
+  ],
+  "dllOverrides": {
+   "mscoree": "native"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "dotnet48",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://download.visualstudio.microsoft.com/download/pr/7afca223-55d2-470a-8edc-6a1739ae3252/abd170b4b0ec15ad0222a809b761a036/ndp48-x86-x64-allos-enu.exe",
+    "sha256": "95889d6de3f2070c07790ad6cf2000d33d9a1bdfc6a381725ab82ab1c314fd53",
+    "fileName": "ndp48-x86-x64-allos-enu.exe"
+   }
+  ],
+  "installerCommands": [
+   "ndp48-x86-x64-allos-enu.exe /sfxlang:1027 /q /norestart"
+  ],
+  "dllOverrides": {
+   "mscoree": "native"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "dotnetcore3",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://download.visualstudio.microsoft.com/download/pr/abb3fb5d-4e82-4ca8-bc03-ac13e988e608/b34036773a72b30c5dc5520ee6a2768f/dotnet-runtime-3.1.10-win-x86.exe",
+    "sha256": "6ae8d2fb7a23ac4770fa815bc27614b2db0e89f5c078eb2744771bf5541cdba3",
+    "fileName": "dotnet-runtime-3.1.10-win-x86.exe"
+   },
+   {
+    "url": "https://download.visualstudio.microsoft.com/download/pr/9845b4b0-fb52-48b6-83cf-4c431558c29b/41025de7a76639eeff102410e7015214/dotnet-runtime-3.1.10-win-x64.exe",
+    "sha256": "78ef39c732ec35e79a0c1a10010ea797733df2811d774709b0fde23dce02efdf",
+    "fileName": "dotnet-runtime-3.1.10-win-x64.exe"
+   }
+  ],
+  "installerCommands": [
+   "dotnet-runtime-3.1.10-win-x86.exe /quiet",
+   "dotnet-runtime-3.1.10-win-x64.exe /quiet"
+  ],
+  "dllOverrides": {},
+  "placedDlls": []
+ },
+ {
+  "name": "dotnetcoredesktop3",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://download.visualstudio.microsoft.com/download/pr/865d0be5-16e2-4b3d-a990-f4c45acd280c/ec867d0a4793c0b180bae85bc3a4f329/windowsdesktop-runtime-3.1.10-win-x86.exe",
+    "sha256": "4da245d9048642ed3f25c04e8fa0156e1d2966b4d257c12a9a3d3a0c929102aa",
+    "fileName": "windowsdesktop-runtime-3.1.10-win-x86.exe"
+   },
+   {
+    "url": "https://download.visualstudio.microsoft.com/download/pr/513acf37-8da2-497d-bdaa-84d6e33c1fee/eb7b010350df712c752f4ec4b615f89d/windowsdesktop-runtime-3.1.10-win-x64.exe",
+    "sha256": "32286b9a35d9a53d28807ef761f3dba43b71e602efd2b794f843fcf5ea8438a9",
+    "fileName": "windowsdesktop-runtime-3.1.10-win-x64.exe"
+   }
+  ],
+  "installerCommands": [
+   "windowsdesktop-runtime-3.1.10-win-x86.exe /quiet",
+   "windowsdesktop-runtime-3.1.10-win-x64.exe /quiet"
+  ],
+  "dllOverrides": {},
+  "placedDlls": []
+ },
+ {
+  "name": "dsdmo",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "https://files.holarse-linuxgaming.de/mirrors/microsoft/directx_feb2010_redist.exe",
+    "sha256": "f6d191e89a963d7cca34f169d30f49eab99c1ed3bb92da73ec43617caaa1e93f",
+    "fileName": "directx_feb2010_redist.exe"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {},
+  "placedDlls": [
+   "dsdmo.dll",
+   "dsdmoprp.dll"
+  ]
+ },
+ {
+  "name": "dsound",
+  "installKind": "cabextract-dll",
+  "downloads": [],
+  "installerCommands": [],
+  "dllOverrides": {
+   "dsound": "native,builtin"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "dswave",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "https://files.holarse-linuxgaming.de/mirrors/microsoft/directx_feb2010_redist.exe",
+    "sha256": "f6d191e89a963d7cca34f169d30f49eab99c1ed3bb92da73ec43617caaa1e93f",
+    "fileName": "directx_feb2010_redist.exe"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {
+   "dswave": "native"
+  },
+  "placedDlls": [
+   "dswave.dll"
+  ]
+ },
+ {
+  "name": "dx8vb",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "https://download.microsoft.com/download/win2000pro/dx/8.1/NT5/DE/DX81NTger.exe",
+    "sha256": "31513966a29dc100165072891d21b5c5e0dd2632abf3409a843cefb3a9886f13",
+    "fileName": "DX81NTger.exe"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {
+   "dx8vb": "native"
+  },
+  "placedDlls": [
+   "dx8vb.dll"
+  ]
+ },
+ {
+  "name": "ffdshow",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://downloads.sourceforge.net/ffdshow-tryout/ffdshow_beta7_rev3154_20091209.exe",
+    "sha256": "86fb22e9a79a1c83340a99fd5722974a4d03948109d404a383c4334fab8f8860",
+    "fileName": "ffdshow_beta7_rev3154_20091209.exe"
+   }
+  ],
+  "installerCommands": [
+   "ffdshow_beta7_rev3154_20091209.exe /silent"
+  ],
+  "dllOverrides": {},
+  "placedDlls": []
+ },
+ {
+  "name": "gdiplus",
+  "installKind": "other",
+  "downloads": [],
+  "installerCommands": [],
+  "dllOverrides": {
+   "gdiplus": "native"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "gfw",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://web.archive.org/web/20140730232216/https://download.microsoft.com/download/5/5/8/55846E20-4A46-4EF8-B272-7F988BC9090A/gfwlivesetupmin.exe",
+    "sha256": "b14609508e2f8dba0886ded84e2817ad532ebfa31f8a6d4be2e6a5a03a9d7c23",
+    "fileName": "gfwlivesetupmin.exe"
+   }
+  ],
+  "installerCommands": [
+   "gfwlivesetupmin.exe /nodotnet /q"
+  ],
+  "dllOverrides": {},
+  "placedDlls": []
+ },
+ {
+  "name": "gmdls",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "https://web.archive.org/web/20100920035904/https://download.microsoft.com/download/3/9/7/3972f80c-5711-4e14-9483-959d48a2d03b/directx_apr2006_redist.exe",
+    "sha256": "dd8c3d401efe4561b67bd88475201b2f62f43cd23e4acc947bb34a659fa74952",
+    "fileName": "directx_apr2006_redist.exe"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {},
+  "placedDlls": [
+   "gm.dls"
+  ]
+ },
+ {
+  "name": "ie8_kb2936068",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://download.microsoft.com/download/3/8/C/38CE0ABB-01FD-4C0A-A569-BC5E82C34A17/IE8-WindowsXP-KB2936068-x86-ENU.exe",
+    "sha256": "8bda23c78cdcd9d01c364a01c6d639dfb2d11550a5521b8a81c808c1a2b1824e",
+    "fileName": "IE8-WindowsXP-KB2936068-x86-ENU.exe"
+   },
+   {
+    "url": "https://download.microsoft.com/download/4/C/5/4C5B97EA-8E28-4CBB-AF27-0AB0D386F4E9/IE8-WindowsServer2003.WindowsXP-KB2936068-x64-ENU.exe",
+    "sha256": "40f42f2d98259dde860bd0dbe71b9a0c623c03e0feff738f67920e4be0845598",
+    "fileName": "IE8-WindowsServer2003.WindowsXP-KB2936068-x64-ENU.exe"
+   }
+  ],
+  "installerCommands": [
+   "IE8-WindowsXP-KB2936068-x86-ENU.exe /quiet /forcerestart",
+   "IE8-WindowsServer2003.WindowsXP-KB2936068-x64-ENU.exe /quiet /forcerestart"
+  ],
+  "dllOverrides": {},
+  "placedDlls": []
+ },
+ {
+  "name": "iertutil",
+  "installKind": "dll-copy",
+  "downloads": [
+   {
+    "url": "http://download.windowsupdate.com/msdownload/update/software/svpk/2011/02/windows6.1-kb976932-x86_c3516bc5c9e69fee6d9ac4f981f5b95977a8a2fa.exe",
+    "sha256": "e5449839955a22fc4dd596291aff1433b998f9797e1c784232226aba1f8abd97",
+    "fileName": "windows6.1-KB976932-X86.exe"
+   },
+   {
+    "url": "http://download.windowsupdate.com/msdownload/update/software/svpk/2011/02/windows6.1-kb976932-x64_74865ef2562006e51d7f9333b4a8d45b7a749dab.exe",
+    "sha256": "f4d1d418d91b1619688a482680ee032ffd2b65e420c6d2eaecf8aa3762aa64c8",
+    "fileName": "windows6.1-KB976932-X64.exe"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {
+   "iertutil": "native,builtin"
+  },
+  "placedDlls": [
+   "iertutil.dll"
+  ]
+ },
+ {
+  "name": "jet40",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://web.archive.org/web/20210225171713/http://download.microsoft.com/download/4/3/9/4393c9ac-e69e-458d-9f6d-2fe191c51469/Jet40SP8_9xNT.exe",
+    "sha256": "b060246cd499085a31f15873689d5fa7df817e407c8261a5c71fa6b9f7042560",
+    "fileName": "jet40sp8_9xnt.exe"
+   }
+  ],
+  "installerCommands": [
+   "jet40sp8_9xnt.exe /q"
+  ],
+  "dllOverrides": {},
+  "placedDlls": []
+ },
+ {
+  "name": "l3codecx",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "https://files.holarse-linuxgaming.de/mirrors/microsoft/directx_feb2010_redist.exe",
+    "sha256": "f6d191e89a963d7cca34f169d30f49eab99c1ed3bb92da73ec43617caaa1e93f",
+    "fileName": "directx_feb2010_redist.exe"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {},
+  "placedDlls": [
+   "l3codecx.ax"
+  ]
+ },
+ {
+  "name": "lavfilters702",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://github.com/Nevcairiel/LAVFilters/releases/download/0.70.2/LAVFilters-0.70.2-Installer.exe",
+    "sha256": "526e6f2de21759c0d5a60bfd2471880b5720cfb88a3b70163865a9d6cd2aa7cc",
+    "fileName": "LAVFilters-0.70.2-Installer.exe"
+   }
+  ],
+  "installerCommands": [
+   "LAVFilters-0.70.2-Installer.exe /VERYSILENT"
+  ],
+  "dllOverrides": {},
+  "placedDlls": []
+ },
+ {
+  "name": "mdac28",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://web.archive.org/web/20070127061938/https://download.microsoft.com/download/4/a/a/4aafff19-9d21-4d35-ae81-02c48dcbbbff/MDAC_TYP.EXE",
+    "sha256": "157ebae46932cb9047b58aa849ac1885e8cbd2f218810cb83e57613b49c679d6",
+    "fileName": "MDAC_TYP.EXE"
+   }
+  ],
+  "installerCommands": [
+   "mdac_typ.exe /q /C:\"setup /qnt\""
+  ],
+  "dllOverrides": {},
+  "placedDlls": []
+ },
+ {
+  "name": "mfc40",
+  "installKind": "dll-copy",
+  "downloads": [
+   {
+    "url": "http://download.windowsupdate.com/msdownload/update/software/svpk/2011/02/windows6.1-kb976932-x86_c3516bc5c9e69fee6d9ac4f981f5b95977a8a2fa.exe",
+    "sha256": "e5449839955a22fc4dd596291aff1433b998f9797e1c784232226aba1f8abd97",
+    "fileName": "windows6.1-KB976932-X86.exe"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {},
+  "placedDlls": [
+   "mfc40.dll",
+   "mfc40u.dll"
+  ]
+ },
+ {
+  "name": "mfc42",
+  "installKind": "cabextract-dll",
+  "downloads": [],
+  "installerCommands": [],
+  "dllOverrides": {},
+  "placedDlls": []
+ },
+ {
+  "name": "msasn1",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "http://x3270.bgp.nu/download/specials/W2KSP4_EN.EXE",
+    "sha256": "167bb78d4adc957cc39fb4902517e1f32b1e62092353be5f8fb9ee647642de7e",
+    "fileName": "W2KSP4_EN.EXE"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {},
+  "placedDlls": [
+   "msasn1.dll"
+  ]
+ },
+ {
+  "name": "msftedit",
+  "installKind": "dll-copy",
+  "downloads": [
+   {
+    "url": "http://download.windowsupdate.com/msdownload/update/software/svpk/2011/02/windows6.1-kb976932-x86_c3516bc5c9e69fee6d9ac4f981f5b95977a8a2fa.exe",
+    "sha256": "e5449839955a22fc4dd596291aff1433b998f9797e1c784232226aba1f8abd97",
+    "fileName": "windows6.1-kb976932-x86_c3516bc5c9e69fee6d9ac4f981f5b95977a8a2fa.exe"
+   },
+   {
+    "url": "http://download.windowsupdate.com/msdownload/update/software/svpk/2011/02/windows6.1-kb976932-x64_74865ef2562006e51d7f9333b4a8d45b7a749dab.exe",
+    "sha256": "f4d1d418d91b1619688a482680ee032ffd2b65e420c6d2eaecf8aa3762aa64c8",
+    "fileName": "windows6.1-kb976932-x64_74865ef2562006e51d7f9333b4a8d45b7a749dab.exe"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {
+   "msftedit": "native,builtin"
+  },
+  "placedDlls": [
+   "msftedit.dll"
+  ]
+ },
+ {
+  "name": "msls31",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "https://download.microsoft.com/download/7/5/4/754D6601-662D-4E39-9788-6F90D8E5C097/IE8-WindowsServer2003-x64-ENU.exe",
+    "sha256": "bcff753e92ceabf31cfefaa6def146335c7cb27a50b95cd4f4658a0c3326f499",
+    "fileName": "IE8-WindowsServer2003-x64-ENU.exe"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {},
+  "placedDlls": [
+   "msls31.dll"
+  ]
+ },
+ {
+  "name": "mspatcha",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "http://x3270.bgp.nu/download/specials/W2KSP4_EN.EXE",
+    "sha256": "167bb78d4adc957cc39fb4902517e1f32b1e62092353be5f8fb9ee647642de7e",
+    "fileName": "W2KSP4_EN.EXE"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {
+   "mspatcha": "native,builtin"
+  },
+  "placedDlls": [
+   "mspatcha.dll"
+  ]
+ },
+ {
+  "name": "msxml3",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://media.codeweavers.com/pub/other/msxml3.msi",
+    "sha256": "f9c678f8217e9d4f9647e8a1f6d89a7c26a57b9e9e00d39f7487493dd7b4e36c",
+    "fileName": "msxml3.msi"
+   },
+   {
+    "url": "http://download.windowsupdate.com/msdownload/update/software/svpk/2011/02/windows6.1-kb976932-x64_74865ef2562006e51d7f9333b4a8d45b7a749dab.exe",
+    "sha256": "f4d1d418d91b1619688a482680ee032ffd2b65e420c6d2eaecf8aa3762aa64c8",
+    "fileName": "windows6.1-kb976932-x64_74865ef2562006e51d7f9333b4a8d45b7a749dab.exe"
+   }
+  ],
+  "installerCommands": [
+   "msiexec /i msxml3.msi /q"
+  ],
+  "dllOverrides": {
+   "msxml3": "native"
+  },
+  "placedDlls": [
+   "msxml3.dll"
+  ]
+ },
+ {
+  "name": "msxml4",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://web.archive.org/web/20210506101448/http://download.microsoft.com/download/A/2/D/A2D8587D-0027-4217-9DAD-38AFDB0A177E/msxml.msi",
+    "sha256": "47c2ae679c37815da9267c81fc3777de900ad2551c11c19c2840938b346d70bb",
+    "fileName": "msxml.msi"
+   }
+  ],
+  "installerCommands": [
+   "msiexec /i msxml.msi"
+  ],
+  "dllOverrides": {
+   "msxml4": "native,builtin"
+  },
+  "placedDlls": [
+   "msxml4.dll"
+  ]
+ },
+ {
+  "name": "msxml6",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "https://download.microsoft.com/download/2/7/7/277681BE-4048-4A58-ABBA-259C465B1699/msxml6-KB2957482-enu-amd64.exe",
+    "sha256": "260cd870851ffc3c6d10b71691f134e20d8d03ac26073bb36951eacb7aa85897",
+    "fileName": "msxml6-KB2957482-enu-amd64.exe"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {
+   "msxml6": "native,builtin"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "openal",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://www.openal.org/downloads/oalinst.zip",
+    "sha256": "d165bcb7628fd950d14847585468cc11943b2a1da92a59a839d397c68f9d4b06",
+    "fileName": "oalinst.zip"
+   }
+  ],
+  "installerCommands": [
+   "\"${W_TMP}/oalinst.exe\" /silent"
+  ],
+  "dllOverrides": {},
+  "placedDlls": []
+ },
+ {
+  "name": "physx",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://us.download.nvidia.com/Windows/9.23.1019/PhysX_9.23.1019_SystemSoftware.exe",
+    "sha256": "9b42b84e881769d681e09f62a1b51532616b2e6a2d5d99d0ccae6eb5fbbc208c",
+    "fileName": "PhysX_9.23.1019_SystemSoftware.exe"
+   }
+  ],
+  "installerCommands": [
+   "PhysX_9.23.1019_SystemSoftware.exe /s"
+  ],
+  "dllOverrides": {},
+  "placedDlls": []
+ },
+ {
+  "name": "powershell",
+  "installKind": "dll-copy",
+  "downloads": [
+   {
+    "url": "https://codeberg.org/Synchro/powershell-wrapper-for-wine/releases/download/latest/powershell32.exe",
+    "sha256": null,
+    "fileName": "powershell32.exe"
+   },
+   {
+    "url": "https://codeberg.org/Synchro/powershell-wrapper-for-wine/releases/download/latest/powershell64.exe",
+    "sha256": null,
+    "fileName": "powershell64.exe"
+   },
+   {
+    "url": "https://codeberg.org/Synchro/powershell-wrapper-for-wine/releases/download/latest/profile.ps1",
+    "sha256": null,
+    "fileName": "profile.ps1"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {
+   "powershell.exe": "native"
+  },
+  "placedDlls": [
+   "powershell.exe"
+  ]
+ },
+ {
+  "name": "powershell_core",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://github.com/PowerShell/PowerShell/releases/download/v7.4.11/PowerShell-7.4.11-win-x64.msi",
+    "sha256": "9579011c463a3ad6abf890736a97e2fbba9a7b4e09ce851576ccf263e15bdc97",
+    "fileName": "PowerShell-7.4.11-win-x64.msi"
+   },
+   {
+    "url": "https://github.com/PowerShell/PowerShell/releases/download/v7.4.11/PowerShell-7.4.11-win-x86.msi",
+    "sha256": "beaed5a0860421383afd18b7d4c2b2663f62b6a89b4e30ac0894575aa65226f8",
+    "fileName": "PowerShell-7.4.11-win-x86.msi"
+   }
+  ],
+  "installerCommands": [
+   "msiexec /quiet /i PowerShell-7.4.11-win-x64.msi ENABLE_PSREMOTING=0 REGISTER_MANIFEST=1 DISABLE_TELEMETRY=1 USE_MU=0 ENABLE_MU=0 LAUNCHAPPONEXIT=0",
+   "msiexec /quiet /i PowerShell-7.4.11-win-x86.msi ENABLE_PSREMOTING=0 REGISTER_MANIFEST=1 DISABLE_TELEMETRY=1 USE_MU=0 ENABLE_MU=0 LAUNCHAPPONEXIT=0"
+  ],
+  "dllOverrides": {},
+  "placedDlls": []
+ },
+ {
+  "name": "qasf",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "http://download.windowsupdate.com/msdownload/update/software/svpk/2011/02/windows6.1-kb976932-x86_c3516bc5c9e69fee6d9ac4f981f5b95977a8a2fa.exe",
+    "sha256": "e5449839955a22fc4dd596291aff1433b998f9797e1c784232226aba1f8abd97",
+    "fileName": "windows6.1-KB976932-X86.exe"
+   },
+   {
+    "url": "http://download.windowsupdate.com/msdownload/update/software/svpk/2011/02/windows6.1-kb976932-x64_74865ef2562006e51d7f9333b4a8d45b7a749dab.exe",
+    "sha256": "f4d1d418d91b1619688a482680ee032ffd2b65e420c6d2eaecf8aa3762aa64c8",
+    "fileName": "windows6.1-KB976932-X64.exe"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {
+   "qasf": "native,builtin"
+  },
+  "placedDlls": [
+   "qasf.dll"
+  ]
+ },
+ {
+  "name": "qcap",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "http://download.windowsupdate.com/msdownload/update/software/svpk/2011/02/windows6.1-kb976932-x86_c3516bc5c9e69fee6d9ac4f981f5b95977a8a2fa.exe",
+    "sha256": "e5449839955a22fc4dd596291aff1433b998f9797e1c784232226aba1f8abd97",
+    "fileName": "windows6.1-KB976932-X86.exe"
+   },
+   {
+    "url": "http://download.windowsupdate.com/msdownload/update/software/svpk/2011/02/windows6.1-kb976932-x64_74865ef2562006e51d7f9333b4a8d45b7a749dab.exe",
+    "sha256": "f4d1d418d91b1619688a482680ee032ffd2b65e420c6d2eaecf8aa3762aa64c8",
+    "fileName": "windows6.1-KB976932-X64.exe"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {
+   "qcap": "native,builtin"
+  },
+  "placedDlls": [
+   "qcap.dll"
+  ]
+ },
+ {
+  "name": "qdvd",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "http://download.windowsupdate.com/msdownload/update/software/svpk/2011/02/windows6.1-kb976932-x86_c3516bc5c9e69fee6d9ac4f981f5b95977a8a2fa.exe",
+    "sha256": "e5449839955a22fc4dd596291aff1433b998f9797e1c784232226aba1f8abd97",
+    "fileName": "windows6.1-KB976932-X86.exe"
+   },
+   {
+    "url": "http://download.windowsupdate.com/msdownload/update/software/svpk/2011/02/windows6.1-kb976932-x64_74865ef2562006e51d7f9333b4a8d45b7a749dab.exe",
+    "sha256": "f4d1d418d91b1619688a482680ee032ffd2b65e420c6d2eaecf8aa3762aa64c8",
+    "fileName": "windows6.1-KB976932-X64.exe"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {
+   "qdvd": "native,builtin"
+  },
+  "placedDlls": [
+   "qdvd.dll"
+  ]
+ },
+ {
+  "name": "qedit",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "http://download.windowsupdate.com/msdownload/update/software/svpk/2011/02/windows6.1-kb976932-x86_c3516bc5c9e69fee6d9ac4f981f5b95977a8a2fa.exe",
+    "sha256": "e5449839955a22fc4dd596291aff1433b998f9797e1c784232226aba1f8abd97",
+    "fileName": "windows6.1-KB976932-X86.exe"
+   },
+   {
+    "url": "http://download.windowsupdate.com/msdownload/update/software/svpk/2011/02/windows6.1-kb976932-x64_74865ef2562006e51d7f9333b4a8d45b7a749dab.exe",
+    "sha256": "f4d1d418d91b1619688a482680ee032ffd2b65e420c6d2eaecf8aa3762aa64c8",
+    "fileName": "windows6.1-KB976932-X64.exe"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {
+   "qedit": "native,builtin"
+  },
+  "placedDlls": [
+   "qedit.dll"
+  ]
+ },
+ {
+  "name": "quartz",
+  "installKind": "other",
+  "downloads": [],
+  "installerCommands": [],
+  "dllOverrides": {
+   "quartz": "native,builtin"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "quicktime72",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "http://appldnld.apple.com.edgesuite.net/content.info.apple.com/QuickTime/061-2915.20070710.pO94c/QuickTimeInstaller.exe",
+    "sha256": "a42b93531910bdf1539cc5ae3199ade5a1ca63fd4ac971df74c345d8e1ee6593",
+    "fileName": "QuickTimeInstaller.exe"
+   }
+  ],
+  "installerCommands": [
+   "QuickTimeInstaller.exe ALLUSERS=1 DESKTOP_SHORTCUTS=0 QTTaskRunFlags=0 QTINFO.BISQTPRO=1 SCHEDULE_ASUW=0 REBOOT_REQUIRED=No /qn"
+  ],
+  "dllOverrides": {},
+  "placedDlls": []
+ },
+ {
+  "name": "riched20",
+  "installKind": "cabextract-dll",
+  "downloads": [],
+  "installerCommands": [],
+  "dllOverrides": {
+   "riched20": "native,builtin"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "urlmon",
+  "installKind": "dll-copy",
+  "downloads": [
+   {
+    "url": "extracted from ../win7sp1/windows6.1-KB976932-X86.exe via helper_win7sp1",
+    "sha256": null,
+    "fileName": "urlmon.dll"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {
+   "urlmon": "native,builtin"
+  },
+  "placedDlls": [
+   "urlmon.dll"
+  ]
+ },
+ {
+  "name": "vb6run",
+  "installKind": "cabextract-dll",
+  "downloads": [],
+  "installerCommands": [],
+  "dllOverrides": {},
+  "placedDlls": []
+ },
+ {
+  "name": "vcredist6",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "https://download.microsoft.com/download/vc60pro/Update/2/W9XNT4/EN-US/VC6RedistSetup_deu.exe",
+    "sha256": "c2eb91d9c4448d50e46a32fecbcc3b418706d002beab9b5f4981de552098cee7",
+    "fileName": "VC6RedistSetup_deu.exe"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {},
+  "placedDlls": [
+   "asycfilt.dll",
+   "comcat.dll",
+   "mfc42.dll",
+   "mfc42u.dll",
+   "msvcirt.dll",
+   "msvcp60.dll",
+   "msvcrt.dll",
+   "oleaut32.dll",
+   "olepro32.dll",
+   "stdole2.tlb",
+   "atl.dll"
+  ]
+ },
+ {
+  "name": "vcredist6sp6",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "https://www.ddsystem.com.br/update/setup/vb6+sp6/VS6SP6.EXE",
+    "sha256": "7fa1d1778824b55a5fceb02f45c399b5d4e4dce7403661e67e587b5f455edbf3",
+    "fileName": "VS6SP6.EXE"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {},
+  "placedDlls": [
+   "asycfilt.dll",
+   "comcat.dll",
+   "mfc42.dll",
+   "mfc42u.dll",
+   "msvcirt.dll",
+   "msvcp60.dll",
+   "msvcrt.dll",
+   "oleaut32.dll",
+   "olepro32.dll",
+   "stdole2.tlb",
+   "atl.dll"
+  ]
+ },
+ {
+  "name": "vcrun2005",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://download.microsoft.com/download/8/B/4/8B42259F-5D70-43F4-AC2E-4B208FD8D66A/vcredist_x86.EXE",
+    "sha256": "8648c5fc29c44b9112fe52f9a33f80e7fc42d10f3b5b42b2121542a13e44adfd",
+    "fileName": "vcredist_x86.EXE"
+   },
+   {
+    "url": "https://download.microsoft.com/download/8/B/4/8B42259F-5D70-43F4-AC2E-4B208FD8D66A/vcredist_x64.EXE",
+    "sha256": "4487570bd86e2e1aac29db2a1d0a91eb63361fcaac570808eb327cd4e0e2240d",
+    "fileName": "vcredist_x64.EXE"
+   }
+  ],
+  "installerCommands": [
+   "\"${file1}\" /q",
+   "vcredist_x64.exe /q"
+  ],
+  "dllOverrides": {
+   "atl80": "native,builtin",
+   "msvcm80": "native,builtin",
+   "msvcp80": "native,builtin",
+   "msvcr80": "native,builtin",
+   "vcomp": "native,builtin"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "vcrun2008",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://download.microsoft.com/download/5/D/8/5D8C65CB-C849-4025-8E95-C3966CAFD8AE/vcredist_x86.exe",
+    "sha256": "8742bcbf24ef328a72d2a27b693cc7071e38d3bb4b9b44dec42aa3d2c8d61d92",
+    "fileName": "vcredist_x86.exe"
+   },
+   {
+    "url": "https://download.microsoft.com/download/5/D/8/5D8C65CB-C849-4025-8E95-C3966CAFD8AE/vcredist_x64.exe",
+    "sha256": "c5e273a4a16ab4d5471e91c7477719a2f45ddadb76c7f98a38fa5074a6838654",
+    "fileName": "vcredist_x64.exe"
+   }
+  ],
+  "installerCommands": [
+   "\"${file1}\" /q",
+   "vcredist_x64.exe /q"
+  ],
+  "dllOverrides": {
+   "atl90": "native,builtin",
+   "msvcm90": "native,builtin",
+   "msvcp90": "native,builtin",
+   "msvcr90": "native,builtin",
+   "vcomp90": "native,builtin"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "vcrun2010",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://download.microsoft.com/download/5/B/C/5BC5DBB3-652D-4DCE-B14A-475AB85EEF6E/vcredist_x86.exe",
+    "sha256": "31d32fa39d52cac9a765a43660431f7a127eee784b54b2f5e2af3e2b763a1af8",
+    "fileName": "vcredist_x86.exe"
+   },
+   {
+    "url": "https://download.microsoft.com/download/A/8/0/A80747C3-41BD-45DF-B505-E9710D2744E0/vcredist_x64.exe",
+    "sha256": "2fddbc3aaaab784c16bc673c3bae5f80929d5b372810dbc28649283566d33255",
+    "fileName": "vcredist_x64.exe"
+   }
+  ],
+  "installerCommands": [
+   "vcredist_x86.exe /q",
+   "vcredist_x64.exe /q"
+  ],
+  "dllOverrides": {
+   "msvcp100": "native,builtin",
+   "msvcr100": "native,builtin",
+   "vcomp100": "native,builtin",
+   "atl100": "native,builtin"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "vcrun2012",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x86.exe",
+    "sha256": "b924ad8062eaf4e70437c8be50fa612162795ff0839479546ce907ffa8d6e386",
+    "fileName": "vcredist_x86.exe"
+   },
+   {
+    "url": "https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x64.exe",
+    "sha256": "681be3e5ba9fd3da02c09d7e565adfa078640ed66a0d58583efad2c1e3cc4064",
+    "fileName": "vcredist_x64.exe"
+   }
+  ],
+  "installerCommands": [
+   "vcredist_x86.exe /q",
+   "vcredist_x64.exe /q"
+  ],
+  "dllOverrides": {
+   "atl110": "native,builtin",
+   "msvcp110": "native,builtin",
+   "msvcr110": "native,builtin",
+   "vcomp110": "native,builtin"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "vcrun2013",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://download.microsoft.com/download/0/5/6/056dcda9-d667-4e27-8001-8a0c6971d6b1/vcredist_x86.exe",
+    "sha256": "89f4e593ea5541d1c53f983923124f9fd061a1c0c967339109e375c661573c17",
+    "fileName": "vcredist_x86.exe"
+   },
+   {
+    "url": "https://download.microsoft.com/download/0/5/6/056dcda9-d667-4e27-8001-8a0c6971d6b1/vcredist_x64.exe",
+    "sha256": "20e2645b7cd5873b1fa3462b99a665ac8d6e14aae83ded9d875fea35ffdd7d7e",
+    "fileName": "vcredist_x64.exe"
+   }
+  ],
+  "installerCommands": [
+   "vcredist_x86.exe /q",
+   "vcredist_x64.exe /q"
+  ],
+  "dllOverrides": {
+   "atl120": "native,builtin",
+   "msvcp120": "native,builtin",
+   "msvcr120": "native,builtin",
+   "vcomp120": "native,builtin"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "vcrun2015",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://download.microsoft.com/download/6/D/F/6DF3FF94-F7F9-4F0B-838C-A328D1A7D0EE/vc_redist.x86.exe",
+    "sha256": "dafb8b5f4b46bfaf7faa1d0ad05211f5c9855f0005cd603f8b5037b6a708d6b6",
+    "fileName": "vc_redist.x86.exe"
+   },
+   {
+    "url": "https://download.microsoft.com/download/6/D/F/6DF3FF94-F7F9-4F0B-838C-A328D1A7D0EE/vc_redist.x64.exe",
+    "sha256": "d7257265dbc0635c96dd67ddf938a09abe0866cb2d4fa05f8b758c8644e724e4",
+    "fileName": "vc_redist.x64.exe"
+   }
+  ],
+  "installerCommands": [
+   "vc_redist.x86.exe /q",
+   "vc_redist.x64.exe /q"
+  ],
+  "dllOverrides": {
+   "api-ms-win-crt-private-l1-1-0": "native,builtin",
+   "api-ms-win-crt-conio-l1-1-0": "native,builtin",
+   "api-ms-win-crt-convert-l1-1-0": "native,builtin",
+   "api-ms-win-crt-environment-l1-1-0": "native,builtin",
+   "api-ms-win-crt-filesystem-l1-1-0": "native,builtin",
+   "api-ms-win-crt-heap-l1-1-0": "native,builtin",
+   "api-ms-win-crt-locale-l1-1-0": "native,builtin",
+   "api-ms-win-crt-math-l1-1-0": "native,builtin",
+   "api-ms-win-crt-multibyte-l1-1-0": "native,builtin",
+   "api-ms-win-crt-process-l1-1-0": "native,builtin",
+   "api-ms-win-crt-runtime-l1-1-0": "native,builtin",
+   "api-ms-win-crt-stdio-l1-1-0": "native,builtin",
+   "api-ms-win-crt-string-l1-1-0": "native,builtin",
+   "api-ms-win-crt-utility-l1-1-0": "native,builtin",
+   "api-ms-win-crt-time-l1-1-0": "native,builtin",
+   "atl140": "native,builtin",
+   "concrt140": "native,builtin",
+   "msvcp140": "native,builtin",
+   "msvcp140_1": "native,builtin",
+   "msvcp140_atomic_wait": "native,builtin",
+   "ucrtbase": "native,builtin",
+   "vcomp140": "native,builtin",
+   "vccorlib140": "native,builtin",
+   "vcruntime140": "native,builtin",
+   "vcruntime140_1": "native,builtin"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "vcrun2017",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://aka.ms/vs/15/release/vc_redist.x86.exe",
+    "sha256": "251640e8039d34290133b2c6e3e6fe098e61e2756d5a4c45fdcec9e4dee6c187",
+    "fileName": "vc_redist.x86.exe"
+   },
+   {
+    "url": "https://aka.ms/vs/15/release/vc_redist.x64.exe",
+    "sha256": "7cf24eba2bd67ea6229b7dd131e06f4e92ebefc06e36fe401cdd227d7ed78264",
+    "fileName": "vc_redist.x64.exe"
+   }
+  ],
+  "installerCommands": [
+   "vc_redist.x86.exe /q",
+   "vc_redist.x64.exe /q"
+  ],
+  "dllOverrides": {
+   "api-ms-win-crt-private-l1-1-0": "native,builtin",
+   "api-ms-win-crt-conio-l1-1-0": "native,builtin",
+   "api-ms-win-crt-heap-l1-1-0": "native,builtin",
+   "api-ms-win-crt-locale-l1-1-0": "native,builtin",
+   "api-ms-win-crt-math-l1-1-0": "native,builtin",
+   "api-ms-win-crt-runtime-l1-1-0": "native,builtin",
+   "api-ms-win-crt-stdio-l1-1-0": "native,builtin",
+   "api-ms-win-crt-time-l1-1-0": "native,builtin",
+   "atl140": "native,builtin",
+   "concrt140": "native,builtin",
+   "msvcp140": "native,builtin",
+   "msvcp140_1": "native,builtin",
+   "msvcp140_2": "native,builtin",
+   "msvcp140_atomic_wait": "native,builtin",
+   "ucrtbase": "native,builtin",
+   "vcamp140": "native,builtin",
+   "vcomp140": "native,builtin",
+   "vccorlib140": "native,builtin",
+   "vcruntime140": "native,builtin",
+   "vcruntime140_1": "native,builtin"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "vcrun2019",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://aka.ms/vs/16/release/vc_redist.x86.exe",
+    "sha256": "49545cb0f6499c4a65e1e8d5033441eeeb4edfae465a68489a70832c6a4f6399",
+    "fileName": "vc_redist.x86.exe"
+   },
+   {
+    "url": "https://aka.ms/vs/16/release/vc_redist.x64.exe",
+    "sha256": "5d9999036f2b3a930f83b7fe3e2186b12e79ae7c007d538f52e3582e986a37c3",
+    "fileName": "vc_redist.x64.exe"
+   }
+  ],
+  "installerCommands": [
+   "vc_redist.x86.exe /q",
+   "vc_redist.x64.exe /q"
+  ],
+  "dllOverrides": {
+   "api-ms-win-crt-private-l1-1-0": "native,builtin",
+   "api-ms-win-crt-conio-l1-1-0": "native,builtin",
+   "api-ms-win-crt-heap-l1-1-0": "native,builtin",
+   "api-ms-win-crt-locale-l1-1-0": "native,builtin",
+   "api-ms-win-crt-math-l1-1-0": "native,builtin",
+   "api-ms-win-crt-runtime-l1-1-0": "native,builtin",
+   "api-ms-win-crt-stdio-l1-1-0": "native,builtin",
+   "api-ms-win-crt-time-l1-1-0": "native,builtin",
+   "atl140": "native,builtin",
+   "concrt140": "native,builtin",
+   "msvcp140": "native,builtin",
+   "msvcp140_1": "native,builtin",
+   "msvcp140_2": "native,builtin",
+   "msvcp140_atomic_wait": "native,builtin",
+   "msvcp140_codecvt_ids": "native,builtin",
+   "vcamp140": "native,builtin",
+   "vccorlib140": "native,builtin",
+   "vcomp140": "native,builtin",
+   "vcruntime140": "native,builtin",
+   "vcruntime140_1": "native,builtin"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "vcrun2022",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://aka.ms/vs/17/release/vc_redist.x86.exe",
+    "sha256": "0c09f2611660441084ce0df425c51c11e147e6447963c3690f97e0b25c55ed64",
+    "fileName": "vc_redist.x86.exe"
+   },
+   {
+    "url": "https://aka.ms/vs/17/release/vc_redist.x64.exe",
+    "sha256": "cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b",
+    "fileName": "vc_redist.x64.exe"
+   }
+  ],
+  "installerCommands": [
+   "vc_redist.x86.exe /q",
+   "vc_redist.x64.exe /q"
+  ],
+  "dllOverrides": {
+   "concrt140": "native,builtin",
+   "msvcp140": "native,builtin",
+   "msvcp140_1": "native,builtin",
+   "msvcp140_2": "native,builtin",
+   "msvcp140_atomic_wait": "native,builtin",
+   "msvcp140_codecvt_ids": "native,builtin",
+   "vcamp140": "native,builtin",
+   "vccorlib140": "native,builtin",
+   "vcomp140": "native,builtin",
+   "vcruntime140": "native,builtin",
+   "vcruntime140_1": "native,builtin"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "vcrun6",
+  "installKind": "cabextract-dll",
+  "downloads": [],
+  "installerCommands": [],
+  "dllOverrides": {},
+  "placedDlls": []
+ },
+ {
+  "name": "webview2",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://go.microsoft.com/fwlink/p/?LinkId=2124703",
+    "sha256": null,
+    "fileName": "MicrosoftEdgeWebview2Setup.exe"
+   }
+  ],
+  "installerCommands": [
+   "MicrosoftEdgeWebview2Setup.exe /silent /install"
+  ],
+  "dllOverrides": {},
+  "placedDlls": []
+ },
+ {
+  "name": "win7",
+  "installKind": "setting",
+  "downloads": [],
+  "installerCommands": [],
+  "dllOverrides": {},
+  "placedDlls": []
+ },
+ {
+  "name": "winXP",
+  "installKind": "setting",
+  "downloads": [],
+  "installerCommands": [],
+  "dllOverrides": {},
+  "placedDlls": []
+ },
+ {
+  "name": "winhttp",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "http://x3270.bgp.nu/download/specials/W2KSP4_EN.EXE",
+    "sha256": "167bb78d4adc957cc39fb4902517e1f32b1e62092353be5f8fb9ee647642de7e",
+    "fileName": "W2KSP4_EN.EXE"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {
+   "winhttp": "native,builtin"
+  },
+  "placedDlls": [
+   "winhttp.dll"
+  ]
+ },
+ {
+  "name": "wininet",
+  "installKind": "dll-copy",
+  "downloads": [
+   {
+    "url": "http://download.windowsupdate.com/msdownload/update/software/svpk/2011/02/windows6.1-kb976932-x86_c3516bc5c9e69fee6d9ac4f981f5b95977a8a2fa.exe",
+    "sha256": "e5449839955a22fc4dd596291aff1433b998f9797e1c784232226aba1f8abd97",
+    "fileName": "windows6.1-KB976932-X86.exe"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {
+   "wininet": "native,builtin"
+  },
+  "placedDlls": [
+   "wininet.dll"
+  ]
+ },
+ {
+  "name": "wsh57",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "https://download.microsoft.com/download/4/4/d/44de8a9e-630d-4c10-9f17-b9b34d3f6417/scripten.exe",
+    "sha256": "63c781b9e50bfd55f10700eb70b5c571a9bedfd8d35af29f6a22a77550df5e7b",
+    "fileName": "scripten.exe"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {
+   "jscript": "native,builtin",
+   "scrrun": "native,builtin",
+   "vbscript": "native,builtin",
+   "cscript.exe": "native,builtin",
+   "wscript.exe": "native,builtin"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "xact",
+  "installKind": "cabextract-dll",
+  "downloads": [],
+  "installerCommands": [],
+  "dllOverrides": {
+   "xaudio2_0": "native,builtin",
+   "xaudio2_1": "native,builtin",
+   "xaudio2_2": "native,builtin",
+   "xaudio2_3": "native,builtin",
+   "xaudio2_4": "native,builtin",
+   "xaudio2_5": "native,builtin",
+   "xaudio2_6": "native,builtin",
+   "xaudio2_7": "native,builtin",
+   "x3daudio1_0": "native,builtin",
+   "x3daudio1_1": "native,builtin",
+   "x3daudio1_2": "native,builtin",
+   "x3daudio1_3": "native,builtin",
+   "x3daudio1_4": "native,builtin",
+   "x3daudio1_5": "native,builtin",
+   "x3daudio1_6": "native,builtin",
+   "x3daudio1_7": "native,builtin",
+   "xapofx1_1": "native,builtin",
+   "xapofx1_2": "native,builtin",
+   "xapofx1_3": "native,builtin",
+   "xapofx1_4": "native,builtin",
+   "xapofx1_5": "native,builtin",
+   "xactengine2_0": "native,builtin",
+   "xactengine2_10": "native,builtin",
+   "xactengine2_1": "native,builtin",
+   "xactengine2_2": "native,builtin",
+   "xactengine2_3": "native,builtin",
+   "xactengine2_4": "native,builtin",
+   "xactengine2_5": "native,builtin",
+   "xactengine2_6": "native,builtin",
+   "xactengine2_7": "native,builtin",
+   "xactengine2_8": "native,builtin",
+   "xactengine2_9": "native,builtin",
+   "xactengine3_0": "native,builtin",
+   "xactengine3_1": "native,builtin",
+   "xactengine3_2": "native,builtin",
+   "xactengine3_3": "native,builtin",
+   "xactengine3_4": "native,builtin",
+   "xactengine3_5": "native,builtin",
+   "xactengine3_6": "native,builtin",
+   "xactengine3_7": "native,builtin"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "xact_x64",
+  "installKind": "cabextract-dll",
+  "downloads": [],
+  "installerCommands": [],
+  "dllOverrides": {
+   "xaudio2_0": "native,builtin",
+   "xaudio2_1": "native,builtin",
+   "xaudio2_2": "native,builtin",
+   "xaudio2_3": "native,builtin",
+   "xaudio2_4": "native,builtin",
+   "xaudio2_5": "native,builtin",
+   "xaudio2_6": "native,builtin",
+   "xaudio2_7": "native,builtin",
+   "x3daudio1_0": "native,builtin",
+   "x3daudio1_1": "native,builtin",
+   "x3daudio1_2": "native,builtin",
+   "x3daudio1_3": "native,builtin",
+   "x3daudio1_4": "native,builtin",
+   "x3daudio1_5": "native,builtin",
+   "x3daudio1_6": "native,builtin",
+   "x3daudio1_7": "native,builtin",
+   "xapofx1_1": "native,builtin",
+   "xapofx1_2": "native,builtin",
+   "xapofx1_3": "native,builtin",
+   "xapofx1_4": "native,builtin",
+   "xapofx1_5": "native,builtin",
+   "xactengine2_0": "native,builtin",
+   "xactengine2_10": "native,builtin",
+   "xactengine2_1": "native,builtin",
+   "xactengine2_2": "native,builtin",
+   "xactengine2_3": "native,builtin",
+   "xactengine2_4": "native,builtin",
+   "xactengine2_5": "native,builtin",
+   "xactengine2_6": "native,builtin",
+   "xactengine2_7": "native,builtin",
+   "xactengine2_8": "native,builtin",
+   "xactengine2_9": "native,builtin",
+   "xactengine3_0": "native,builtin",
+   "xactengine3_1": "native,builtin",
+   "xactengine3_2": "native,builtin",
+   "xactengine3_3": "native,builtin",
+   "xactengine3_4": "native,builtin",
+   "xactengine3_5": "native,builtin",
+   "xactengine3_6": "native,builtin",
+   "xactengine3_7": "native,builtin"
+  },
+  "placedDlls": []
+ },
+ {
+  "name": "xinput",
+  "installKind": "cabextract-dll",
+  "downloads": [
+   {
+    "url": "https://files.holarse-linuxgaming.de/mirrors/microsoft/directx_Jun2010_redist.exe",
+    "sha256": "8746ee1a84a083a90e37899d71d50d5c7c015e69688a466aa80447f011780c0d",
+    "fileName": "directx_Jun2010_redist.exe"
+   }
+  ],
+  "installerCommands": [],
+  "dllOverrides": {
+   "xinput1_1": "native",
+   "xinput1_2": "native",
+   "xinput1_3": "native",
+   "xinput9_1_0": "native"
+  },
+  "placedDlls": [
+   "xinput1_1.dll",
+   "xinput1_2.dll",
+   "xinput1_3.dll",
+   "xinput9_1_0.dll"
+  ]
+ },
+ {
+  "name": "xna31",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://web.archive.org/web/20120325004645/https://download.microsoft.com/download/5/9/1/5912526C-B950-4662-99B6-119A83E60E5C/xnafx31_redist.msi",
+    "sha256": "187e7e6b08fe35428d945612a7d258bfed25fad53cc54882983abdc73fe60f91",
+    "fileName": "xnafx31_redist.msi"
+   }
+  ],
+  "installerCommands": [
+   "msiexec /quiet /i xnafx31_redist.msi"
+  ],
+  "dllOverrides": {},
+  "placedDlls": []
+ },
+ {
+  "name": "xna40",
+  "installKind": "installer",
+  "downloads": [
+   {
+    "url": "https://web.archive.org/web/20120325002813/https://download.microsoft.com/download/A/C/2/AC2C903B-E6E8-42C2-9FD7-BEBAC362A930/xnafx40_redist.msi",
+    "sha256": "e6c41d692ebcba854dad4b1c52bb7ddd05926bad3105595d6596b8bab01c25e7",
+    "fileName": "xnafx40_redist.msi"
+   }
+  ],
+  "installerCommands": [
+   "msiexec /quiet /i xnafx40_redist.msi"
+  ],
+  "dllOverrides": {},
+  "placedDlls": []
+ }
+]
