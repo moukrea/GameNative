@@ -60,6 +60,34 @@ All behind the opt-in `PrefManager.enablePerGameProvisioning` flag; zero regress
 | 3-stage launch (config → components → deps) | the `RecipeResolver` (precedence: user > GameHub > migrated) + `ProvisioningEngine` (idempotent, transactional) at the `XServerScreen` pre-launch hook. |
 | Just-in-time dependency install (`IEmuContainer.installDependency`) | **`ProvisioningDepsStep`** — a `PreInstallStep` that downloads the resolved installer verbs (VC++ 2005-2022, PhysX, .NET 4.8, XNA) from their official vendors (SHA-256-verified) into `C:\.gnprov\<verb>\` and runs them silently in the Wine guest via the existing pre-install chain. |
 
+## Steam DRM (the *other* boot blocker — e.g. Mirror's Edge)
+
+Runtime provisioning does **not** fix Steam-DRM games. A Steam-DRM-wrapped exe shows **"Application
+load error 3:0000065432"** when it can't reach a Steam client to validate ownership. This is
+orthogonal to VC++/PhysX/.NET.
+
+How GameHub solves it: it ships a full **real Steam client** (an 11 MB Rust reimplementation,
+`libsteamkit_core.so`) that logs into the user's real account and serves genuine ownership tickets —
+out of scope to replicate. But **GameNative already bundles the open-source answer**: the Goldberg
+`steam_api` emulator (`assets/steampipe/`), a cold-client `steamclient` loader, `generateInterfacesFile`,
+`ensureSteamSettings`, and Steamless. It exposes three launch paths in `MainViewModel.launchApp`
+(real-Steam → restore Valve DLLs; `useLegacyDRM` → Goldberg `steam_api`; default → cold-client
+`steamclient`). The missing piece was simply that **none of it is keyed by appid** — a fresh game
+defaults to the cold-client path, and for a 2008 title like Mirror's Edge the stub survives.
+
+This work adds that appid-keying declaratively: a recipe's optional **`steamDrm`** block
+(`SteamDrmStrategy` = `legacy_goldberg` | `cold_client` | `real_steam` | `auto`, plus `unpack`) is
+applied by `PerGameProvisioning` to the container's *existing* DRM toggles
+(`setUseLegacyDRM`/`setUnpackFiles`/`setLaunchRealSteam`). It selects an already-shipped mechanism —
+nothing new is bundled, no third-party code is copied (it mirrors only the *semantics* of GameHub's
+per-game `fakeSteamClient`/`offlineMode` flags). It is set once per container (respecting later manual
+changes) and re-applied immediately by the "Re-apply provisioning" menu action.
+
+The Mirror's Edge recipe (`gamehub-recipes.json`, appid 17410) selects `legacy_goldberg` + `unpack` —
+the investigation's leading hypothesis for its 2008 SteamStub. **This needs on-device confirmation**:
+which exact mode boots a given DRM title is a fact to validate on hardware and then encode in the
+recipe.
+
 ## How the dependency install works (the boot-maker)
 
 GameHub bakes the common Windows runtimes into its base `imagefs`. GameNative ships no such image, so

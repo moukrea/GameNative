@@ -36,8 +36,48 @@ data class GameRecipe(
     val iniPatches: List<IniPatch> = emptyList(),
     val cleanup: Cleanup = Cleanup(),
     val launch: LaunchSpec = LaunchSpec(),
+    val steamDrm: SteamDrmSpec? = null,
     val deviceOverrides: List<DeviceOverride> = emptyList(),
     val provenance: Provenance? = null,
+)
+
+/**
+ * Per-game Steam DRM strategy. Steam-DRM-wrapped games fail to boot ("Application load error
+ * 3:0000065432") unless a Steam client/emulator answers the ownership check. GameNative already
+ * bundles the open-source Goldberg `steam_api` emulator, a cold-client `steamclient` loader and a
+ * Steamless de-stubber, but never picks one per game. This lets a recipe encode which existing path
+ * a known title needs — the appid-keyed selection that is otherwise missing. It only selects an
+ * already-shipped mechanism; it bundles nothing new and copies no third-party code.
+ */
+@Serializable
+enum class SteamDrmStrategy {
+    /** Leave the container's existing DRM toggles untouched. */
+    @SerialName("auto")
+    AUTO,
+
+    /** Goldberg `steam_api(64).dll` replacement (best for older Steamworks titles). */
+    @SerialName("legacy_goldberg")
+    LEGACY_GOLDBERG,
+
+    /** Cold-client `steamclient` loader (GameNative's default path). */
+    @SerialName("cold_client")
+    COLD_CLIENT,
+
+    /** Run the user's real Steam client in the prefix. */
+    @SerialName("real_steam")
+    REAL_STEAM,
+}
+
+/**
+ * A recipe's Steam-DRM decision. Applied by [app.gamenative.provisioning.PerGameProvisioning] to the
+ * container's existing DRM toggles ([com.winlator.container.Container.setUseLegacyDRM] etc.) so the
+ * game takes the path it needs. [unpack] additionally enables the Steamless de-stub pass.
+ */
+@Serializable
+data class SteamDrmSpec(
+    val strategy: SteamDrmStrategy = SteamDrmStrategy.AUTO,
+    val unpack: Boolean = false,
+    val note: String = "",
 )
 
 /** Identity and matching rules used to bind a recipe to a launched game. */

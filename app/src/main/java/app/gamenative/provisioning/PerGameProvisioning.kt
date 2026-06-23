@@ -9,6 +9,8 @@ import app.gamenative.provisioning.engine.GameHubBaseline
 import app.gamenative.provisioning.engine.ProvisioningEngine
 import app.gamenative.provisioning.engine.ProvisioningResult
 import app.gamenative.provisioning.model.DeviceProfile
+import app.gamenative.provisioning.model.SteamDrmSpec
+import app.gamenative.provisioning.model.SteamDrmStrategy
 import app.gamenative.provisioning.resolver.GameHubCatalogSource
 import app.gamenative.provisioning.resolver.MigratedFixCatalogSource
 import app.gamenative.provisioning.resolver.PrefixRecipeCache
@@ -69,6 +71,18 @@ object PerGameProvisioning {
 
         val result = engine.applyDeclarative(resolved.recipe, DeviceProfile.UNKNOWN, state)
         Timber.tag(TAG).i("Applied recipe '${resolved.recipe.id}' from ${resolved.sourceName}: $result")
+
+        // Apply the recipe's Steam DRM strategy ONCE per container (set-if-not-yet-applied), so a
+        // known DRM title auto-selects the right path on its first provisioned launch without
+        // clobbering a mode the user later changes manually.
+        resolved.recipe.steamDrm?.let { spec ->
+            if (container.getExtra(DRM_APPLIED_EXTRA, "").isEmpty()) {
+                val desc = applySteamDrm(container, spec)
+                container.putExtra(DRM_APPLIED_EXTRA, spec.strategy.name)
+                container.saveData()
+                Timber.tag(TAG).i("Applied Steam DRM strategy ($desc) for '$appId'")
+            }
+        }
     }
 
     /**
@@ -115,6 +129,13 @@ object PerGameProvisioning {
             parts += "no per-game recipe"
         }
 
+        // Explicitly (re)apply the recipe's Steam DRM strategy — the user asked for it.
+        resolved?.recipe?.steamDrm?.let { spec ->
+            parts += applySteamDrm(container, spec)
+            container.putExtra(DRM_APPLIED_EXTRA, spec.strategy.name)
+            container.saveData()
+        }
+
         // Clear the dependency marker so the runtime installers re-run on the next launch.
         PreInstallSteps.clearProvisioningDepsMarker(container)
 
@@ -136,4 +157,32 @@ object PerGameProvisioning {
             }
         }
     }
+
+    /**
+     * Selects the existing GameNative Steam-DRM path the recipe asks for, by setting the container's
+     * own DRM toggles (no new mechanism — Goldberg `steam_api`, the cold-client loader and Steamless
+     * are all already shipped). Returns a short human description for the snackbar/log. The DRM
+     * replace itself happens later, in the launch path, which reads these container fields.
+     */
+    private fun applySteamDrm(container: Container, spec: SteamDrmSpec): String = when (spec.strategy) {
+        SteamDrmStrategy.AUTO -> "DRM: unchanged"
+        SteamDrmStrategy.LEGACY_GOLDBERG -> {
+            container.setLaunchRealSteam(false)
+            container.setUseLegacyDRM(true)
+            container.setUnpackFiles(spec.unpack)
+            "DRM: legacy Goldberg steam_api" + if (spec.unpack) " + unpack" else ""
+        }
+        SteamDrmStrategy.COLD_CLIENT -> {
+            container.setLaunchRealSteam(false)
+            container.setUseLegacyDRM(false)
+            container.setUnpackFiles(spec.unpack)
+            "DRM: cold-client steamclient" + if (spec.unpack) " + unpack" else ""
+        }
+        SteamDrmStrategy.REAL_STEAM -> {
+            container.setLaunchRealSteam(true)
+            "DRM: real Steam client"
+        }
+    }
+
+    private const val DRM_APPLIED_EXTRA = "provisioning.drmApplied"
 }

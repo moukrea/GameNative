@@ -431,5 +431,23 @@
       "confidence": "reported",
       "contributor": "bannerhub-catalog (The412Banner/bannerhub-api)"
     }
+  },
+  {
+    "schemaVersion": 1,
+    "id": "gamehub-17410-mirrors-edge-drm",
+    "match": {
+      "source": "STEAM",
+      "appId": "17410"
+    },
+    "steamDrm": {
+      "strategy": "legacy_goldberg",
+      "unpack": true,
+      "note": "Mirror's Edge (2008) Steamworks DRM stub causes 'Application load error 3:0000065432'. Select the bundled Goldberg steam_api emulator (Legacy DRM path) + Steamless de-stub. Leading hypothesis from the DRM investigation; confirm on-device."
+    },
+    "provenance": {
+      "source": "gamehub-mechanism",
+      "confidence": "reported",
+      "contributor": "DRM investigation: SteamStub needs a steam_api emulator; Goldberg legacy path is the open-source equivalent of GameHub's fakeSteamClient"
+    }
   }
 ]

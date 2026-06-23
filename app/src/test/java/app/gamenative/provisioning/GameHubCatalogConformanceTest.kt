@@ -32,7 +32,10 @@ class GameHubCatalogConformanceTest {
             assertTrue("${recipe.id} invalid: ${validation.errors}", validation.isValid)
             assertEquals("${recipe.id} not round-tripping", recipe, RecipeCodec.decode(RecipeCodec.encode(recipe)))
             assertEquals("${recipe.id} should be a Steam recipe", GameSource.STEAM, recipe.match.source)
-            assertTrue("${recipe.id} should ship config files", recipe.files.isNotEmpty())
+            assertTrue(
+                "${recipe.id} should carry config files or a Steam DRM directive",
+                recipe.files.isNotEmpty() || recipe.steamDrm != null,
+            )
 
             val state = InMemoryPrefixState()
             val result = engine.applyDeclarative(recipe, DeviceProfile.UNKNOWN, state)
