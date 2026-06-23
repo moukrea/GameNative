@@ -440,14 +440,13 @@
       "appId": "17410"
     },
     "steamDrm": {
-      "strategy": "legacy_goldberg",
-      "unpack": true,
-      "note": "Mirror's Edge (2008) Steamworks DRM stub causes 'Application load error 3:0000065432'. Select the bundled Goldberg steam_api emulator (Legacy DRM path) + Steamless de-stub. Leading hypothesis from the DRM investigation; confirm on-device."
+      "strategy": "real_steam",
+      "note": "Mirror's Edge (2008) is Steam CEG (Custom Executable Generation) — Valve's per-user AES-256 exe encryption, not SteamStub/SecuROM. CEG can ONLY be decrypted by the real logged-in Steam client that owns the game; Goldberg (steam_api emu) and Steamless both cannot handle CEG. So we select GameNative's real-Steam path (steam.exe -applaunch via the stored Steam token). Otherwise: 'Application load error 3:0000065432'. Confirm on-device."
     },
     "provenance": {
       "source": "gamehub-mechanism",
       "confidence": "reported",
-      "contributor": "DRM investigation: SteamStub needs a steam_api emulator; Goldberg legacy path is the open-source equivalent of GameHub's fakeSteamClient"
+      "contributor": "DRM investigation: CEG (PCGamingWiki Steam DRM list) requires a real Steam client to decrypt; matches GameHub's real-client (libsteamkit_core) model"
     }
   }
 ]

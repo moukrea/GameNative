@@ -83,10 +83,16 @@ nothing new is bundled, no third-party code is copied (it mirrors only the *sema
 per-game `fakeSteamClient`/`offlineMode` flags). It is set once per container (respecting later manual
 changes) and re-applied immediately by the "Re-apply provisioning" menu action.
 
-The Mirror's Edge recipe (`gamehub-recipes.json`, appid 17410) selects `legacy_goldberg` + `unpack` —
-the investigation's leading hypothesis for its 2008 SteamStub. **This needs on-device confirmation**:
-which exact mode boots a given DRM title is a fact to validate on hardware and then encode in the
-recipe.
+The Mirror's Edge recipe (`gamehub-recipes.json`, appid 17410) selects **`real_steam`**. Mirror's Edge
+is **Steam CEG** (Custom Executable Generation — Valve's per-user AES-256 executable encryption), *not*
+SteamStub or SecuROM. CEG can only be decrypted by the **real, logged-in Steam client that owns the
+game**: Goldberg only emulates the Steamworks API (it can't decrypt a CEG exe) and Steamless explicitly
+never strips CEG. So the only path that works is GameNative's real-Steam mode, which runs
+`steam.exe -applaunch <id>` and logs in non-interactively with the stored Steam token
+(`SteamTokenLogin`) — architecturally the same thing GameHub does with its real-client
+`libsteamkit_core`. This also required fixing a latent crash: `SteamUtils.restoreSteamApi` force-unwrapped
+`userSteamId` and NPE'd on every real-Steam launch when offline/token-only; it now uses the null-safe
+`getSteam3AccountId()`. On-device confirmation of the boot is still the final step.
 
 ## How the dependency install works (the boot-maker)
 

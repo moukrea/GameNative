@@ -288,8 +288,12 @@ object PerGameProvisioning {
             "DRM: cold-client steamclient" + if (spec.unpack) " + unpack" else ""
         }
         SteamDrmStrategy.REAL_STEAM -> {
+            // CEG-protected games (e.g. Mirror's Edge) can only be decrypted by a real logged-in
+            // Steam client; clear the emulator/de-stub flags so the real-Steam path is taken cleanly.
+            container.setUseLegacyDRM(false)
+            container.setUnpackFiles(false)
             container.setLaunchRealSteam(true)
-            "DRM: real Steam client"
+            "DRM: real Steam client (decrypts CEG)"
         }
     }
 

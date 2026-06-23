@@ -841,8 +841,12 @@ object SteamUtils {
             cfgFile.writeText("BootStrapperInhibitAll=Enable\nBootStrapperForceSelfUpdate=False")
         }
 
-        // Update or modify localconfig.vdf
-        updateOrModifyLocalConfig(imageFs, container, steamAppId.toString(), SteamService.userSteamId!!.accountID.toString())
+        // Update or modify localconfig.vdf. userSteamId is null when offline / token-only, and
+        // force-unwrapping it crashed every real-Steam launch in that state; localconfig needs a
+        // live account id anyway, so skip it when absent (matches the null-safe pattern above).
+        getSteam3AccountId()?.let { accountId ->
+            updateOrModifyLocalConfig(imageFs, container, steamAppId.toString(), accountId.toString())
+        }
 
         skipFirstTimeSteamSetup(imageFs.rootDir)
         val appDirPath = SteamService.getAppDirPath(steamAppId)
@@ -854,7 +858,7 @@ object SteamUtils {
         Timber.i("Checking directory: $appDirPath")
 
         autoLoginUserChanges(imageFs)
-        setupLightweightSteamConfig(imageFs, SteamService.userSteamId!!.accountID.toString())
+        setupLightweightSteamConfig(imageFs, getSteam3AccountId()?.toString())
 
         putBackSteamDlls(appDirPath)
 

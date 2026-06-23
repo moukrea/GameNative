@@ -63,14 +63,15 @@ class GameHubMechanismTest {
     }
 
     @Test
-    fun mirrorsEdgeRecipeSelectsLegacyGoldbergDrm() {
-        // The DRM recipe must load from assets and its @SerialName-mapped strategy must decode.
+    fun mirrorsEdgeRecipeSelectsRealSteamForCeg() {
+        // Mirror's Edge is Steam CEG: only a real logged-in Steam client can decrypt it (Goldberg
+        // and Steamless both cannot), so the recipe must select REAL_STEAM. Also exercises the
+        // @SerialName decode and asset load.
         val recipe = GameHubCatalog.forGame(GameSource.STEAM, "17410")
         assertNotNull("Mirror's Edge (17410) DRM recipe should be in the catalog", recipe)
         val drm = recipe!!.steamDrm
         assertNotNull("17410 should declare a Steam DRM strategy", drm)
-        assertEquals(SteamDrmStrategy.LEGACY_GOLDBERG, drm!!.strategy)
-        assertTrue("17410 should request a Steamless de-stub pass", drm.unpack)
+        assertEquals(SteamDrmStrategy.REAL_STEAM, drm!!.strategy)
         assertTrue("recipe must validate", RecipeValidator.validate(recipe).isValid)
     }
 }
