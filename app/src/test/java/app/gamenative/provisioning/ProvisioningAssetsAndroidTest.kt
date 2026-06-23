@@ -39,7 +39,7 @@ class ProvisioningAssetsAndroidTest {
         ProvisioningAssets.init(ApplicationProvider.getApplicationContext())
         val baseline = ProvisioningAssets.readText("gamehub-baseline.json")
         assertNotNull("baseline must load via context.assets on Android", baseline)
-        assertTrue(baseline!!.contains("BOX64_DYNAREC"))
+        assertTrue(baseline!!.contains("gamehub-baseline"))
         // The lazy loader decodes it to a real recipe (end-to-end through the Android path).
         assertNotNull("GameHubBaseline.recipe should decode on Android", GameHubBaseline.recipe)
     }

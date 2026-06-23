@@ -57,9 +57,10 @@ class GameHubMechanismTest {
         val state = InMemoryPrefixState()
         val result = ProvisioningEngine().applyDeclarative(baseline, DeviceProfile.UNKNOWN, state)
         assertTrue("baseline failed to apply: $result", result is ProvisioningResult.Applied)
-        assertEquals("1", state.env["BOX64_DYNAREC"])
-        assertEquals("2", state.env["BOX64_DYNAREC_BIGBLOCK"])
-        assertEquals("1", state.env["FEXCORE_TSOEnabled"])
+        // GameHub Wine/DXVK env vars that GameNative didn't set (verbatim from bg5.smali).
+        assertEquals("1", state.env["DXVK_ASYNC"])
+        assertEquals("1", state.env["PROTON_DISABLE_LSTEAMCLIENT"])
+        assertEquals("warn", state.env["DXVK_LOG_LEVEL"])
     }
 
     @Test

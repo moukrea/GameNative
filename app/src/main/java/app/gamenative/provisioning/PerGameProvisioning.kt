@@ -6,6 +6,7 @@ import app.gamenative.data.GameSource
 import app.gamenative.gamefixes.GameFixesRegistry
 import app.gamenative.provisioning.engine.FilePrefixState
 import app.gamenative.provisioning.engine.GameHubBaseline
+import app.gamenative.provisioning.engine.PrefixState
 import app.gamenative.provisioning.engine.ProvisioningEngine
 import app.gamenative.provisioning.engine.ProvisioningResult
 import app.gamenative.provisioning.model.DeviceProfile
@@ -16,6 +17,7 @@ import app.gamenative.provisioning.resolver.MigratedFixCatalogSource
 import app.gamenative.provisioning.resolver.PrefixRecipeCache
 import app.gamenative.provisioning.resolver.RecipeResolver
 import app.gamenative.provisioning.resolver.UserRecipeSource
+import app.gamenative.provisioning.verbs.AppVerbContext
 import app.gamenative.provisioning.verbs.DataDrivenVerb
 import app.gamenative.provisioning.verbs.VerbRegistry
 import app.gamenative.service.SteamService
@@ -23,6 +25,7 @@ import app.gamenative.service.epic.EpicService
 import app.gamenative.utils.ContainerUtils
 import app.gamenative.utils.PreInstallSteps
 import com.winlator.container.Container
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import timber.log.Timber
 import java.io.File
@@ -61,6 +64,25 @@ object PerGameProvisioning {
             val baseResult = engine.applyDeclarative(it, DeviceProfile.UNKNOWN, state)
             Timber.tag(TAG).i("Applied GameHub baseline: $baseResult")
         }
+
+        // 1b. Per-Steam-AppId WINE_* tuning (GameHub's jgm table) — applies to ANY Steam game, not
+        //     just recipe-matched ones. Set-if-absent so a user/recipe value is never overwritten.
+        if (source == GameSource.STEAM) {
+            gameId.toLongOrNull()?.let { appNum ->
+                val tuning = AppIdEnvTuning.envFor(appNum)
+                if (tuning.isNotEmpty()) {
+                    tuning.forEach { (k, v) -> if (state.getEnv(k) == null) state.setEnv(k, v) }
+                    state.commit()
+                    Timber.tag(TAG).i("Applied per-appId env tuning for $appNum: ${tuning.keys}")
+                }
+            }
+        }
+
+        // 1c. DLL-drop verbs (host-side file placement) — wires the previously-dead verb engine.
+        //     Only verbs that actually place files run here (raw-DLL verbs like d3dcompiler_47);
+        //     installer verbs are handled in-guest by ProvisioningDepsStep, and the cab-packed
+        //     DirectX family by the DXSETUP installer path, so we never double-download.
+        placeDllDropVerbs(container, state, GameHubBaseline.recipe?.dependencies.orEmpty())
 
         // 2. Per-game recipe (user override > GameHub catalog > migrated fixes).
         val resolver = RecipeResolver(
@@ -286,6 +308,34 @@ object PerGameProvisioning {
         "d3dx9" to listOf("d3dx9_43.dll", "d3dx9_42.dll"),
         // dotnet40/48 / xna40 install to the GAC/registry, not a checkable system32 DLL — omitted.
     )
+
+    /**
+     * Runs the DLL-drop verbs (those declaring `placeFiles`) host-side via the verb engine + a real
+     * [AppVerbContext], so their DLLs actually land in the prefix system dirs. Only file-placing verbs
+     * run here (installer verbs are handled in-guest by ProvisioningDepsStep), so there's no
+     * double-download. Best-effort and non-fatal: a failed verb is logged, never aborts launch.
+     */
+    private fun placeDllDropVerbs(container: Container, state: PrefixState, deps: List<String>) {
+        if (deps.isEmpty()) return
+        val registry = VerbRegistry.builtin()
+        val placeVerbs = deps.distinct()
+            .mapNotNull { registry.get(it) as? DataDrivenVerb }
+            .filter { it.definition.placeFiles.isNotEmpty() }
+        if (placeVerbs.isEmpty()) return
+        runCatching {
+            runBlocking {
+                val ctx = AppVerbContext(File(container.rootDir, ".wine/drive_c/.gnverb"))
+                placeVerbs.forEach { verb ->
+                    val o = verb.install(state, ctx)
+                    Timber.tag(TAG).i(
+                        "DLL-drop verb '%s': installed=%b skipped=%b err=%s",
+                        verb.name, o.installed, o.skipped, o.error,
+                    )
+                }
+                state.commit()
+            }
+        }.onFailure { Timber.tag(TAG).w(it, "verb-engine DLL placement failed (non-fatal)") }
+    }
 
     /**
      * Applies a per-game recipe's recommended Steam DRM mode to the container, called from the launch
