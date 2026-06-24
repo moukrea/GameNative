@@ -3342,14 +3342,38 @@ private fun setupXEnvironment(
         PluviaApp.events.emit(AndroidEvent.GuestProgramTerminated)
     }
 
+    // Watchdog: a single in-guest installer that never exits (e.g. a redist that spins a child
+    // process or waits on a dialog) used to freeze the whole pre-install chain forever — the session
+    // never terminates, so the chain's termination callback never fires and the launch hangs on
+    // "Installing prerequisites". This arms a per-step timeout that force-runs `wineserver -k` to
+    // kill the stuck session, which fires the termination callback and advances the chain (the
+    // step's marker is withheld by markStepDone's signature check, so it retries next launch). It is
+    // disarmed on normal termination. It never applies to the game session itself.
+    val preInstallStepTimeoutMs = 4 * 60 * 1000L
+    var preInstallWatchdog: kotlinx.coroutines.Job? = null
+    fun armPreInstallWatchdog(label: String) {
+        preInstallWatchdog?.cancel()
+        preInstallWatchdog = CoroutineScope(Dispatchers.IO).launch {
+            kotlinx.coroutines.delay(preInstallStepTimeoutMs)
+            Timber.tag("Provisioning").w(
+                "Pre-install step '%s' exceeded %d ms with no exit; force-killing wineserver to unblock the chain",
+                label, preInstallStepTimeoutMs,
+            )
+            runCatching { guestProgramLauncherComponent.execShellCommand("wineserver -k") }
+                .onFailure { Timber.w(it, "watchdog wineserver -k failed (non-fatal)") }
+        }
+    }
+
     fun chainPreInstallSteps(remaining: List<PreInstallSteps.PreInstallCommand>) {
         if (remaining.isEmpty()) {
+            preInstallWatchdog?.cancel()
             guestProgramLauncherComponent.setGuestExecutable(gameExecutable)
             guestProgramLauncherComponent.setTerminationCallback(gameTerminationCallback)
             return
         }
         guestProgramLauncherComponent.setGuestExecutable(remaining.first().executable)
         guestProgramLauncherComponent.setTerminationCallback { _ ->
+            preInstallWatchdog?.cancel() // session ended (normally or via the watchdog kill) — disarm
             val current = remaining.first()
             PreInstallSteps.markStepDone(container, current.marker)
             guestProgramLauncherComponent.setPreUnpack(null)
@@ -3366,6 +3390,7 @@ private fun setupXEnvironment(
             }
             chainPreInstallSteps(nextRemaining)
             guestProgramLauncherComponent.start()
+            if (nextRemaining.isNotEmpty()) armPreInstallWatchdog(nextRemaining.first().marker.name)
         }
     }
 
@@ -3446,6 +3471,10 @@ private fun setupXEnvironment(
             Timber.tag("replaceXAudioDllsFromRedistributable").w(e, "Failed to replace XAudio DLLs; continuing launch")
         }
     }
+
+    // Arm the watchdog for the FIRST pre-install step (started by startEnvironmentComponents); the
+    // chain's termination callback re-arms it for each subsequent step and disarms before the game.
+    if (preInstallCommands.isNotEmpty()) armPreInstallWatchdog(preInstallCommands.first().marker.name)
 
     try {
         environment.startEnvironmentComponents()
