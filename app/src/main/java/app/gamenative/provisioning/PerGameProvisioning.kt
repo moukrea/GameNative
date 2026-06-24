@@ -62,7 +62,7 @@ object PerGameProvisioning {
         // 1. GameHub baseline (common Windows-runtime deps + Box64/FEX tuning) applied under any
         //    per-game recipe — the default-prefix provisioning that makes many games boot.
         GameHubBaseline.recipe?.let {
-            val baseResult = engine.applyDeclarative(it, DeviceProfile.UNKNOWN, state)
+            val baseResult = engine.applyDeclarative(it, DeviceProfile.current(context), state)
             Timber.tag(TAG).i("Applied GameHub baseline: $baseResult")
         }
 
@@ -97,7 +97,7 @@ object PerGameProvisioning {
             return
         }
 
-        val result = engine.applyDeclarative(resolved.recipe, DeviceProfile.UNKNOWN, state)
+        val result = engine.applyDeclarative(resolved.recipe, DeviceProfile.current(context), state)
         Timber.tag(TAG).i("Applied recipe '${resolved.recipe.id}' from ${resolved.sourceName}: $result")
 
         // NOTE: we intentionally do NOT touch the container's Steam-DRM toggles here. GameNative
@@ -132,7 +132,7 @@ object PerGameProvisioning {
 
         val baseline = GameHubBaseline.recipe
         if (baseline != null) {
-            val r = engine.applyDeclarative(baseline, DeviceProfile.UNKNOWN, state, force = true)
+            val r = engine.applyDeclarative(baseline, DeviceProfile.current(context), state, force = true)
             parts += if (r is ProvisioningResult.Applied) "baseline applied" else "baseline ok"
         } else {
             parts += "baseline unavailable"
@@ -144,7 +144,7 @@ object PerGameProvisioning {
         )
         val resolved = resolver.resolve(source, matchId)
         if (resolved != null) {
-            engine.applyDeclarative(resolved.recipe, DeviceProfile.UNKNOWN, state, force = true)
+            engine.applyDeclarative(resolved.recipe, DeviceProfile.current(context), state, force = true)
             parts += "recipe '${resolved.recipe.id}' (${resolved.sourceName})"
         } else {
             parts += "no per-game recipe"
