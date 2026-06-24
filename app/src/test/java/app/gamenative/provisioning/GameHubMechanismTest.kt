@@ -13,6 +13,7 @@ import app.gamenative.provisioning.verbs.GameHubVerbCatalog
 import app.gamenative.provisioning.verbs.VerbRegistry
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -59,8 +60,11 @@ class GameHubMechanismTest {
         assertTrue("baseline failed to apply: $result", result is ProvisioningResult.Applied)
         // GameHub Wine/DXVK env vars that GameNative didn't set (verbatim from bg5.smali).
         assertEquals("1", state.env["DXVK_ASYNC"])
-        assertEquals("1", state.env["PROTON_DISABLE_LSTEAMCLIENT"])
         assertEquals("warn", state.env["DXVK_LOG_LEVEL"])
+        // PROTON_DISABLE_LSTEAMCLIENT is deliberately NOT in the baseline: it suppresses Proton's
+        // lsteamclient.dll bridge, which the bionic/real-Steam CEG path needs (it black-screened
+        // Mirror's Edge). XServerScreen also scrubs any stale copy on the Steam-client launch paths.
+        assertNull("baseline must not disable lsteamclient (breaks CEG/bionic-Steam)", state.env["PROTON_DISABLE_LSTEAMCLIENT"])
     }
 
     @Test

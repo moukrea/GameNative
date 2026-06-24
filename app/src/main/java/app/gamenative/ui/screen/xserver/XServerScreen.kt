@@ -3216,6 +3216,13 @@ private fun setupXEnvironment(
         envVars.putAll(container.envVars)
         envVars.remove("DXVK_FRAME_RATE")
         envVars.remove("VKD3D_FRAME_RATE")
+        // CEG titles need Proton's lsteamclient.dll bridge to reach the native libsteamclient.so on the
+        // bionic/real-Steam paths. PROTON_DISABLE_LSTEAMCLIENT=1 (written into older containers by a
+        // previous provisioning build) suppresses that bridge -> CEG never decrypts -> black screen.
+        // Scrub it for the Steam-client paths regardless of where it came from (stale container env or recipe).
+        if (container.isLaunchBionicSteam || container.isLaunchRealSteam) {
+            envVars.remove("PROTON_DISABLE_LSTEAMCLIENT")
+        }
         if (!envVars.has("WINEESYNC")) envVars.put("WINEESYNC", "1")
         val graphicsDriverConfig = KeyValueSet(container.getGraphicsDriverConfig())
         if (graphicsDriverConfig.get("version").lowercase(Locale.getDefault()).contains("gen8")) {
