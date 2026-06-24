@@ -327,6 +327,8 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
             // Boot the native libsteamclient.so inside *this* (Android) process
             // so Wine-side lsteamclient.dll has something to connect to.
             bootstrapNativeSteamClient(envVars, imageFs);
+        } else if (container != null) {
+            Log.i("DRMTrace", "bionic bootstrap SKIPPED (isLaunchBionicSteam=false)");
         }
 
         // Merge any additional environment variables from external sources
@@ -573,10 +575,15 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
 
         File libFile = new File(libPath);
         if (!libFile.exists()) {
-            Log.w("BionicProgramLauncherComponent",
-                  "libsteamclient.so not found at " + libPath + "; skipping native bootstrap");
+            // Fingerprint of the first-launch-after-reset bug: the bionic-Steam assets were not staged
+            // (BionicSteamAssetsDependency was skipped because the launch flag was set too late), so the
+            // CEG decryption bridge cannot come up and the encrypted game exe will not start.
+            Log.e("DRMTrace",
+                  "libsteamclient.so MISSING at " + libPath + " — bionic assets not staged; "
+                  + "native Steam bridge will NOT start (CEG cannot decrypt)");
             return;
         }
+        Log.i("DRMTrace", "bootstrapNativeSteamClient: libsteamclient.so present, bringing up native bridge");
 
         java.util.HashMap<String, String> extra = new java.util.HashMap<>();
         // bootstrap-gate handshake vars libsteamclient.so checks during init

@@ -3909,6 +3909,10 @@ private fun getWineStartCommand(
         }
     }
 
+    Timber.tag("DRMTrace").i(
+        "getWineStartCommand bionic=%b real=%b legacy=%b -> guest exe: %s",
+        container.isLaunchBionicSteam, container.isLaunchRealSteam, container.isUseLegacyDRM, args,
+    )
     return "winhandler.exe $args"
 }
 private fun getSteamlessTarget(
