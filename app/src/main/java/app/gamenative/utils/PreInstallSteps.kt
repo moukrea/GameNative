@@ -92,9 +92,39 @@ object PreInstallSteps {
         }
     }
 
+    /**
+     * Signature DLLs that prove a runtime installer actually landed in the prefix. GameHub verifies
+     * each dependency by file presence ("broken" = file missing) and re-runs it otherwise; we mirror
+     * that for the DLL-verifiable runtime steps so a silently-failed installer (e.g. PhysX black-holing
+     * under Box64) is NOT recorded as done and re-runs next launch instead of faking success. Steps
+     * without a checkable system DLL (GOG/Ubisoft scripts, .NET/XNA in the GAC, and the multi-runtime
+     * ProvisioningDepsStep which has its own partial-install handling) are not listed and mark as before.
+     */
+    private val SIGNATURE_DLLS: Map<Marker, List<String>> = mapOf(
+        Marker.PHYSX_INSTALLED to listOf("PhysXLoader.dll", "PhysXLoader64.dll", "PhysXCore.dll", "physxcudart_20.dll"),
+        Marker.VCREDIST_INSTALLED to listOf(
+            "msvcp140.dll", "vcruntime140.dll", "msvcr120.dll", "msvcr110.dll", "msvcr100.dll", "msvcr90.dll", "msvcr80.dll",
+        ),
+        Marker.OPENAL_INSTALLED to listOf("OpenAL32.dll", "soft_oal.dll", "wrap_oal.dll"),
+    )
+
+    private fun signatureSatisfied(container: Container, marker: Marker): Boolean {
+        val dlls = SIGNATURE_DLLS[marker] ?: return true // not DLL-verifiable -> trust completion
+        val sys32 = File(container.rootDir, ".wine/drive_c/windows/system32")
+        val syswow = File(container.rootDir, ".wine/drive_c/windows/syswow64")
+        return dlls.any { File(sys32, it).isFile || File(syswow, it).isFile }
+    }
+
     fun markStepDone(container: Container, marker: Marker) {
         val gameDir = getGameDir(container) ?: return
         val gameDirPath = gameDir.absolutePath
+        if (!signatureSatisfied(container, marker)) {
+            // Installer ran but its signature DLL is absent -> withhold the marker so the step retries
+            // next launch instead of recording a false success (the "ça prétend installer" failure).
+            timber.log.Timber.tag("Provisioning")
+                .w("Step %s ran but its signature DLL is missing; not marking done (will retry)", marker)
+            return
+        }
         MarkerUtils.addMarker(gameDirPath, marker)
     }
 

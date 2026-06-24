@@ -6,6 +6,7 @@ import com.winlator.container.Container
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.After
 import org.junit.Before
@@ -114,9 +115,33 @@ class PreInstallStepsTest {
 
     @Test
     fun markStepDone_createsSelectedMarkerFile() {
-        PreInstallSteps.markStepDone(container, Marker.OPENAL_INSTALLED)
+        // GOG_SCRIPT_INSTALLED is not DLL-verifiable, so it marks unconditionally (mechanism test).
+        PreInstallSteps.markStepDone(container, Marker.GOG_SCRIPT_INSTALLED)
 
-        assertTrue(File(gameDir, Marker.OPENAL_INSTALLED.fileName).exists())
+        assertTrue(File(gameDir, Marker.GOG_SCRIPT_INSTALLED.fileName).exists())
+    }
+
+    @Test
+    fun markStepDone_withholdsVerifiableMarker_whenSignatureDllMissing() {
+        val root = createTempDirectory(prefix = "preinstall-root-missing").toFile()
+        every { container.rootDir } returns root
+        // No PhysXLoader.dll in the prefix -> the step must NOT be recorded as done (it will retry).
+        PreInstallSteps.markStepDone(container, Marker.PHYSX_INSTALLED)
+
+        assertFalse(File(gameDir, Marker.PHYSX_INSTALLED.fileName).exists())
+        root.deleteRecursively()
+    }
+
+    @Test
+    fun markStepDone_marksVerifiableMarker_whenSignatureDllPresent() {
+        val root = createTempDirectory(prefix = "preinstall-root-present").toFile()
+        every { container.rootDir } returns root
+        File(root, ".wine/drive_c/windows/system32").apply { mkdirs() }
+            .also { File(it, "PhysXLoader.dll").writeText("stub") }
+        PreInstallSteps.markStepDone(container, Marker.PHYSX_INSTALLED)
+
+        assertTrue(File(gameDir, Marker.PHYSX_INSTALLED.fileName).exists())
+        root.deleteRecursively()
     }
 
     @Test
