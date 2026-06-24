@@ -487,7 +487,7 @@ class LibraryViewModel @Inject constructor(
                     return true
                 }
                 val cached = GameCompatibilityCache.getCached(gameName) ?: return true
-                val status = compatibilityStatusFor(cached)
+                val status = compatibilityStatusFor(cached, ranWithFps(currentState, gameName))
                 return status == GameCompatibilityStatus.COMPATIBLE || status == GameCompatibilityStatus.GPU_COMPATIBLE
             }
 
@@ -987,12 +987,12 @@ class LibraryViewModel @Inject constructor(
     private fun updateCompatibilityState(
         results: Map<String, GameCompatibilityService.GameCompatibilityResponse>
     ) {
-        val compatibilityMap = results.mapValues { (gameName, response) ->
-            compatibilityStatusFor(response)
-        }
-
-        // Update state with compatibility map (merge with existing)
+        // Update state with compatibility map (merge with existing). Computed inside the update so the
+        // fps cross-reference reads the latest stats (loaded from cache before compatibility fetch).
         _state.update { currentState ->
+            val compatibilityMap = results.mapValues { (gameName, response) ->
+                compatibilityStatusFor(response, ranWithFps(currentState, gameName))
+            }
             val mergedMap = currentState.compatibilityMap.toMutableMap()
             mergedMap.putAll(compatibilityMap)
             Timber.tag("LibraryViewModel").d("Updated state with ${compatibilityMap.size} compatibility entries, total: ${mergedMap.size}")
@@ -1000,15 +1000,40 @@ class LibraryViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Maps a backend compatibility response to a badge status, CROSSED with this device's real
+     * in-game evidence. The backend "playable" counts alone over-report wildly: a game went green if
+     * ANY device on ANY GPU reported it playable once (totalPlayableCount > 0), and a "playable"
+     * report carries no fps — so a title that launched to a 0-fps black screen still painted green.
+     * Now green (GPU_COMPATIBLE) requires BOTH a playable report on THIS GPU and a recorded run with
+     * fps > 0 on this GPU/device. Without that evidence the game is UNKNOWN ("untested here") — the
+     * honest state — instead of a misleading green badge.
+     */
     private fun compatibilityStatusFor(
         response: GameCompatibilityService.GameCompatibilityResponse,
+        ranWithFps: Boolean,
     ): GameCompatibilityStatus {
         return when {
             response.isNotWorking -> GameCompatibilityStatus.NOT_COMPATIBLE
             !response.hasBeenTried -> GameCompatibilityStatus.UNKNOWN
-            response.gpuPlayableCount > 0 -> GameCompatibilityStatus.GPU_COMPATIBLE
-            response.totalPlayableCount > 0 -> GameCompatibilityStatus.COMPATIBLE
+            response.gpuPlayableCount > 0 && ranWithFps -> GameCompatibilityStatus.GPU_COMPATIBLE
             else -> GameCompatibilityStatus.UNKNOWN
         }
+    }
+
+    /**
+     * True when this device OR this GPU has a recorded SUCCESSFUL run with measured fps > 0 for the
+     * game [name]. This is the only real "it actually ran here and rendered frames" signal the client
+     * has (DeviceGameStats); the compatibility payload itself carries no fps. Stats maps are keyed by
+     * source then name; a hit under any source counts (a game name maps to one source in practice).
+     */
+    private fun ranWithFps(state: LibraryState, name: String): Boolean {
+        val device = state.deviceGameStats.values.any { byName ->
+            byName[name]?.let { it.successfulRuns > 0 && it.medianFps > 0 } == true
+        }
+        val gpu = state.gpuGameStats.values.any { byName ->
+            byName[name]?.let { it.successfulRuns > 0 && it.medianFps > 0 } == true
+        }
+        return device || gpu
     }
 }
