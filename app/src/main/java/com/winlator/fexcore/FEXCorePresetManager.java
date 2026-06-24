@@ -19,6 +19,17 @@ public abstract class FEXCorePresetManager {
     public static EnvVars getEnvVars(Context context, String id) {
         EnvVars envVars = new EnvVars();
 
+        // GameHub's FEX baseline (verified present in the bundled FEX-2605 thunks). All five pin
+        // FEX's own intrinsic/asset defaults, so this is faithful GameHub parity with no behaviour
+        // change; per-preset puts below may still override. Excluded for user CUSTOM presets.
+        if (!id.startsWith(FEXCorePreset.CUSTOM)) {
+            envVars.put("FEX_MAXINST", "5000");
+            envVars.put("FEX_HOSTFEATURES", "off");
+            envVars.put("FEX_FORCESVEWIDTH", "0");
+            envVars.put("FEX_SILENTLOG", "1");
+            envVars.put("FEX_MONOHACKS", "1");
+        }
+
         if (id.equals(FEXCorePreset.STABILITY)) {
             envVars.put("FEX_TSOENABLED", "1");
             envVars.put("FEX_VECTORTSOENABLED", "1");

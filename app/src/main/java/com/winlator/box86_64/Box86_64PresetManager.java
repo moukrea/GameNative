@@ -20,6 +20,19 @@ public abstract class Box86_64PresetManager {
         String ucPrefix = prefix.toUpperCase(Locale.ENGLISH);
         EnvVars envVars = new EnvVars();
 
+        // GameHub's BOX64 baseline (verified present in the bundled box64 0.4.2). The first four pin
+        // box64's own defaults (parity, no behaviour change); DIRTY=0 and DYNACACHE_MIN=350 are
+        // GameHub's deliberate non-default choices (SMC handling / warm-start cache) — kept isolated
+        // here so they can be reverted independently if a title regresses. box64-only; excludes CUSTOM.
+        if (ucPrefix.equals("BOX64") && !id.startsWith(Box86_64Preset.CUSTOM)) {
+            envVars.put("BOX64_DYNAREC_NATIVEFLAGS", "1");
+            envVars.put("BOX64_DYNAREC_DIV0", "0");
+            envVars.put("BOX64_DYNAREC_PAUSE", "0");
+            envVars.put("BOX64_IGNOREINT3", "0");
+            envVars.put("BOX64_DYNAREC_DIRTY", "0");
+            envVars.put("BOX64_DYNACACHE_MIN", "350");
+        }
+
         if (id.equals(Box86_64Preset.STABILITY)) {
             envVars.put(ucPrefix + "_DYNAREC_SAFEFLAGS", "2");
             envVars.put(ucPrefix + "_DYNAREC_FASTNAN", "0");
