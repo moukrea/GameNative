@@ -5,6 +5,19 @@ BOX64_ENV1=WINEDLLOVERRIDES=gameoverlayui,gameoverlayui64.exe=d
 [steamwebhelper.exe]
 BOX64_DYNAREC_STRONGMEM=1
 
+# Rockstar Games Launcher helpers: mirror the FEX AppConfig tuning we apply on
+# Arm64EC builds. These are multi-threaded x86 services/CEF processes that
+# assume x86 Total Store Ordering; without STRONGMEM they can deadlock or hang
+# during RPC init (observed as the Launcher getting stuck on "Connecting").
+[RockstarService.exe]
+BOX64_DYNAREC_STRONGMEM=1
+
+[SocialClubHelper.exe]
+BOX64_DYNAREC_STRONGMEM=1
+
+[RockstarSteamHelper.exe]
+BOX64_DYNAREC_STRONGMEM=1
+
 [MgsGroundZeroes.exe]
 BOX64_ENV=WINEFORCENTCONTINUE=1
 
