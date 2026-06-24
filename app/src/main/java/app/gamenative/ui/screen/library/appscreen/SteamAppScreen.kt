@@ -856,7 +856,17 @@ class SteamAppScreen : BaseAppScreen() {
                 AppOptionMenuType.ProvisioningStatus,
                 onClick = {
                     scope.launch(Dispatchers.IO) {
-                        SnackbarManager.show(PerGameProvisioning.statusSummary(context, appId))
+                        // Build the full launch diagnostic and copy it to the clipboard so it can be
+                        // shared without adb (the snackbar alone was too transient to read/copy).
+                        val report = PerGameProvisioning.diagnosticReport(context, appId)
+                        withContext(Dispatchers.Main) {
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE)
+                                as android.content.ClipboardManager
+                            clipboard.setPrimaryClip(
+                                android.content.ClipData.newPlainText("GameNative diagnostic", report),
+                            )
+                        }
+                        SnackbarManager.show("Provisioning diagnostic copied to clipboard — paste it to share")
                     }
                 },
             )

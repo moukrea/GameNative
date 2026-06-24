@@ -24,6 +24,7 @@ import app.gamenative.service.SteamService
 import app.gamenative.service.epic.EpicService
 import app.gamenative.utils.ContainerUtils
 import app.gamenative.utils.PreInstallSteps
+import app.gamenative.utils.launchdependencies.BionicSteamAssetsDependency
 import com.winlator.container.Container
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
@@ -291,6 +292,50 @@ object PerGameProvisioning {
                 },
             )
         }
+    }
+
+    /**
+     * Full, copy-pasteable launch diagnostic for the per-game menu. Unlike [statusSummary] (a one-line
+     * snackbar that flashes and is gone), this is meant to be copied to the clipboard so the user can
+     * share the exact launch-decision state WITHOUT adb: the resolved DRM strategy, the container's
+     * real launch flags, the set-once marker, whether the CEG bridge assets actually staged on disk,
+     * and the runtime-DLL ground truth. The "CEG bridge staged" line is the decisive one — if it is
+     * false for a bionic-Steam game, the encrypted exe cannot decrypt and the game won't start.
+     */
+    fun diagnosticReport(context: Context, appId: String): String = buildString {
+        appendLine("=== GameNative provisioning diagnostic ===")
+        appendLine("appId: $appId")
+        appendLine("provisioning enabled: ${PrefManager.enablePerGameProvisioning}")
+        if (!PrefManager.enablePerGameProvisioning) return@buildString
+
+        val source = ContainerUtils.extractGameSourceFromContainerId(appId)
+        val gameId = ContainerUtils.extractGameIdFromContainerId(appId)
+        val container = ContainerUtils.getOrCreateContainer(context, appId)
+
+        appendLine("container variant: ${container.containerVariant}")
+        appendLine(
+            "flags: bionicSteam=${container.isLaunchBionicSteam} realSteam=${container.isLaunchRealSteam} " +
+                "legacyDRM=${container.isUseLegacyDRM} unpack=${container.isUnpackFiles}",
+        )
+        appendLine("DRM marker (set-once): '${container.getExtra(DRM_APPLIED_EXTRA, "")}'")
+
+        val spec = resolveDrmSpec(context, appId, container)
+        if (spec != null) {
+            appendLine("recipe DRM: recommended=${spec.strategy} effective=${effectiveStrategy(container, spec.strategy)}")
+        } else {
+            appendLine("recipe DRM: none (no recipe match for this game)")
+        }
+
+        // Decisive check: are the CEG-bridge assets actually on disk? (steam.exe + steamclient DLLs +
+        // lsteamclient + native libsteamclient.so). False here on a bionic game == the first-launch
+        // staging bug bit and the encrypted exe cannot decrypt.
+        val bridgeStaged = runCatching {
+            BionicSteamAssetsDependency.isSatisfied(context, container, source, gameId)
+        }.getOrDefault(false)
+        appendLine("CEG bridge assets staged: $bridgeStaged")
+
+        appendLine("--- runtimes ---")
+        appendLine(statusSummary(context, appId))
     }
 
     /** Signature DLLs proving a runtime is actually installed in the prefix (system32/syswow64). */
