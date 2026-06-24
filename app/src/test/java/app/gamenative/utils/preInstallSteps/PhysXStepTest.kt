@@ -53,7 +53,8 @@ class PhysXStepTest {
         assertNotNull(cmd)
         val expectedParts = listOf(
             "msiexec /i A:\\_CommonRedist\\PhysX\\PhysX_legacy.msi /quiet /norestart",
-            "A:\\_CommonRedist\\PhysX\\PhysX_setup.exe /quiet /norestart",
+            // NVIDIA PhysX .exe is an NSIS self-extractor -> /s (not the InstallShield /quiet flags).
+            "A:\\_CommonRedist\\PhysX\\PhysX_setup.exe /s",
         ).sorted()
         val actualParts = cmd!!.split(" & ").sorted()
         assertEquals(expectedParts, actualParts)
