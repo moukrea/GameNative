@@ -3223,6 +3223,10 @@ private fun setupXEnvironment(
         if (container.isLaunchBionicSteam || container.isLaunchRealSteam) {
             envVars.remove("PROTON_DISABLE_LSTEAMCLIENT")
         }
+        // Upgrade the old VKD3D_SHADER_MODEL default (6_0) to GameHub's 6_6 on containers created
+        // before the default bump, so existing prefixes get SM6.6 support without a reset. Only the
+        // stale default is rewritten — a deliberately different user value is left untouched.
+        if (envVars.get("VKD3D_SHADER_MODEL") == "6_0") envVars.put("VKD3D_SHADER_MODEL", "6_6")
         if (!envVars.has("WINEESYNC")) envVars.put("WINEESYNC", "1")
         val graphicsDriverConfig = KeyValueSet(container.getGraphicsDriverConfig())
         if (graphicsDriverConfig.get("version").lowercase(Locale.getDefault()).contains("gen8")) {
