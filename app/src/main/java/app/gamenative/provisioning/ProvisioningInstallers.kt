@@ -30,12 +30,13 @@ object ProvisioningInstallers {
         // NVIDIA PhysX System Software is a 7-Zip/NSIS self-extractor: its silent switch is `/s`
         // (it does not understand the InstallShield-style /quiet /norestart switches).
         "physx" to "/s",
-        // .NET 4.0 full bootstrapper — prerequisite for dotnet48 and xna40 (must run first).
-        "dotnet40" to "/q /norestart",
-        // .NET Framework 4.8: winetricks-faithful silent switch (run with fusion=b override; see below).
-        "dotnet48" to "/sfxlang:1027 /q /norestart",
-        "xna31" to "/quiet /norestart",
-        "xna40" to "/quiet /norestart",
+        // NOTE: dotnet40/dotnet48 are deliberately NOT run in-guest. The real .NET Framework
+        // installers HANG under Wine/Box64 (they spin a child process that never exits silently),
+        // which froze the whole pre-install chain on device ("Installing prerequisites" forever).
+        // GameNative already installs wine-mono (see XServerScreen.unpackExecutableFile), which
+        // provides the .NET runtime for managed apps, so the fragile real installers add hang risk
+        // for no gain. The correct way to bake real .NET would be a prefix/imagefs seed, not an
+        // in-guest installer. xna40/xna31 (which depended on dotnet40) are dropped for the same reason.
         // DirectX June 2010 redist self-extractor (covers the whole d3dx9 / d3dcompiler_43 / xact /
         // dsound family). Handled specially in guestCommand: extract then run DXSETUP.
         "d3dx9" to "/silent",

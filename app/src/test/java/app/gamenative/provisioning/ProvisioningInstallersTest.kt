@@ -15,8 +15,9 @@ class ProvisioningInstallersTest {
     fun installerVerbsFiltersToKnownAndDeduplicatesPreservingOrder() {
         val deps = listOf("vcrun2010", "d3dx9", "vcrun2010", "physx", "gdiplus", "xna40", "unknownverb")
         val verbs = ProvisioningInstallers.installerVerbs(deps)
-        // d3dx9 is now handled (DirectX redist + DXSETUP); gdiplus is override-only; unknownverb dropped.
-        assertEquals(listOf("vcrun2010", "d3dx9", "physx", "xna40"), verbs)
+        // d3dx9 is handled (DirectX redist + DXSETUP); gdiplus is override-only; unknownverb dropped;
+        // xna40 is no longer run in-guest (depended on the hang-prone .NET installers, now removed).
+        assertEquals(listOf("vcrun2010", "d3dx9", "physx"), verbs)
     }
 
     @Test
@@ -32,21 +33,20 @@ class ProvisioningInstallersTest {
     }
 
     @Test
-    fun dotnet48RunsWithFusionOverride() {
-        val cmd = ProvisioningInstallers.guestCommand(
-            Staged("dotnet48", "ndp48-x86-x64-allos-enu.exe", "C:\\.gnprov\\dotnet48\\ndp48-x86-x64-allos-enu.exe"),
-        )
-        assertEquals(
-            "set WINEDLLOVERRIDES=fusion=b& " +
-                "C:\\.gnprov\\dotnet48\\ndp48-x86-x64-allos-enu.exe /sfxlang:1027 /q /norestart",
-            cmd,
-        )
+    fun dotnetAndXnaAreNotRunInGuest() {
+        // The real .NET / XNA installers hang under Wine/Box64 and froze the pre-install chain on
+        // device; wine-mono provides .NET instead. They must not appear as runnable installer verbs.
+        val flags = ProvisioningInstallers.INSTALL_FLAGS
+        listOf("dotnet40", "dotnet48", "xna31", "xna40").forEach {
+            assertTrue("$it must NOT be a runnable installer (it hangs under Wine)", !flags.containsKey(it))
+        }
+        assertEquals(emptyList<String>(), ProvisioningInstallers.installerVerbs(listOf("dotnet48", "xna40")))
     }
 
     @Test
     fun coversTheBootCriticalRuntimeSet() {
         val flags = ProvisioningInstallers.INSTALL_FLAGS
-        listOf("vcrun2005", "vcrun2010", "vcrun2013", "vcrun2022", "physx", "dotnet48", "xna40").forEach {
+        listOf("vcrun2005", "vcrun2010", "vcrun2013", "vcrun2022", "physx", "d3dx9").forEach {
             assertTrue("INSTALL_FLAGS missing boot-critical verb $it", flags.containsKey(it))
         }
     }
