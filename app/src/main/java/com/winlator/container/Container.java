@@ -98,6 +98,7 @@ public class Container {
     private boolean allowSteamUpdates;
     private boolean wow64Mode = true;
     private boolean needsUnpacking = true;
+    private boolean needsRepair = false;
     private byte startupSelection = STARTUP_SELECTION_AGGRESSIVE;
     private String cpuList;
     private String cpuListWoW64;
@@ -399,6 +400,14 @@ public class Container {
 
     public void setNeedsUnpacking(boolean needsUnpacking) {
         this.needsUnpacking = needsUnpacking;
+    }
+
+    public boolean isNeedsRepair() {
+        return needsRepair;
+    }
+
+    public void setNeedsRepair(boolean needsRepair) {
+        this.needsRepair = needsRepair;
     }
 
     public byte getStartupSelection() {
@@ -713,6 +722,7 @@ public class Container {
             data.put("execArgs", execArgs);
             data.put("executablePath", executablePath);
             data.put("needsUnpacking", needsUnpacking);
+            data.put("needsRepair", needsRepair);
             data.put("sdlControllerAPI", sdlControllerAPI);
             // Disable mouse input flag
             data.put("disableMouseInput", disableMouseInput);
@@ -914,6 +924,9 @@ public class Container {
                     break;
                 case "needsUnpacking" :
                     setNeedsUnpacking(data.getBoolean(key));
+                    break;
+                case "needsRepair" :
+                    setNeedsRepair(data.getBoolean(key));
                     break;
                 case "sdlControllerAPI" :
                     setSdlControllerAPI(data.getBoolean(key));

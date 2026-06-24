@@ -54,9 +54,15 @@ public class GlibcProgramLauncherComponent extends GuestProgramLauncherComponent
     private final ContentProfile wineProfile;
     private File workingDir;
     private Container container;
+    // Captured from XServerScreen at launch time when the user requested a Repair Container.
+    // Currently a no-op here because extractBox64Files always re-extracts; kept for symmetry
+    // with BionicProgramLauncherComponent so the wiring is in place if a skip-cache is added.
+    private boolean forceReextract = false;
 
     public Container getContainer() { return this.container; }
     public void setContainer(Container container) { this.container = container; }
+
+    public void setForceReextract(boolean force) { this.forceReextract = force; }
 
     public GlibcProgramLauncherComponent(ContentsManager contentsManager, ContentProfile wineProfile) {
         this.contentsManager = contentsManager;

@@ -251,6 +251,7 @@ private fun OptionItem(
     val icon = getIconForOption(option.optionType)
     val isDestructive = option.optionType == AppOptionMenuType.Uninstall ||
         option.optionType == AppOptionMenuType.ResetToDefaults ||
+        option.optionType == AppOptionMenuType.RepairContainer ||
         option.optionType == AppOptionMenuType.ResetDrm
 
     Row(
@@ -350,6 +351,7 @@ private fun getIconForOption(type: AppOptionMenuType): ImageVector {
         AppOptionMenuType.ChangeBranch -> Icons.AutoMirrored.Filled.CallSplit
         AppOptionMenuType.ReapplyProvisioning -> Icons.Default.AutoFixHigh
         AppOptionMenuType.ProvisioningStatus -> Icons.Default.Info
+        AppOptionMenuType.RepairContainer -> Icons.Default.Build
     }
 }
 
@@ -383,6 +385,7 @@ private fun groupOptions(options: List<AppMenuOption>): Map<OptionCategory, List
             AppOptionMenuType.ResetDrm,
             AppOptionMenuType.ReapplyProvisioning,
             AppOptionMenuType.ProvisioningStatus,
+            AppOptionMenuType.RepairContainer,
             AppOptionMenuType.UseKnownConfig,
             AppOptionMenuType.ImportConfig,
             AppOptionMenuType.ExportConfig,

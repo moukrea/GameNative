@@ -708,6 +708,72 @@ abstract class BaseAppScreen {
     }
 
     /**
+     * Repair Container Button
+     * Marks the container as needing repair. On the next launch, XServerScreen will treat
+     * the container as if every cached extraction guard had missed: applyGeneralPatches will
+     * run, DXVK/VKD3D, win components, drivers, main wrapper, openal, theme, the box64 binary,
+     * and pre-install markers all get re-extracted/reset. User Container Settings are not changed.
+     */
+    protected fun repairContainerFiles(context: Context, libraryItem: LibraryItem) {
+        val container = ContainerUtils.getOrCreateContainer(context, libraryItem.appId)
+        container.setNeedsRepair(true)
+        container.saveData()
+        Timber.i("repairContainerFiles: queued repair for container ${libraryItem.appId}")
+        SnackbarManager.show(context.getString(R.string.repair_container_success))
+    }
+
+    @Composable
+    protected fun RepairConfirmDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+        val context = LocalContext.current
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text(context.getString(R.string.repair_container_title)) },
+            text = { Text(context.getString(R.string.repair_container_message)) },
+            confirmButton = {
+                TextButton(onClick = onConfirm) {
+                    Text(
+                        text = context.getString(R.string.repair_container_confirm),
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text(context.getString(R.string.cancel))
+                }
+            },
+        )
+    }
+
+    /**
+     * Returns a "Repair container" menu option that forces re-extraction of all container files
+     * on the next launch without changing any settings.
+     * Subclasses may override to return null if not applicable.
+     */
+    @Composable
+    protected open fun getRepairContainerOption(
+        context: Context,
+        libraryItem: LibraryItem,
+    ): AppMenuOption? {
+        var showRepairConfirmDialog by remember { mutableStateOf(false) }
+
+        if (showRepairConfirmDialog) {
+            RepairConfirmDialog(
+                onConfirm = {
+                    showRepairConfirmDialog = false
+                    repairContainerFiles(context, libraryItem)
+                },
+                onDismiss = { showRepairConfirmDialog = false },
+            )
+        }
+
+        return AppMenuOption(
+            AppOptionMenuType.RepairContainer,
+            onClick = { showRepairConfirmDialog = true },
+        )
+    }
+
+    /**
      * Shared helper to fetch and apply a "known config" for a given game/library item.
      * Installs any missing manifest components before applying the config.
      */
@@ -865,6 +931,7 @@ abstract class BaseAppScreen {
             getRunContainerOption(context, libraryItem, onClickPlay)?.let { menuOptions.add(it) }
             getTestGraphicsOption(context, libraryItem, onTestGraphics)?.let { menuOptions.add(it) }
             getResetContainerOption(context, libraryItem)?.let { menuOptions.add(it) }
+            getRepairContainerOption(context, libraryItem)?.let { menuOptions.add(it) }
             getCreateShortcutOption(context, libraryItem)?.let { menuOptions.add(it) }
             getExportContainerOption(context, libraryItem, exportFrontendLauncher)?.let { menuOptions.add(it) }
         }
