@@ -58,30 +58,31 @@ object ProvisioningInstallers {
     /**
      * The silent guest command for one staged installer file.
      *
-     * Wrapped in `start "" /wait` so the surrounding `cmd /c "... & taskkill explorer & wineserver -k"`
-     * BLOCKS until the installer (and the child process the bootstrapper spawns) actually exits.
-     * Without this, the `&` chain returned immediately and `wineserver -k` tore the installer down
-     * mid-flight — the installers never finished, so nothing landed in the prefix.
+     * The installer is run **directly** (no `start "" /wait` wrapper), exactly like GameNative's own
+     * shipped pre-install steps ([app.gamenative.utils.VcRedistStep], [app.gamenative.utils.PhysXStep]):
+     * the surrounding `cmd /c "<cmd1> & <cmd2> & … & wineserver -k"` runs each `&`-separated console
+     * installer sequentially and waits for it to exit before the next. An earlier build wrapped these
+     * in `start "" /wait`, which is unproven under this Wine's cmd and differs from the steps that are
+     * known to work on-device — the most likely reason nothing installed. Aligning to the proven raw
+     * form keeps a single, validated execution model for every installer.
      */
     fun guestCommand(staged: Staged): String {
         // DirectX family: extract the redist's cabs then run DXSETUP (no Kotlin .cab extraction).
         if (staged.verb in DIRECTX_REDIST_VERBS) {
             val dir = staged.guestPath.substringBeforeLast('\\')
             val extract = "$dir\\dxextract"
-            return "start \"\" /wait ${staged.guestPath} /Q /T:$extract & " +
-                "start \"\" /wait $extract\\DXSETUP.exe /silent"
+            return "${staged.guestPath} /Q /T:$extract & $extract\\DXSETUP.exe /silent"
         }
         // .NET 4.8 needs the fusion DLL forced to builtin during install, or it hangs under Wine.
         // Set it in the cmd session (no nested quotes — those would break the outer cmd /c "...").
         if (staged.verb == "dotnet48") {
-            return "set WINEDLLOVERRIDES=fusion=b& " +
-                "start \"\" /wait ${staged.guestPath} /sfxlang:1027 /q /norestart"
+            return "set WINEDLLOVERRIDES=fusion=b& ${staged.guestPath} /sfxlang:1027 /q /norestart"
         }
         val flags = INSTALL_FLAGS[staged.verb] ?: "/quiet /norestart"
         return if (staged.fileName.substringAfterLast('.', "").equals("msi", ignoreCase = true)) {
-            "start \"\" /wait msiexec /i ${staged.guestPath} $flags"
+            "msiexec /i ${staged.guestPath} $flags"
         } else {
-            "start \"\" /wait ${staged.guestPath} $flags"
+            "${staged.guestPath} $flags"
         }
     }
 

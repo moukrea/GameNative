@@ -25,8 +25,8 @@ class ProvisioningInstallersTest {
             Staged("d3dx9", "directx_Jun2010_redist.exe", "C:\\.gnprov\\d3dx9\\directx_Jun2010_redist.exe"),
         )
         assertEquals(
-            "start \"\" /wait C:\\.gnprov\\d3dx9\\directx_Jun2010_redist.exe /Q /T:C:\\.gnprov\\d3dx9\\dxextract & " +
-                "start \"\" /wait C:\\.gnprov\\d3dx9\\dxextract\\DXSETUP.exe /silent",
+            "C:\\.gnprov\\d3dx9\\directx_Jun2010_redist.exe /Q /T:C:\\.gnprov\\d3dx9\\dxextract & " +
+                "C:\\.gnprov\\d3dx9\\dxextract\\DXSETUP.exe /silent",
             cmd,
         )
     }
@@ -38,7 +38,7 @@ class ProvisioningInstallersTest {
         )
         assertEquals(
             "set WINEDLLOVERRIDES=fusion=b& " +
-                "start \"\" /wait C:\\.gnprov\\dotnet48\\ndp48-x86-x64-allos-enu.exe /sfxlang:1027 /q /norestart",
+                "C:\\.gnprov\\dotnet48\\ndp48-x86-x64-allos-enu.exe /sfxlang:1027 /q /norestart",
             cmd,
         )
     }
@@ -52,17 +52,18 @@ class ProvisioningInstallersTest {
     }
 
     @Test
-    fun exeRunsViaStartWaitAndMsiRunsViaMsiexecWithSilentFlags() {
-        // start "" /wait makes the cmd chain block until the installer exits (not torn down early).
+    fun exeRunsDirectlyAndMsiRunsViaMsiexecWithSilentFlags() {
+        // Raw form (no start/wait), matching GameNative's shipped VcRedistStep/PhysXStep: cmd's `&`
+        // chain runs each console installer sequentially and waits for it before the next.
         val exe = ProvisioningInstallers.guestCommand(
             Staged("vcrun2010", "vcredist_x86.exe", "C:\\.gnprov\\vcrun2010\\vcredist_x86.exe"),
         )
-        assertEquals("start \"\" /wait C:\\.gnprov\\vcrun2010\\vcredist_x86.exe /q /norestart", exe)
+        assertEquals("C:\\.gnprov\\vcrun2010\\vcredist_x86.exe /q /norestart", exe)
 
         val msi = ProvisioningInstallers.guestCommand(
             Staged("xna40", "xnafx40_redist.msi", "C:\\.gnprov\\xna40\\xnafx40_redist.msi"),
         )
-        assertEquals("start \"\" /wait msiexec /i C:\\.gnprov\\xna40\\xnafx40_redist.msi /quiet /norestart", msi)
+        assertEquals("msiexec /i C:\\.gnprov\\xna40\\xnafx40_redist.msi /quiet /norestart", msi)
     }
 
     @Test
@@ -75,8 +76,8 @@ class ProvisioningInstallersTest {
             ),
         )
         assertEquals(
-            "start \"\" /wait C:\\.gnprov\\vcrun2022\\vc_redist.x86.exe /install /quiet /norestart & " +
-                "start \"\" /wait C:\\.gnprov\\vcrun2022\\vc_redist.x64.exe /install /quiet /norestart",
+            "C:\\.gnprov\\vcrun2022\\vc_redist.x86.exe /install /quiet /norestart & " +
+                "C:\\.gnprov\\vcrun2022\\vc_redist.x64.exe /install /quiet /norestart",
             chain,
         )
     }
