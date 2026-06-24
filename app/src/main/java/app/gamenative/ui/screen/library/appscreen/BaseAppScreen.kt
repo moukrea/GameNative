@@ -27,6 +27,7 @@ import app.gamenative.PluviaApp
 import app.gamenative.R
 import app.gamenative.data.GameSource
 import app.gamenative.data.LibraryItem
+import app.gamenative.provisioning.PerGameProvisioning
 import app.gamenative.events.AndroidEvent
 import app.gamenative.ui.component.dialog.ContainerConfigDialog
 import app.gamenative.ui.data.AppMenuOption
@@ -695,6 +696,13 @@ abstract class BaseAppScreen {
         val defaults = ContainerUtils.getDefaultContainerData().copy(drives = container.drives)
 
         ContainerUtils.applyToContainer(context, libraryItem.appId, defaults)
+
+        // The reset flips the DRM launch flags back to defaults but leaves the "DRM recommendation
+        // already applied" extra behind; clear it so the per-game recipe re-applies its strategy
+        // (e.g. CEG -> bionic-Steam) on the next launch instead of silently staying on the default path.
+        PerGameProvisioning.clearDrmRecommendationMarker(
+            ContainerUtils.getOrCreateContainer(context, libraryItem.appId),
+        )
 
         SnackbarManager.show("Container reset to defaults")
     }

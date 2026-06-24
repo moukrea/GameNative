@@ -55,6 +55,7 @@ import app.gamenative.MainActivity
 import app.gamenative.NetworkMonitor
 import app.gamenative.PluviaApp
 import app.gamenative.PrefManager
+import app.gamenative.provisioning.PerGameProvisioning
 import app.gamenative.R
 import app.gamenative.data.GameSource
 import app.gamenative.enums.AppTheme
@@ -1651,6 +1652,21 @@ fun preLaunchApp(
 
         // set up Ubuntu file system — download required files and install
         SplitCompat.install(context)
+
+        // Apply the per-game recipe's recommended Steam-DRM strategy BEFORE launch-dependency staging.
+        // This is the fix for the CEG black screen: BionicSteamAssetsDependency (and the steam.tzst gate
+        // below) stage the bionic-Steam assets only when container.isLaunchBionicSteam is already true,
+        // but that flag used to be set later, in launchApp (the onSuccess callback that runs AFTER this
+        // staging). On the first launch after a container reset the assets were therefore never staged,
+        // the lsteamclient<->libsteamclient CEG bridge never came up, and the encrypted game exe never
+        // started. Setting the strategy here (set-once; honoured later in launchApp) makes the assets
+        // stage on the first launch. Safe no-op for non-recipe games and when the flag is already set.
+        PerGameProvisioning.applyRecommendedDrmOnce(context, appId, container)
+        Timber.tag("DRMTrace").i(
+            "preLaunch appId=%s variant=%s bionic=%b real=%b legacy=%b (before deps)",
+            appId, container.containerVariant, container.isLaunchBionicSteam,
+            container.isLaunchRealSteam, container.isUseLegacyDRM,
+        )
 
         try {
             LaunchDependencies().ensureLaunchDependencies(

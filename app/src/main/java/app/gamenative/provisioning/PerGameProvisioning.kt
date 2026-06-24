@@ -357,6 +357,19 @@ object PerGameProvisioning {
         Timber.tag(TAG).i("Applied DRM '$effective' for '$appId' (recipe recommended ${spec.strategy})")
     }
 
+    /**
+     * Clears the "DRM recommendation already applied" marker so [applyRecommendedDrmOnce] will re-apply
+     * the recipe's strategy on the next launch. Call this when a container is RESET to defaults: the
+     * reset flips isLaunchBionicSteam/RealSteam back to false but leaves this marker behind, so without
+     * clearing it the set-once guard would early-return and never re-enable the CEG path — the game
+     * would silently fall back to the Goldberg/cold path and black-screen. (A manual DRM toggle change
+     * deliberately does NOT clear this — only an explicit reset does — so user choices still win.)
+     */
+    fun clearDrmRecommendationMarker(container: Container) {
+        container.putExtra(DRM_APPLIED_EXTRA, null)
+        container.saveData()
+    }
+
     /** Resolves the recipe's Steam DRM spec for a launched Steam/Epic game (null if none). */
     private fun resolveDrmSpec(context: Context, appId: String, container: Container): SteamDrmSpec? {
         val source = ContainerUtils.extractGameSourceFromContainerId(appId)
