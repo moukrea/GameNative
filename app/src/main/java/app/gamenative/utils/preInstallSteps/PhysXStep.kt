@@ -58,7 +58,12 @@ object PhysXStep : PreInstallStep {
                         if (installerFile.name.endsWith(".msi", ignoreCase = true)) {
                             "msiexec /i $winePath /quiet /norestart"
                         } else {
-                            "$winePath /quiet /norestart"
+                            // NVIDIA PhysX System Software (.exe) is an NSIS self-extractor: its silent
+                            // switch is /s. /quiet /norestart (InstallShield-style) is silently ignored
+                            // by NSIS, so the installer black-holes and PhysXLoader.dll never lands —
+                            // the exact reason Mirror's Edge (bionic CEG) black-screened with PhysX
+                            // missing. Same /s rationale as ProvisioningInstallers.INSTALL_FLAGS["physx"].
+                            "$winePath /s"
                         }
                     parts.add(command)
                 }

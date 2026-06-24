@@ -48,12 +48,13 @@ object ProvisioningDepsStep : PreInstallStep {
         gameSource: GameSource,
         gameDirPath: String,
     ): Boolean = PrefManager.enablePerGameProvisioning &&
-        // When the genuine Steam client runs (bionic/real-Steam), Steam installs the game's bundled
-        // redistributables itself (its _CommonRedist install scripts) — running our in-guest installers
-        // on top is the collision the user hit: Steam actually installed PhysX while this step only
-        // *claimed* to. Defer to Steam on those paths; this step is for the emulator (Goldberg/cold)
-        // launches where nothing else provisions the runtimes.
-        !container.isLaunchBionicSteam && !container.isLaunchRealSteam &&
+        // Defer ONLY to the full real-Steam client (steam.exe -applaunch): that path runs the game's
+        // _CommonRedist install scripts itself, so our installers would collide with it. The bionic
+        // path does NOT — it launches the game exe DIRECTLY (XServerScreen getWineStartCommand bionic
+        // branch), so Steam never runs the redist scripts there; nothing else provisions the runtimes.
+        // GameHub likewise always runs its blocking dependency phase pre-launch regardless of Steam
+        // mode (its host-side Steam agent only grants the launch). So run for bionic + emulator paths.
+        !container.isLaunchRealSteam &&
         !MarkerUtils.hasMarker(gameDirPath, marker)
 
     override fun buildCommand(

@@ -65,20 +65,22 @@ class ProvisioningDepsStepWiringTest {
     }
 
     @Test
-    fun stepDefersToSteamClientWhenBionicOrRealSteamActive() {
+    fun stepRunsForBionicButDefersToRealSteamClient() {
         mockkObject(PrefManager)
         every { PrefManager.enablePerGameProvisioning } returns true
         val freshDir = createTempDirectory("gnprov-steamgate").toString()
 
+        // bionic-Steam launches the game exe DIRECTLY, so Steam never runs the redist scripts — we must.
         val bionic = mockk<Container>(relaxed = true) { every { isLaunchBionicSteam } returns true }
-        assertFalse(
-            "bionic-Steam installs the game's redists itself; our installers must not double-run",
+        assertTrue(
+            "bionic-Steam launches the exe directly; nothing else provisions the runtimes, so we run",
             ProvisioningDepsStep.appliesTo(bionic, GameSource.STEAM, freshDir),
         )
 
+        // real-Steam (steam.exe -applaunch) runs the game's _CommonRedist scripts itself; defer to it.
         val realSteam = mockk<Container>(relaxed = true) { every { isLaunchRealSteam } returns true }
         assertFalse(
-            "real-Steam installs the game's redists itself; our installers must not double-run",
+            "real-Steam runs the game's redists itself; our installers must not double-run",
             ProvisioningDepsStep.appliesTo(realSteam, GameSource.STEAM, freshDir),
         )
     }
