@@ -48,6 +48,12 @@ object ProvisioningDepsStep : PreInstallStep {
         gameSource: GameSource,
         gameDirPath: String,
     ): Boolean = PrefManager.enablePerGameProvisioning &&
+        // When the genuine Steam client runs (bionic/real-Steam), Steam installs the game's bundled
+        // redistributables itself (its _CommonRedist install scripts) — running our in-guest installers
+        // on top is the collision the user hit: Steam actually installed PhysX while this step only
+        // *claimed* to. Defer to Steam on those paths; this step is for the emulator (Goldberg/cold)
+        // launches where nothing else provisions the runtimes.
+        !container.isLaunchBionicSteam && !container.isLaunchRealSteam &&
         !MarkerUtils.hasMarker(gameDirPath, marker)
 
     override fun buildCommand(
@@ -64,13 +70,13 @@ object ProvisioningDepsStep : PreInstallStep {
         // Shared per-prefix staging under drive_c so deps download once per container, not per game.
         val stagingRoot = File(container.rootDir, ".wine/drive_c/.gnprov")
         val staged = mutableListOf<ProvisioningInstallers.Staged>()
+        val skipped = mutableListOf<String>()
 
-        var allStaged = true
         verbs.forEachIndexed { index, verb ->
             val def = (registry.get(verb) as? DataDrivenVerb)?.definition
             if (def == null) {
                 Timber.tag(TAG).w("Verb '%s' is not installable in the registry; skipping", verb)
-                allStaged = false
+                skipped += verb
                 return@forEachIndexed
             }
             val runnable = def.downloads.filter { ProvisioningInstallers.isRunnable(it.fileName) }
@@ -98,17 +104,22 @@ object ProvisioningDepsStep : PreInstallStep {
             if (ok) {
                 staged += verbStaged
             } else {
-                allStaged = false
+                skipped += verb
                 Timber.tag(TAG).w("Skipping verb '%s' (download/verify failed)", verb)
             }
         }
 
-        // The completion marker is written (by the pre-install chain) only when this returns a
-        // non-null command. If any verb failed to stage, defer by returning null so the whole step
-        // re-runs on the next launch (downloads are cached, so the retry is cheap) — a transient
-        // network failure must never leave the prefix permanently half-provisioned.
-        if (!allStaged) {
-            Timber.tag(TAG).w("Provisioning incomplete for %s; deferring so it retries next launch", appId)
+        // Install whatever DID stage rather than discarding the entire chain when one verb fails.
+        // The previous all-or-nothing return-null meant a single flaky CDN (e.g. the archived XNA
+        // mirror) silently zeroed PhysX + VC++ + DirectX too — the user saw "nothing installed".
+        // Staged files are cached under the shared per-prefix dir, so a reinstall (fresh game dir,
+        // no marker) re-attempts only the verbs that are still missing.
+        if (skipped.isNotEmpty()) {
+            Timber.tag(TAG).w("Provisioning partial for %s: installing %d verb file(s); skipped %s",
+                appId, staged.size, skipped.joinToString(","))
+        }
+        if (staged.isEmpty()) {
+            Timber.tag(TAG).w("Nothing staged for %s (all downloads failed); deferring to next launch", appId)
             return null
         }
         Timber.tag(TAG).i("Provisioning %d installer file(s) for %s", staged.size, appId)
