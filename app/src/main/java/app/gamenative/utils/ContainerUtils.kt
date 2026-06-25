@@ -418,6 +418,7 @@ object ContainerUtils {
                 "audioDriver" -> value?.let { updatedData.copy(audioDriver = it as? String ?: updatedData.audioDriver) } ?: updatedData
                 "wincomponents" -> value?.let { updatedData.copy(wincomponents = it as? String ?: updatedData.wincomponents) } ?: updatedData
                 "videoMemorySize" -> value?.let { updatedData.copy(videoMemorySize = it as? String ?: updatedData.videoMemorySize) } ?: updatedData
+                "wow64Mode" -> value?.let { updatedData.copy(wow64Mode = it as? Boolean ?: updatedData.wow64Mode) } ?: updatedData
                 else -> updatedData
             }
         }

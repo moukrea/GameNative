@@ -1,6 +1,7 @@
 package app.gamenative.utils
 
 import app.gamenative.data.GameCompatibilityStatus
+import com.winlator.container.Container
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Request
@@ -82,14 +83,6 @@ object EmuReadyService {
         }.onFailure { Timber.tag(TAG).w(it, "listingsForGame failed for %s", gameId) }.getOrDefault(emptyList())
     }
 
-    /** The raw GameNative launch config EmuReady stores for a listing (for the import picker), or null. */
-    suspend fun getEmulatorConfig(listingId: String): String? = withContext(Dispatchers.IO) {
-        runCatching {
-            val data = getJson("listings.getEmulatorConfig", JSONObject().put("listingId", listingId))
-            data?.toString()
-        }.onFailure { Timber.tag(TAG).w(it, "getEmulatorConfig failed for %s", listingId) }.getOrNull()
-    }
-
     /** The importable GameNative config JSON (the `content` blob) for a listing, or null. */
     suspend fun getEmulatorConfigContent(listingId: String): String? = withContext(Dispatchers.IO) {
         runCatching {
@@ -108,20 +101,41 @@ object EmuReadyService {
      *   wineVersion is arm64ec (otherwise the manifest is filtered by the wrong variant and the
      *   available proton — e.g. proton-11.0-1-arm64ec-1 — is wrongly reported "not available").
      * - EmuReady uses the literal "other" as a placeholder meaning "see the notes"; it is not an
-     *   installable component, so drop those keys (keep the container's current/default) instead of
-     *   blocking the whole import. The real value (e.g. the DXVK version) is in the notes, surfaced
-     *   in the picker so the user can set it manually.
+     *   installable component. CRITICAL: dxwrapper + dxwrapperConfig are HARD-REQUIRED by the import
+     *   (BestConfigService rejects the ENTIRE config — empty map — if either is missing/empty), so we
+     *   must NOT remove them; we SUBSTITUTE GameNative's installed default (DEFAULT_DXWRAPPER /
+     *   DEFAULT_DXWRAPPERCONFIG version) so the rest of the config still imports. The real DXVK version
+     *   is in the notes, surfaced in the picker, for the user to set manually.
+     * - graphicsDriver* are OPTIONAL (only applied if present), so an "other" graphics driver is
+     *   handled by dropping the WHOLE graphics group atomically (driver + version + config) — keeping
+     *   the container's current driver. Dropping only one key would orphan a version/config onto a
+     *   foreign driver.
      */
     fun sanitizeGameNativeConfig(content: String): String = runCatching {
         val o = JSONObject(content)
+        // 1) arm64ec Proton only runs on a bionic container.
         if (o.optString("wineVersion").contains("arm64ec", ignoreCase = true)) {
             o.put("containerVariant", "bionic")
         }
-        for (k in listOf("dxwrapper", "graphicsDriver", "graphicsDriverVersion")) {
-            if (o.optString(k).equals("other", ignoreCase = true)) o.remove(k)
+        // 2) "other" graphics driver -> keep the container's current driver: drop the whole group.
+        if (o.optString("graphicsDriver").equals("other", ignoreCase = true) ||
+            o.optString("graphicsDriverVersion").equals("other", ignoreCase = true)
+        ) {
+            o.remove("graphicsDriver"); o.remove("graphicsDriverVersion"); o.remove("graphicsDriverConfig")
         }
-        if (o.optString("dxwrapperConfig").contains("version=other", ignoreCase = true)) {
-            o.remove("dxwrapper"); o.remove("dxwrapperConfig")
+        // 3) "other" dxwrapper / "version=other" -> SUBSTITUTE the installed default (never remove the
+        //    required keys, or the entire import is rejected).
+        if (o.optString("dxwrapper").equals("other", ignoreCase = true) || o.optString("dxwrapper").isBlank()) {
+            o.put("dxwrapper", Container.DEFAULT_DXWRAPPER)
+        }
+        val dxc = o.optString("dxwrapperConfig")
+        if (dxc.contains("version=other", ignoreCase = true)) {
+            val defaultVersion = Regex("version=([^,]+)")
+                .find(Container.DEFAULT_DXWRAPPERCONFIG)?.groupValues?.getOrNull(1).orEmpty()
+            val fixed = dxc.replace(Regex("version=other", RegexOption.IGNORE_CASE), "version=$defaultVersion").trim(',', ' ')
+            o.put("dxwrapperConfig", fixed.ifBlank { Container.DEFAULT_DXWRAPPERCONFIG })
+        } else if (dxc.isBlank()) {
+            o.put("dxwrapperConfig", Container.DEFAULT_DXWRAPPERCONFIG)
         }
         o.toString()
     }.getOrDefault(content)
@@ -185,25 +199,36 @@ object EmuReadyService {
      */
     fun computeBadge(listings: List<EmuListing>, deviceGpu: String?): EmuBadge {
         if (listings.isEmpty()) return EmuBadge(GameCompatibilityStatus.UNKNOWN, caveat = false, attribution = "")
-        // Best = best GPU proximity, then best (lowest) performance rank.
-        val ranked = listings.sortedWith(
-            compareBy<EmuListing> { EmuReadyGpuMatch.tier(deviceGpu, it.gpuModel).ordinal }
-                .thenBy { it.performanceRank },
-        )
-        val best = ranked.first()
+        val n = listings.size
+        // The closest hardware tier present; the verdict is anchored there, but we AGGREGATE within it
+        // (best report of that tier) rather than trusting a single report — one noisy EXACT "Nothing"
+        // must not flip a game to NOT_COMPATIBLE when a similar GPU ran it Perfect.
+        val bestTier = listings.map { EmuReadyGpuMatch.tier(deviceGpu, it.gpuModel) }.minBy { it.ordinal }
+        val inTier = listings.filter { EmuReadyGpuMatch.tier(deviceGpu, it.gpuModel) == bestTier }
+        val best = inTier.minByOrNull { it.performanceRank } ?: listings.first()
         val worked = best.performanceRank in 1..3
         val marginal = best.performanceRank in 4..5
-        val tier = EmuReadyGpuMatch.tier(deviceGpu, best.gpuModel)
-        val n = listings.size
         return when {
-            worked && tier == EmuReadyGpuMatch.Tier.EXACT ->
+            worked && bestTier == EmuReadyGpuMatch.Tier.EXACT ->
                 EmuBadge(GameCompatibilityStatus.GPU_COMPATIBLE, caveat = false, attribution = attribution(best, n, "your GPU"))
-            worked ->
-                EmuBadge(GameCompatibilityStatus.COMPATIBLE, caveat = true, attribution = attribution(best, n, gpuPhrase(tier, best.gpuModel)))
-            marginal ->
-                EmuBadge(GameCompatibilityStatus.COMPATIBLE, caveat = true, attribution = attribution(best, n, gpuPhrase(tier, best.gpuModel)))
-            // listings exist but the best report is Intro/Loadable/Nothing -> reported not working.
-            else -> EmuBadge(GameCompatibilityStatus.NOT_COMPATIBLE, caveat = false, attribution = attribution(best, n, gpuPhrase(tier, best.gpuModel)))
+            worked || marginal ->
+                EmuBadge(GameCompatibilityStatus.COMPATIBLE, caveat = true, attribution = attribution(best, n, gpuPhrase(bestTier, best.gpuModel)))
+            else -> {
+                // Closest tier reports non-working. If ANYONE (even other hardware) ran it, surface a
+                // caveat "compatible" rather than condemning; only call NOT_COMPATIBLE with corroboration
+                // (>=2 negative reports), else stay UNKNOWN — a single negative is not enough evidence.
+                val workedAnywhere = listings.minByOrNull { it.performanceRank }?.takeIf { it.performanceRank in 1..3 }
+                val negatives = listings.count { it.performanceRank >= 6 }
+                when {
+                    workedAnywhere != null -> {
+                        val t = EmuReadyGpuMatch.tier(deviceGpu, workedAnywhere.gpuModel)
+                        EmuBadge(GameCompatibilityStatus.COMPATIBLE, caveat = true, attribution = attribution(workedAnywhere, n, gpuPhrase(t, workedAnywhere.gpuModel)))
+                    }
+                    negatives >= 2 ->
+                        EmuBadge(GameCompatibilityStatus.NOT_COMPATIBLE, caveat = false, attribution = attribution(best, n, gpuPhrase(bestTier, best.gpuModel)))
+                    else -> EmuBadge(GameCompatibilityStatus.UNKNOWN, caveat = false, attribution = "")
+                }
+            }
         }
     }
 
@@ -259,9 +284,16 @@ object EmuReadyService {
         val url = "$BASE/$procedure?input=" + URLEncoder.encode(envelope, "UTF-8")
         val req = Request.Builder().url(url).get().build()
         httpClient.newCall(req).execute().use { resp ->
-            if (!resp.isSuccessful) return null
+            if (!resp.isSuccessful) {
+                Timber.tag(TAG).w("%s -> HTTP %d", procedure, resp.code)
+                return null
+            }
             val body = resp.body?.string() ?: return null
-            return JSONObject(body).optJSONObject("result")?.optJSONObject("data")?.optJSONArray("json")
+            val root = JSONObject(body)
+            // Mirror getJson: surface a tRPC error envelope instead of silently returning null (so a
+            // real zod/4xx error is distinguishable from "game not found").
+            root.optJSONObject("error")?.let { Timber.tag(TAG).w("%s tRPC error: %s", procedure, it); return null }
+            return root.optJSONObject("result")?.optJSONObject("data")?.optJSONArray("json")
         }
     }
 

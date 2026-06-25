@@ -11,14 +11,26 @@ object EmuReadyGpuMatch {
     /** Proximity of an EmuReady listing's GPU to the device's, best first. */
     enum class Tier { EXACT, FAMILY, LOWER, OTHER }
 
-    private val VENDORS = listOf("adreno", "mali", "xclipse", "powervr", "immortalis")
-
     private data class Gpu(val vendor: String?, val number: Int?)
 
     private fun normalize(raw: String?): Gpu {
         if (raw.isNullOrBlank()) return Gpu(null, null)
-        val s = raw.lowercase().replace("(tm)", " ").replace("(r)", " ")
-        val vendor = VENDORS.firstOrNull { s.contains(it) }
+        var s = raw.lowercase().replace("(tm)", " ").replace("(r)", " ")
+        // Strip Arm's core/module-count suffixes (MP12, MC6, ...) FIRST: otherwise the model-number
+        // scan grabs the core count, e.g. "Mali-G1 Ultra MP12" would parse as 12 instead of G1.
+        s = s.replace(Regex("\\bm[cp]\\d+\\b"), " ")
+        // Canonical vendor. Arm brands the SAME chip as both "Mali-Gxxx" and "Immortalis-Gxxx" (and the
+        // dual-branded "Mali-G720-Immortalis"), so fold them into one family or an exact-GPU report
+        // never matches. Check the more specific brands before the generic "mali".
+        val vendor = when {
+            s.contains("adreno") -> "adreno"
+            s.contains("xclipse") -> "xclipse"
+            s.contains("immortalis") || s.contains("mali") -> "arm-mali"
+            s.contains("powervr") -> "powervr"
+            s.contains("tegra") || s.contains("nvidia") || s.contains("geforce") -> "nvidia"
+            s.contains("intel") -> "intel"
+            else -> null
+        }
         // First 2-4 digit run is the model number (Mali "g615" -> 615, Adreno "740" -> 740).
         val number = Regex("(\\d{2,4})").find(s)?.value?.toIntOrNull()
         return Gpu(vendor, number)

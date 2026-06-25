@@ -1532,6 +1532,8 @@
     <string name="emuready_no_configs">No EmuReady configs found for this game</string>
     <string name="emuready_config_imported">Imported EmuReady config (may be incomplete)</string>
     <string name="emuready_notes_title">EmuReady report notes</string>
+    <string name="emuready_glibc_unsupported">This EmuReady config targets the glibc container, which this build can\'t run. Try an arm64ec/bionic report instead.</string>
+    <string name="config_browser_loading">Loading known configs…</string>
     <string name="config_browser_title">Known configs (closest hardware first)</string>
     <string name="config_browser_applied">Applied: %s</string>
     <string name="config_browser_apply">Apply</string>

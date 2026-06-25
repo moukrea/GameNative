@@ -120,6 +120,13 @@ class LibraryViewModel @Inject constructor(
     private val SEARCH_DEBOUNCE_MS = 500L // 500ms debounce
 
     // Cache GPU name to avoid repeated calls
+    /**
+     * Game titles already run through EmuReady enrichment this process. fetchCompatibilityForPage is
+     * called with the CUMULATIVE paged list, so without this guard every scroll/filter would re-iterate
+     * (and on a cold badge-cache, re-hit the public API for) every game loaded so far. Thread-safe set.
+     */
+    private val emuReadyAttempted: MutableSet<String> = java.util.Collections.newSetFromMap(java.util.concurrent.ConcurrentHashMap())
+
     private val gpuName: String by lazy {
         try {
             val gpu = GPUInformation.getRenderer(context)
@@ -995,12 +1002,14 @@ class LibraryViewModel @Inject constructor(
      */
     private suspend fun enrichCompatibilityWithEmuReady(gameNames: List<String>) {
         if (gpuName == "Unknown GPU") return
-        for (name in gameNames) {
-            val emu = EmuReadyService.badgeFor(name, gpuName).status
-            if (emu == GameCompatibilityStatus.UNKNOWN) continue
+        // Only games not yet attempted this process (the caller passes the cumulative paged list).
+        val fresh = gameNames.filter { emuReadyAttempted.add(it) }
+        for (name in fresh) {
+            val emu = EmuReadyService.badgeFor(name, gpuName)
+            if (emu.status == GameCompatibilityStatus.UNKNOWN) continue
             _state.update { st ->
                 val current = st.compatibilityMap[name] ?: GameCompatibilityStatus.UNKNOWN
-                val merged = mergeCompatibility(current, emu)
+                val merged = mergeEmuReadyOnto(current, emu)
                 if (merged == current) {
                     st
                 } else {
@@ -1010,12 +1019,26 @@ class LibraryViewModel @Inject constructor(
         }
     }
 
-    /** Combines two compatibility statuses, preferring the strongest positive evidence. */
-    private fun mergeCompatibility(a: GameCompatibilityStatus, b: GameCompatibilityStatus): GameCompatibilityStatus = when {
-        a == GameCompatibilityStatus.GPU_COMPATIBLE || b == GameCompatibilityStatus.GPU_COMPATIBLE -> GameCompatibilityStatus.GPU_COMPATIBLE
-        a == GameCompatibilityStatus.COMPATIBLE || b == GameCompatibilityStatus.COMPATIBLE -> GameCompatibilityStatus.COMPATIBLE
-        a == GameCompatibilityStatus.NOT_COMPATIBLE || b == GameCompatibilityStatus.NOT_COMPATIBLE -> GameCompatibilityStatus.NOT_COMPATIBLE
-        else -> GameCompatibilityStatus.UNKNOWN
+    /**
+     * Merges EmuReady's badge ONTO GameNative's (gn), evidence-ranked so a weak EmuReady signal can't
+     * overrule GameNative's device-specific verdict:
+     * - A non-caveat EmuReady GPU_COMPATIBLE (proven on the user's EXACT GPU) is the strongest signal —
+     *   it wins, even over a GameNative NOT_COMPATIBLE.
+     * - GameNative's own GPU_COMPATIBLE (verified on this device with fps) is likewise kept.
+     * - GameNative NOT_COMPATIBLE is the user's own broken verdict on their fleet; a caveated EmuReady
+     *   "compatible" (ran on other/weaker hardware) must NOT flip it to green-ish — keep NOT_COMPATIBLE.
+     * - Otherwise prefer any positive (COMPATIBLE) over a negative/unknown.
+     */
+    private fun mergeEmuReadyOnto(gn: GameCompatibilityStatus, emu: EmuReadyService.EmuBadge): GameCompatibilityStatus {
+        val e = emu.status
+        return when {
+            e == GameCompatibilityStatus.GPU_COMPATIBLE && !emu.caveat -> GameCompatibilityStatus.GPU_COMPATIBLE
+            gn == GameCompatibilityStatus.GPU_COMPATIBLE -> GameCompatibilityStatus.GPU_COMPATIBLE
+            gn == GameCompatibilityStatus.NOT_COMPATIBLE -> GameCompatibilityStatus.NOT_COMPATIBLE
+            e == GameCompatibilityStatus.COMPATIBLE || gn == GameCompatibilityStatus.COMPATIBLE -> GameCompatibilityStatus.COMPATIBLE
+            e == GameCompatibilityStatus.NOT_COMPATIBLE -> GameCompatibilityStatus.NOT_COMPATIBLE
+            else -> GameCompatibilityStatus.UNKNOWN
+        }
     }
 
     /**

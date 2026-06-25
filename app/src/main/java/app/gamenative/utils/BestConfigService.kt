@@ -900,6 +900,11 @@ object BestConfigService {
                 if (filteredJson.has("videoMemorySize") && !filteredJson.isNull("videoMemorySize")) {
                     resultMap["videoMemorySize"] = filteredJson.optString("videoMemorySize", PrefManager.videoMemorySize)
                 }
+                // arm64ec Proton configs carry wow64Mode=true; without this the imported container keeps
+                // its prior WoW64 value and arm64ec silently runs misconfigured.
+                if (filteredJson.has("wow64Mode") && !filteredJson.isNull("wow64Mode")) {
+                    resultMap["wow64Mode"] = filteredJson.optBoolean("wow64Mode", PrefManager.wow64Mode)
+                }
 
                 return resultMap
             }
