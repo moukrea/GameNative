@@ -90,6 +90,31 @@ object EmuReadyService {
         }.onFailure { Timber.tag(TAG).w(it, "getEmulatorConfig failed for %s", listingId) }.getOrNull()
     }
 
+    // ---- cached, best-effort per-game badge ------------------------------------------------------
+
+    private data class Cached(val badge: EmuBadge, val atMs: Long)
+    private val badgeCache = java.util.concurrent.ConcurrentHashMap<String, Cached>()
+    private const val TTL_MS = 6 * 60 * 60 * 1000L
+
+    /**
+     * The EmuReady-derived badge for a game title on this device's GPU. Best-effort + cached 6h in
+     * memory (keyed by title|gpu) so a library scroll never re-hits the API. Any failure or missing
+     * game yields UNKNOWN, so the caller simply falls back to the GameNative badge. Two network calls
+     * on a cache miss (searchGameId + listingsForGame); none on a hit.
+     */
+    suspend fun badgeFor(title: String, deviceGpu: String?): EmuBadge {
+        val key = "$title|${deviceGpu ?: ""}"
+        badgeCache[key]?.let { if (System.currentTimeMillis() - it.atMs < TTL_MS) return it.badge }
+        val badge = runCatching {
+            val gameId = searchGameId(title) ?: return@runCatching unknownBadge()
+            computeBadge(listingsForGame(gameId), deviceGpu)
+        }.getOrDefault(unknownBadge())
+        badgeCache[key] = Cached(badge, System.currentTimeMillis())
+        return badge
+    }
+
+    private fun unknownBadge() = EmuBadge(GameCompatibilityStatus.UNKNOWN, caveat = false, attribution = "")
+
     // ---- badge logic (pure, unit-tested) ---------------------------------------------------------
 
     /**

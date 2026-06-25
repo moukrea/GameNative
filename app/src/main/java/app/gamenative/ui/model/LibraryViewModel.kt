@@ -41,6 +41,7 @@ import app.gamenative.data.RecommendedGame
 import app.gamenative.utils.DeviceGameStatsCache
 import app.gamenative.utils.GpuGameStatsCache
 import app.gamenative.utils.GameCompatibilityCache
+import app.gamenative.utils.EmuReadyService
 import app.gamenative.utils.GameCompatibilityService
 import app.gamenative.utils.HardwareUtils
 import app.gamenative.utils.unaccent
@@ -974,11 +975,47 @@ class LibraryViewModel @Inject constructor(
                         onFilterApps(paginationCurrentPage)
                     }
                 }
+
+                // Best-effort: enrich the badges with EmuReady's per-GPU reports (cached 6h). Runs
+                // AFTER the GameNative updates so it merges on top of the final GN status (never the
+                // reverse). Any failure or missing game leaves the GameNative badge untouched.
+                enrichCompatibilityWithEmuReady(gameNames)
             } catch (e: Exception) {
                 Timber.tag("LibraryViewModel").e(e, "Error fetching compatibility data: ${e.message}")
                 e.printStackTrace()
             }
         }
+    }
+
+    /**
+     * Merges EmuReady's per-GPU compatibility (a SECOND data source) into the badge map, on top of
+     * GameNative's. Cached + best-effort: a cache hit is free, a miss is two EmuReady API calls, and
+     * any failure is skipped (the GameNative badge stays). EmuReady adds real hardware-tiered evidence
+     * GameNative's API lacks (it knows which GPU each report came from + how well it ran).
+     */
+    private suspend fun enrichCompatibilityWithEmuReady(gameNames: List<String>) {
+        if (gpuName == "Unknown GPU") return
+        for (name in gameNames) {
+            val emu = EmuReadyService.badgeFor(name, gpuName).status
+            if (emu == GameCompatibilityStatus.UNKNOWN) continue
+            _state.update { st ->
+                val current = st.compatibilityMap[name] ?: GameCompatibilityStatus.UNKNOWN
+                val merged = mergeCompatibility(current, emu)
+                if (merged == current) {
+                    st
+                } else {
+                    st.copy(compatibilityMap = st.compatibilityMap.toMutableMap().apply { put(name, merged) })
+                }
+            }
+        }
+    }
+
+    /** Combines two compatibility statuses, preferring the strongest positive evidence. */
+    private fun mergeCompatibility(a: GameCompatibilityStatus, b: GameCompatibilityStatus): GameCompatibilityStatus = when {
+        a == GameCompatibilityStatus.GPU_COMPATIBLE || b == GameCompatibilityStatus.GPU_COMPATIBLE -> GameCompatibilityStatus.GPU_COMPATIBLE
+        a == GameCompatibilityStatus.COMPATIBLE || b == GameCompatibilityStatus.COMPATIBLE -> GameCompatibilityStatus.COMPATIBLE
+        a == GameCompatibilityStatus.NOT_COMPATIBLE || b == GameCompatibilityStatus.NOT_COMPATIBLE -> GameCompatibilityStatus.NOT_COMPATIBLE
+        else -> GameCompatibilityStatus.UNKNOWN
     }
 
     /**
