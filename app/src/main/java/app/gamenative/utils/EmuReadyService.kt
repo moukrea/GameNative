@@ -3,6 +3,8 @@ package app.gamenative.utils
 import app.gamenative.data.GameCompatibilityStatus
 import com.winlator.container.Container
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import okhttp3.Request
 import org.json.JSONObject
@@ -39,6 +41,8 @@ object EmuReadyService {
         val id: String,
         val gpuModel: String?,
         val socName: String?,
+        val deviceModel: String?, // device.modelName, e.g. "Thor Max"
+        val deviceBrand: String?, // device.brand.name, e.g. "AYN"
         val performanceRank: Int, // 1=Perfect .. 8=Nothing (lower is better)
         val performanceLabel: String,
         val upvotes: Int,
@@ -92,8 +96,22 @@ object EmuReadyService {
         }.onFailure { Timber.tag(TAG).w(it, "getEmulatorConfigContent failed for %s", listingId) }.getOrNull()
     }
 
-    /** One pickable EmuReady report: id (to fetch the config), a human label, and the author's notes. */
-    data class RankedListing(val id: String, val label: String, val notes: String?)
+    /**
+     * One pickable EmuReady report for the config browser. Carries the raw facts (device, GPU, perf,
+     * best-effort fps, notes) plus the matching signals (sameDevice + gpuTier) so the UI can section it
+     * SAME DEVICE > SAME GPU > LOWER-TIER GPU > OTHER. `fps` is free-text (e.g. "25", "20-30") or null.
+     */
+    data class RankedListing(
+        val id: String,
+        val gpuModel: String?,
+        val deviceLabel: String?, // "AYN Thor Max"
+        val performanceLabel: String,
+        val performanceRank: Int,
+        val fps: String?,
+        val notes: String?,
+        val sameDevice: Boolean,
+        val gpuTier: EmuReadyGpuMatch.Tier,
+    )
 
     /**
      * Sanitises an EmuReady GameNative config so GameNative's import doesn't falsely reject it:
@@ -141,26 +159,78 @@ object EmuReadyService {
     }.getOrDefault(content)
 
     /**
-     * A game's GameNative reports ranked by GPU proximity (EXACT > FAMILY > LOWER > OTHER) then by
-     * performance rank, as rows for the import picker. Empty if the game isn't on EmuReady.
+     * A game's FUNCTIONAL GameNative reports (it actually ran — performance rank 1..5, i.e.
+     * Perfect..Playable-with-issues; "Loadable"/"Nothing" reports are dropped), ordered SAME DEVICE >
+     * SAME GPU > LOWER-TIER GPU > OTHER, then by performance rank. Each carries a best-effort fps
+     * (free-text, fetched per-listing from listings.byId — concurrent, never fatal). Empty if the game
+     * isn't on EmuReady. Used by the on-demand config browser (NOT the library badge — this fans out).
      */
-    suspend fun rankedListings(title: String, deviceGpu: String?): List<RankedListing> = withContext(Dispatchers.IO) {
+    suspend fun rankedListings(
+        title: String,
+        deviceGpu: String?,
+        deviceModel: String?,
+        deviceBrand: String?,
+    ): List<RankedListing> = withContext(Dispatchers.IO) {
         val gameId = searchGameId(title) ?: return@withContext emptyList()
-        listingsForGame(gameId, limit = 50)
+        val functional = listingsForGame(gameId, limit = 50).filter { it.performanceRank in 1..5 }
+        if (functional.isEmpty()) return@withContext emptyList()
+        // Best-effort fps per listing, concurrent (capped) — never blocks/throws the whole list.
+        val fpsById: Map<String, String?> = coroutineScope {
+            functional.take(20).map { l ->
+                async { l.id to runCatching { fetchAverageFps(l.id) }.getOrNull() }
+            }.map { it.await() }.toMap()
+        }
+        functional
+            .map { l ->
+                val sameDevice = isSameDevice(deviceModel, deviceBrand, l.deviceModel, l.deviceBrand)
+                val gpuTier = EmuReadyGpuMatch.tier(deviceGpu, l.gpuModel)
+                RankedListing(
+                    id = l.id,
+                    gpuModel = l.gpuModel,
+                    deviceLabel = listOfNotNull(l.deviceBrand, l.deviceModel).joinToString(" ").ifBlank { null },
+                    performanceLabel = l.performanceLabel,
+                    performanceRank = l.performanceRank,
+                    fps = fpsById[l.id],
+                    notes = l.notes,
+                    sameDevice = sameDevice,
+                    gpuTier = gpuTier,
+                )
+            }
             .sortedWith(
-                compareBy<EmuListing> { EmuReadyGpuMatch.tier(deviceGpu, it.gpuModel).ordinal }
+                compareByDescending<RankedListing> { it.sameDevice }
+                    .thenBy { it.gpuTier.ordinal }
                     .thenBy { it.performanceRank },
             )
-            .map { l ->
-                val tierLabel = when (EmuReadyGpuMatch.tier(deviceGpu, l.gpuModel)) {
-                    EmuReadyGpuMatch.Tier.EXACT -> "your GPU"
-                    EmuReadyGpuMatch.Tier.FAMILY -> "similar GPU"
-                    EmuReadyGpuMatch.Tier.LOWER -> "weaker GPU"
-                    EmuReadyGpuMatch.Tier.OTHER -> "other GPU"
+    }
+
+    /** Same physical device = the EmuReady model/brand match this device's Build identity (lenient). */
+    private fun isSameDevice(myModel: String?, myBrand: String?, emuModel: String?, emuBrand: String?): Boolean {
+        if (emuModel.isNullOrBlank() || myModel.isNullOrBlank()) return false
+        fun norm(s: String?) = s?.lowercase()?.trim().orEmpty()
+        val modelMatch = norm(emuModel) == norm(myModel) ||
+            norm(myModel).contains(norm(emuModel)) || norm(emuModel).contains(norm(myModel))
+        if (!modelMatch) return false
+        // If both brands are known, require them to agree too (guards same-model-name across brands).
+        if (!emuBrand.isNullOrBlank() && !myBrand.isNullOrBlank()) {
+            return norm(emuBrand) == norm(myBrand) ||
+                norm(myBrand).contains(norm(emuBrand)) || norm(emuBrand).contains(norm(myBrand))
+        }
+        return true
+    }
+
+    /** Best-effort free-text "Average FPS" custom field for a listing (listings.byId), or null. */
+    private suspend fun fetchAverageFps(listingId: String): String? = withContext(Dispatchers.IO) {
+        runCatching {
+            val data = getJson("listings.byId", JSONObject().put("id", listingId)) ?: return@runCatching null
+            val fields = data.optJSONArray("customFieldValues") ?: return@runCatching null
+            for (i in 0 until fields.length()) {
+                val f = fields.optJSONObject(i) ?: continue
+                if (f.optJSONObject("customFieldDefinition")?.optString("name") == "average_fps") {
+                    return@runCatching f.optString("value").ifBlank { null }
                 }
-                val noteHint = l.notes?.let { " · 📝" } ?: ""
-                RankedListing(l.id, "${l.gpuModel ?: "?"} · ${l.performanceLabel} · $tierLabel$noteHint", l.notes)
             }
+            null
+        }.getOrNull()
     }
 
     // ---- cached, best-effort per-game badge ------------------------------------------------------
@@ -247,11 +317,14 @@ object EmuReadyService {
     private fun parseListing(o: JSONObject?): EmuListing? {
         o ?: return null
         val perf = o.optJSONObject("performance")
-        val soc = o.optJSONObject("device")?.optJSONObject("soc")
+        val device = o.optJSONObject("device")
+        val soc = device?.optJSONObject("soc")
         return EmuListing(
             id = o.optString("id").ifBlank { return null },
             gpuModel = soc?.optString("gpuModel")?.ifBlank { null },
             socName = soc?.optString("name")?.ifBlank { null },
+            deviceModel = device?.optString("modelName")?.ifBlank { null },
+            deviceBrand = device?.optJSONObject("brand")?.optString("name")?.ifBlank { null },
             performanceRank = perf?.optInt("rank", 99) ?: 99,
             performanceLabel = perf?.optString("label")?.ifBlank { "?" } ?: "?",
             upvotes = o.optInt("upvoteCount", o.optInt("upVotes", 0)),

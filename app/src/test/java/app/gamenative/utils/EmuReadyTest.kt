@@ -47,7 +47,7 @@ class EmuReadyTest {
     }
 
     private fun listing(gpu: String?, rank: Int, label: String = "x") =
-        EmuListing("id-$rank-$gpu", gpu, "SoC", rank, label, 1, 0, 0.9, null)
+        EmuListing("id-$rank-$gpu", gpu, "SoC", null, null, rank, label, 1, 0, 0.9, null)
 
     @Test
     fun badge_strongGreenOnlyForExactGpuThatWorked() {

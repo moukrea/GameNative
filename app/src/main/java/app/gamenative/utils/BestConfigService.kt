@@ -208,6 +208,22 @@ object BestConfigService {
     }
 
     /**
+     * arm64ec Proton only runs on a bionic container. The manifest lists every arm64ec proton as
+     * variant="bionic", so a non-bionic containerVariant (e.g. a glibc/x86_64 server config that still
+     * names an arm64ec wineVersion) filters them out and a perfectly valid wineVersion like
+     * proton-11.0-1-arm64ec-1 is wrongly reported "not available" in BOTH validateComponentVersions and
+     * resolveMissingManifestInstallRequests. Force bionic for any arm64ec wineVersion so both resolve.
+     * (This is the server-config counterpart of EmuReadyService.sanitizeGameNativeConfig.)
+     */
+    private fun normalizeArm64ecVariant(filteredJson: JSONObject) {
+        if (filteredJson.optString("wineVersion").contains("arm64ec", ignoreCase = true) &&
+            !filteredJson.optString("containerVariant").equals(Container.BIONIC, ignoreCase = true)
+        ) {
+            filteredJson.put("containerVariant", Container.BIONIC)
+        }
+    }
+
+    /**
      * Applies hard GPU-family constraints that override server-provided versions
      * when the matched GPU is from a different family than the user's actual GPU.
      *
@@ -471,6 +487,7 @@ object BestConfigService {
         val updatedConfigJson = Json.parseToJsonElement(configJson.toString()).jsonObject
         val filteredConfig = filterConfigByMatchType(updatedConfigJson, matchType)
         val filteredJson = applyGpuFamilyOverrides(context, JSONObject(filteredConfig.toString()), matchedGpu)
+        normalizeArm64ecVariant(filteredJson)
         val installed = ManifestComponentHelper.loadInstalledContentLists(context)
         val manifest = ManifestRepository.loadManifest(context)
         val installedContent = installed.installed
@@ -804,6 +821,7 @@ object BestConfigService {
                 val updatedConfigJson = Json.parseToJsonElement(originalJson.toString()).jsonObject
                 val filteredConfig = filterConfigByMatchType(updatedConfigJson, matchType, storeMatch)
                 val filteredJson = applyGpuFamilyOverrides(context, JSONObject(filteredConfig.toString()), matchedGpu)
+                normalizeArm64ecVariant(filteredJson)
 
                 // Step 2: check for unavailable component versions
                 lastMissingComponents = validateComponentVersions(context, filteredJson)

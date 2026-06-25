@@ -37,14 +37,23 @@ import app.gamenative.ui.data.GameDisplayInfo
 import app.gamenative.ui.enums.AppOptionMenuType
 import app.gamenative.ui.util.ContainerConfigTransfer
 import app.gamenative.ui.util.SnackbarManager
+import app.gamenative.ui.component.dialog.ConfigBrowserDialog
+import app.gamenative.ui.component.dialog.ConfigBrowserRow
+import app.gamenative.ui.component.dialog.ConfigTier
 import app.gamenative.ui.component.dialog.LoadingDialog
+import app.gamenative.ui.component.dialog.PlannedChangesDialog
 import app.gamenative.utils.BestConfigService
 import app.gamenative.utils.ContainerUtils
+import app.gamenative.utils.EmuReadyGpuMatch
 import app.gamenative.utils.GameCompatibilityCache
 import app.gamenative.utils.GameCompatibilityService
 import app.gamenative.utils.ManifestInstaller
+import app.gamenative.utils.PlannedChange
+import app.gamenative.utils.PlannedChanges
 import app.gamenative.utils.createPinnedShortcut
 import kotlinx.coroutines.CancellationException
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
 import com.winlator.container.ContainerData
 import com.winlator.core.GPUInformation
 import java.io.File
@@ -788,14 +797,13 @@ abstract class BaseAppScreen {
     ): AppMenuOption? {
         if (!supportsContainerConfig()) return null
         val scope = rememberCoroutineScope()
-        var browser by remember {
-            mutableStateOf<Pair<String?, List<app.gamenative.ui.component.dialog.ConfigBrowserRow>>?>(null)
-        }
+        var browser by remember { mutableStateOf<Pair<String?, List<ConfigBrowserRow>>?>(null) }
+        var preview by remember { mutableStateOf<ConfigPreview?>(null) }
         // Guards the menu tap so a slow network can't multiply API fan-out on repeated taps.
         var loadingConfigs by remember { mutableStateOf(false) }
 
         browser?.let { (applied, rows) ->
-            app.gamenative.ui.component.dialog.ConfigBrowserDialog(
+            ConfigBrowserDialog(
                 currentApplied = applied,
                 rows = rows,
                 onResetDefaults = {
@@ -803,9 +811,20 @@ abstract class BaseAppScreen {
                     scope.launch(Dispatchers.IO) {
                         resetContainerToDefaults(context, libraryItem)
                         recordAppliedConfig(context, libraryItem.appId, null)
+                        browser = null
                     }
                 },
                 onDismiss = { browser = null },
+            )
+        }
+        preview?.let { p ->
+            PlannedChangesDialog(
+                title = p.title,
+                changes = p.changes,
+                missingNote = p.missingNote,
+                customComponentNote = p.customNote,
+                onConfirm = p.onConfirm,
+                onDismiss = { preview = null },
             )
         }
 
@@ -819,58 +838,74 @@ abstract class BaseAppScreen {
                     try {
                         val applied = readAppliedConfig(context, libraryItem.appId)
                         val gpu = com.winlator.core.GPUInformation.getRenderer(context)
-                        val rows = mutableListOf<app.gamenative.ui.component.dialog.ConfigBrowserRow>()
-                        // GameNative's own server-recommended config (best match for this game/GPU).
+                        val rows = mutableListOf<ConfigBrowserRow>()
+
+                        // --- GameNative server-recommended config ---
+                        val gnApply: () -> Unit = {
+                            scope.launch(Dispatchers.IO) {
+                                if (applyKnownConfigForLibraryItem(context, libraryItem)) {
+                                    recordAppliedConfig(context, libraryItem.appId, "GameNative")
+                                    browser = null
+                                }
+                            }
+                        }
+                        val gnTitle = context.getString(R.string.config_browser_gamenative_recommended)
                         rows.add(
-                            app.gamenative.ui.component.dialog.ConfigBrowserRow(
+                            ConfigBrowserRow(
                                 source = "GameNative",
-                                label = context.getString(R.string.config_browser_gamenative_recommended),
+                                tier = ConfigTier.GAMENATIVE,
+                                appliedKey = "GameNative",
+                                title = gnTitle,
+                                subtitle = null,
+                                fps = null,
                                 notes = null,
-                                onApply = {
+                                onApply = gnApply,
+                                onPreview = {
                                     scope.launch(Dispatchers.IO) {
-                                        // Only record "Applied" when the config actually applied.
-                                        if (applyKnownConfigForLibraryItem(context, libraryItem)) {
-                                            recordAppliedConfig(context, libraryItem.appId, "GameNative")
-                                        }
+                                        val r = gameNativePlannedChanges(context, libraryItem)
+                                        preview = ConfigPreview(
+                                            title = gnTitle,
+                                            changes = r?.changes ?: emptyList(),
+                                            missingNote = if (r == null) context.getString(R.string.best_config_no_config_available)
+                                            else missingNoteFor(context, r.missing),
+                                            customNote = r?.note,
+                                            onConfirm = gnApply,
+                                        )
                                     }
                                 },
                             ),
                         )
-                        // EmuReady community reports, ranked closest-hardware-first, with their notes.
-                        EmuReadyService.rankedListings(libraryItem.name, gpu).forEach { l ->
+
+                        // --- EmuReady community reports, sectioned by hardware proximity ---
+                        EmuReadyService.rankedListings(
+                            libraryItem.name, gpu, android.os.Build.MODEL, android.os.Build.MANUFACTURER,
+                        ).forEach { l ->
+                            val key = "EmuReady · ${l.deviceLabel ?: l.gpuModel ?: l.id} · ${l.performanceLabel}"
+                            val emuApply: () -> Unit = {
+                                scope.launch(Dispatchers.IO) {
+                                    applyEmuReadyConfig(context, libraryItem, l.id, key) { browser = null }
+                                }
+                            }
                             rows.add(
-                                app.gamenative.ui.component.dialog.ConfigBrowserRow(
+                                ConfigBrowserRow(
                                     source = "EmuReady",
-                                    label = l.label,
+                                    tier = tierOf(l),
+                                    appliedKey = key,
+                                    title = l.deviceLabel ?: l.gpuModel ?: "EmuReady report",
+                                    subtitle = listOfNotNull(l.gpuModel, l.performanceLabel).joinToString(" · ").ifBlank { null },
+                                    fps = l.fps,
                                     notes = l.notes,
-                                    onApply = {
+                                    onApply = emuApply,
+                                    onPreview = {
                                         scope.launch(Dispatchers.IO) {
-                                            val content = EmuReadyService.getEmulatorConfigContent(l.id)
-                                            if (content.isNullOrBlank()) {
-                                                SnackbarManager.show(context.getString(R.string.best_config_known_config_invalid))
-                                                return@launch
-                                            }
-                                            // Sanitise (arm64ec->bionic, substitute "other" placeholders).
-                                            val sanitized = EmuReadyService.sanitizeGameNativeConfig(content)
-                                            // glibc configs are EmuReady's default but can't run on the
-                                            // modern (arm) flavor — say so plainly, not a generic reject.
-                                            if (BuildConfig.MODERN_ANDROID && isGlibcConfig(sanitized)) {
-                                                SnackbarManager.show(context.getString(R.string.emuready_glibc_unsupported))
-                                                return@launch
-                                            }
-                                            // Per-apply unique temp file (no cross-tap race), always cleaned up.
-                                            val tmp = java.io.File.createTempFile("emuready_${libraryItem.appId}_", ".json", context.cacheDir)
-                                            val ok = try {
-                                                tmp.writeText(sanitized)
-                                                ContainerConfigTransfer.importConfig(context, libraryItem.appId, android.net.Uri.fromFile(tmp))
-                                            } finally {
-                                                tmp.delete()
-                                            }
-                                            // importConfig surfaces its own error; only announce on success.
-                                            if (ok) {
-                                                recordAppliedConfig(context, libraryItem.appId, "EmuReady · ${l.label}")
-                                                SnackbarManager.show(context.getString(R.string.emuready_config_imported))
-                                            }
+                                            val r = emuReadyPlannedChanges(context, libraryItem, l.id)
+                                            preview = ConfigPreview(
+                                                title = l.deviceLabel ?: l.gpuModel ?: "EmuReady",
+                                                changes = r?.changes ?: emptyList(),
+                                                missingNote = r?.let { missingNoteFor(context, it.missing) },
+                                                customNote = r?.note,
+                                                onConfirm = emuApply,
+                                            )
                                         }
                                     },
                                 ),
@@ -885,10 +920,130 @@ abstract class BaseAppScreen {
         )
     }
 
+    /** Maps an EmuReady ranked listing to a browser section: same device > same GPU > lower > other. */
+    private fun tierOf(l: EmuReadyService.RankedListing): ConfigTier = when {
+        l.sameDevice -> ConfigTier.SAME_DEVICE
+        l.gpuTier == EmuReadyGpuMatch.Tier.EXACT -> ConfigTier.SAME_GPU
+        l.gpuTier == EmuReadyGpuMatch.Tier.FAMILY || l.gpuTier == EmuReadyGpuMatch.Tier.LOWER -> ConfigTier.LOWER_TIER
+        else -> ConfigTier.OTHER
+    }
+
+    /** Preview/apply holder: the planned-changes dialog content + the action to run on confirm. */
+    private data class ConfigPreview(
+        val title: String,
+        val changes: List<PlannedChange>,
+        val missingNote: String?,
+        val customNote: String?,
+        val onConfirm: () -> Unit,
+    )
+
+    /** Parsed-config preview result: the field diff, the components that would install, an optional note. */
+    private data class PreviewResult(
+        val changes: List<PlannedChange>,
+        val missing: List<String>,
+        val note: String?,
+    )
+
+    private fun missingNoteFor(context: Context, missing: List<String>): String? =
+        if (missing.isEmpty()) null else context.getString(R.string.config_browser_preview_missing)
+
+    /** Computes the planned changes for the GameNative server best-config (forceApply so missing comps don't blank it). */
+    private suspend fun gameNativePlannedChanges(context: Context, libraryItem: LibraryItem): PreviewResult? {
+        val gameName = ContainerUtils.resolveGameName(libraryItem.appId)
+        val gpuName = GPUInformation.getRenderer(context)
+        val best = BestConfigService.fetchBestConfig(gameName, gpuName, libraryItem.gameSource.name) ?: return null
+        if (best.matchType == "no_match") return null
+        val map = BestConfigService.parseConfigToContainerData(
+            context = context,
+            configJson = best.bestConfig,
+            matchType = best.matchType,
+            applyKnownConfig = true,
+            storeMatch = best.matchedStore.equals(libraryItem.gameSource.name, ignoreCase = true),
+            forceApply = true,
+            matchedGpu = best.matchedGpu,
+        ) ?: emptyMap()
+        val missing = BestConfigService.consumeLastMissingComponents()
+        val current = ContainerUtils.toContainerData(ContainerUtils.getOrCreateContainer(context, libraryItem.appId))
+        return PreviewResult(PlannedChanges.compute(current, map), missing, note = null)
+    }
+
+    /** Computes the planned changes for an EmuReady config (sanitised), with a custom/glibc note. */
+    private suspend fun emuReadyPlannedChanges(context: Context, libraryItem: LibraryItem, listingId: String): PreviewResult? {
+        val content = EmuReadyService.getEmulatorConfigContent(listingId) ?: return null
+        val sanitized = EmuReadyService.sanitizeGameNativeConfig(content)
+        if (BuildConfig.MODERN_ANDROID && isGlibcConfig(sanitized)) {
+            return PreviewResult(emptyList(), emptyList(), context.getString(R.string.emuready_glibc_unsupported))
+        }
+        val json = runCatching { Json.parseToJsonElement(sanitized).jsonObject }.getOrNull() ?: return null
+        val map = BestConfigService.parseConfigToContainerData(
+            context = context,
+            configJson = json,
+            matchType = "exact_gpu_match",
+            applyKnownConfig = true,
+            forceApply = true,
+        ) ?: emptyMap()
+        val missing = BestConfigService.consumeLastMissingComponents()
+        val current = ContainerUtils.toContainerData(ContainerUtils.getOrCreateContainer(context, libraryItem.appId))
+        val custom = customComponentIn(content)
+        val note = custom?.let { context.getString(R.string.config_browser_custom_component, it) }
+        return PreviewResult(PlannedChanges.compute(current, map), missing, note)
+    }
+
+    /** Applies an EmuReady config; truthfully reports a custom/"other" component instead of hiding it. */
+    private suspend fun applyEmuReadyConfig(
+        context: Context,
+        libraryItem: LibraryItem,
+        listingId: String,
+        appliedKey: String,
+        onSuccess: () -> Unit,
+    ) {
+        val content = EmuReadyService.getEmulatorConfigContent(listingId)
+        if (content.isNullOrBlank()) {
+            SnackbarManager.show(context.getString(R.string.best_config_known_config_invalid))
+            return
+        }
+        val sanitized = EmuReadyService.sanitizeGameNativeConfig(content)
+        if (BuildConfig.MODERN_ANDROID && isGlibcConfig(sanitized)) {
+            SnackbarManager.show(context.getString(R.string.emuready_glibc_unsupported))
+            return
+        }
+        val custom = customComponentIn(content)
+        // Per-apply unique temp file (no cross-tap race), always cleaned up.
+        val tmp = java.io.File.createTempFile("emuready_${libraryItem.appId}_", ".json", context.cacheDir)
+        val ok = try {
+            tmp.writeText(sanitized)
+            ContainerConfigTransfer.importConfig(context, libraryItem.appId, android.net.Uri.fromFile(tmp))
+        } finally {
+            tmp.delete()
+        }
+        // importConfig surfaces its own error; only announce on success.
+        if (ok) {
+            recordAppliedConfig(context, libraryItem.appId, appliedKey)
+            if (custom != null) {
+                SnackbarManager.show(context.getString(R.string.config_browser_custom_applied, custom))
+            } else {
+                SnackbarManager.show(context.getString(R.string.emuready_config_imported))
+            }
+            onSuccess()
+        }
+    }
+
     /** True if an EmuReady config targets the glibc container variant (unsupported on the modern flavor). */
     private fun isGlibcConfig(configJson: String): Boolean = runCatching {
         org.json.JSONObject(configJson).optString("containerVariant").equals(com.winlator.container.Container.GLIBC, ignoreCase = true)
     }.getOrDefault(false)
+
+    /** Names the custom/"other" component in an EmuReady config (so the user is told to set it manually), or null. */
+    private fun customComponentIn(originalContent: String): String? = runCatching {
+        val o = org.json.JSONObject(originalContent)
+        when {
+            o.optString("dxwrapper").equals("other", ignoreCase = true) ||
+                o.optString("dxwrapperConfig").contains("version=other", ignoreCase = true) -> "DXVK"
+            o.optString("graphicsDriver").equals("other", ignoreCase = true) ||
+                o.optString("graphicsDriverVersion").equals("other", ignoreCase = true) -> "Graphics driver"
+            else -> null
+        }
+    }.getOrNull()
 
     /** Records which known-config profile was last applied to the container (for the browser's "Applied: …"). */
     private fun recordAppliedConfig(context: Context, appId: String, label: String?) {
