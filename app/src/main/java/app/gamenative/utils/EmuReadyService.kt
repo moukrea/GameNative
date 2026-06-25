@@ -90,6 +90,40 @@ object EmuReadyService {
         }.onFailure { Timber.tag(TAG).w(it, "getEmulatorConfig failed for %s", listingId) }.getOrNull()
     }
 
+    /** The importable GameNative config JSON (the `content` blob) for a listing, or null. */
+    suspend fun getEmulatorConfigContent(listingId: String): String? = withContext(Dispatchers.IO) {
+        runCatching {
+            val data = getJson("listings.getEmulatorConfig", JSONObject().put("listingId", listingId)) ?: return@runCatching null
+            if (data.optString("type") != "gamenative") return@runCatching null // route: only GameNative configs
+            data.optString("content").ifBlank { null } // a stringified JSON config (keys match ContainerData)
+        }.onFailure { Timber.tag(TAG).w(it, "getEmulatorConfigContent failed for %s", listingId) }.getOrNull()
+    }
+
+    /** One pickable EmuReady report: its id (to fetch the config) + a human label. */
+    data class RankedListing(val id: String, val label: String)
+
+    /**
+     * A game's GameNative reports ranked by GPU proximity (EXACT > FAMILY > LOWER > OTHER) then by
+     * performance rank, as rows for the import picker. Empty if the game isn't on EmuReady.
+     */
+    suspend fun rankedListings(title: String, deviceGpu: String?): List<RankedListing> = withContext(Dispatchers.IO) {
+        val gameId = searchGameId(title) ?: return@withContext emptyList()
+        listingsForGame(gameId, limit = 50)
+            .sortedWith(
+                compareBy<EmuListing> { EmuReadyGpuMatch.tier(deviceGpu, it.gpuModel).ordinal }
+                    .thenBy { it.performanceRank },
+            )
+            .map { l ->
+                val tierLabel = when (EmuReadyGpuMatch.tier(deviceGpu, l.gpuModel)) {
+                    EmuReadyGpuMatch.Tier.EXACT -> "your GPU"
+                    EmuReadyGpuMatch.Tier.FAMILY -> "similar GPU"
+                    EmuReadyGpuMatch.Tier.LOWER -> "weaker GPU"
+                    EmuReadyGpuMatch.Tier.OTHER -> "other GPU"
+                }
+                RankedListing(l.id, "${l.gpuModel ?: "?"} · ${l.performanceLabel} · $tierLabel")
+            }
+    }
+
     // ---- cached, best-effort per-game badge ------------------------------------------------------
 
     private data class Cached(val badge: EmuBadge, val atMs: Long)

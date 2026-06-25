@@ -28,6 +28,7 @@ import app.gamenative.R
 import app.gamenative.data.GameSource
 import app.gamenative.data.LibraryItem
 import app.gamenative.provisioning.PerGameProvisioning
+import app.gamenative.utils.EmuReadyService
 import app.gamenative.events.AndroidEvent
 import app.gamenative.ui.component.dialog.ContainerConfigDialog
 import app.gamenative.ui.data.AppMenuOption
@@ -774,6 +775,63 @@ abstract class BaseAppScreen {
     }
 
     /**
+     * "Import EmuReady config": fetches this game's GameNative reports from EmuReady (a second
+     * community source), ranks them by hardware similarity (closest GPU + best performance first),
+     * lets the user PICK one, then imports that report's config into the container via GameNative's
+     * existing config-import pipeline. The config is flagged as EmuReady-sourced (may be incomplete).
+     */
+    @Composable
+    protected open fun getImportEmuReadyConfigOption(
+        context: Context,
+        libraryItem: LibraryItem,
+    ): AppMenuOption? {
+        if (!supportsContainerConfig()) return null
+        val scope = rememberCoroutineScope()
+        var pickerItems by remember { mutableStateOf<List<EmuReadyService.RankedListing>?>(null) }
+
+        pickerItems?.let { items ->
+            app.gamenative.ui.component.dialog.SingleChoiceDialog(
+                openDialog = true,
+                title = stringResource(R.string.emuready_config_picker_title),
+                items = items.map { it.label },
+                currentItem = -1,
+                onSelected = { idx ->
+                    val chosen = items[idx]
+                    pickerItems = null
+                    scope.launch(Dispatchers.IO) {
+                        val content = EmuReadyService.getEmulatorConfigContent(chosen.id)
+                        if (content.isNullOrBlank()) {
+                            SnackbarManager.show(context.getString(R.string.best_config_known_config_invalid))
+                            return@launch
+                        }
+                        // Reuse the proven import pipeline: write the EmuReady config to a temp file
+                        // and feed it through ContainerConfigTransfer.importConfig (its keys match ContainerData).
+                        val tmp = java.io.File(context.cacheDir, "emuready_${libraryItem.appId}.json").apply { writeText(content) }
+                        ContainerConfigTransfer.importConfig(context, libraryItem.appId, android.net.Uri.fromFile(tmp))
+                        SnackbarManager.show(context.getString(R.string.emuready_config_imported))
+                    }
+                },
+                onDismiss = { pickerItems = null },
+            )
+        }
+
+        return AppMenuOption(
+            optionType = AppOptionMenuType.ImportEmuReadyConfig,
+            onClick = {
+                scope.launch(Dispatchers.IO) {
+                    val gpu = com.winlator.core.GPUInformation.getRenderer(context)
+                    val rows = EmuReadyService.rankedListings(libraryItem.name, gpu)
+                    if (rows.isEmpty()) {
+                        SnackbarManager.show(context.getString(R.string.emuready_no_configs))
+                    } else {
+                        pickerItems = rows
+                    }
+                }
+            },
+        )
+    }
+
+    /**
      * Shared helper to fetch and apply a "known config" for a given game/library item.
      * Installs any missing manifest components before applying the config.
      */
@@ -932,6 +990,7 @@ abstract class BaseAppScreen {
             getTestGraphicsOption(context, libraryItem, onTestGraphics)?.let { menuOptions.add(it) }
             getResetContainerOption(context, libraryItem)?.let { menuOptions.add(it) }
             getRepairContainerOption(context, libraryItem)?.let { menuOptions.add(it) }
+            getImportEmuReadyConfigOption(context, libraryItem)?.let { menuOptions.add(it) }
             getCreateShortcutOption(context, libraryItem)?.let { menuOptions.add(it) }
             getExportContainerOption(context, libraryItem, exportFrontendLauncher)?.let { menuOptions.add(it) }
         }

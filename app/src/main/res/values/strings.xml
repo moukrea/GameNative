@@ -1527,6 +1527,10 @@
     <string name="option_reset_drm">Reset DRM</string>
     <string name="option_reapply_provisioning">Re-apply provisioning</string>
     <string name="option_provisioning_status">Provisioning status</string>
+    <string name="option_import_emuready_config">Import EmuReady config</string>
+    <string name="emuready_config_picker_title">EmuReady configs (closest hardware first)</string>
+    <string name="emuready_no_configs">No EmuReady configs found for this game</string>
+    <string name="emuready_config_imported">Imported EmuReady config (may be incomplete)</string>
     <string name="option_use_known_config">Use known config</string>
     <string name="option_import_saves">Import saves</string>
     <string name="option_export_saves">Export saves</string>

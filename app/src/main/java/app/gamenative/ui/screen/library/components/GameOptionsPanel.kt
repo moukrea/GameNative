@@ -352,6 +352,7 @@ private fun getIconForOption(type: AppOptionMenuType): ImageVector {
         AppOptionMenuType.ReapplyProvisioning -> Icons.Default.AutoFixHigh
         AppOptionMenuType.ProvisioningStatus -> Icons.Default.Info
         AppOptionMenuType.RepairContainer -> Icons.Default.Build
+        AppOptionMenuType.ImportEmuReadyConfig -> Icons.Default.CloudDownload
     }
 }
 
@@ -385,6 +386,7 @@ private fun groupOptions(options: List<AppMenuOption>): Map<OptionCategory, List
             AppOptionMenuType.ResetDrm,
             AppOptionMenuType.ReapplyProvisioning,
             AppOptionMenuType.ProvisioningStatus,
+            AppOptionMenuType.ImportEmuReadyConfig,
             AppOptionMenuType.RepairContainer,
             AppOptionMenuType.UseKnownConfig,
             AppOptionMenuType.ImportConfig,

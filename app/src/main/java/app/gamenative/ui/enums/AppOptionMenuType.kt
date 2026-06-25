@@ -35,4 +35,5 @@ enum class AppOptionMenuType(@StringRes val title: Int) {
     ChangeBranch(R.string.change_branch),
     ReapplyProvisioning(R.string.option_reapply_provisioning),
     ProvisioningStatus(R.string.option_provisioning_status),
+    ImportEmuReadyConfig(R.string.option_import_emuready_config),
 }
