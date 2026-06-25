@@ -85,13 +85,16 @@ private data class BadgeStyle(
 private fun getBadgeStyle(status: GameCompatibilityStatus): BadgeStyle {
     val colors = PluviaTheme.colors
     return when (status) {
+        // CAVEAT tier: it ran somewhere, but NOT verified on your exact GPU (other hardware, or no
+        // fps measured here). Amber + a distinct label so it reads differently from the strong badge.
         GameCompatibilityStatus.COMPATIBLE -> BadgeStyle(
             icon = Icons.Rounded.Verified,
-            backgroundColor = colors.compatibilityGoodBackground.copy(alpha = 0.9f),
-            iconTint = colors.compatibilityGood,
-            labelResId = R.string.library_compatible,
+            backgroundColor = colors.compatibilityUnknownBackground.copy(alpha = 0.9f),
+            iconTint = colors.compatibilityUnknown,
+            labelResId = R.string.library_compatible_other_hw,
         )
 
+        // STRONG tier: ran on YOUR GPU with measured fps>0.
         GameCompatibilityStatus.GPU_COMPATIBLE -> BadgeStyle(
             icon = Icons.Rounded.Verified,
             backgroundColor = colors.compatibilityGoodBackground.copy(alpha = 0.9f),

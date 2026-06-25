@@ -1016,7 +1016,13 @@ class LibraryViewModel @Inject constructor(
         return when {
             response.isNotWorking -> GameCompatibilityStatus.NOT_COMPATIBLE
             !response.hasBeenTried -> GameCompatibilityStatus.UNKNOWN
+            // STRONG: ran on YOUR GPU with a measured fps>0 — the closest thing to "it runs on
+            // hardware like yours". (RAM sub-tiers — same/lower/higher RAM — are not computable: the
+            // server exposes no per-RAM breakdown, only per-GPU/all-GPU counts.)
             response.gpuPlayableCount > 0 && ranWithFps -> GameCompatibilityStatus.GPU_COMPATIBLE
+            // CAVEAT: reported playable on your GPU but no fps measured here, OR only on OTHER GPUs/
+            // hardware. Rendered as a distinct "compatible, but not verified on your GPU" badge.
+            response.gpuPlayableCount > 0 || response.totalPlayableCount > 0 -> GameCompatibilityStatus.COMPATIBLE
             else -> GameCompatibilityStatus.UNKNOWN
         }
     }
