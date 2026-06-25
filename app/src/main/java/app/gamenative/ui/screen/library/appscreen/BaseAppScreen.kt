@@ -788,6 +788,16 @@ abstract class BaseAppScreen {
         if (!supportsContainerConfig()) return null
         val scope = rememberCoroutineScope()
         var pickerItems by remember { mutableStateOf<List<EmuReadyService.RankedListing>?>(null) }
+        var notesToShow by remember { mutableStateOf<String?>(null) }
+
+        notesToShow?.let { notes ->
+            AlertDialog(
+                onDismissRequest = { notesToShow = null },
+                title = { Text(stringResource(R.string.emuready_notes_title)) },
+                text = { Text(notes) },
+                confirmButton = { TextButton(onClick = { notesToShow = null }) { Text(stringResource(R.string.ok)) } },
+            )
+        }
 
         pickerItems?.let { items ->
             app.gamenative.ui.component.dialog.SingleChoiceDialog(
@@ -804,11 +814,16 @@ abstract class BaseAppScreen {
                             SnackbarManager.show(context.getString(R.string.best_config_known_config_invalid))
                             return@launch
                         }
-                        // Reuse the proven import pipeline: write the EmuReady config to a temp file
-                        // and feed it through ContainerConfigTransfer.importConfig (its keys match ContainerData).
-                        val tmp = java.io.File(context.cacheDir, "emuready_${libraryItem.appId}.json").apply { writeText(content) }
+                        // Sanitise (fix arm64ec variant, drop "other" placeholders so it doesn't falsely
+                        // reject), then reuse the proven import pipeline (write to a temp file ->
+                        // ContainerConfigTransfer.importConfig; EmuReady's keys match ContainerData).
+                        val sanitized = EmuReadyService.sanitizeGameNativeConfig(content)
+                        val tmp = java.io.File(context.cacheDir, "emuready_${libraryItem.appId}.json").apply { writeText(sanitized) }
                         ContainerConfigTransfer.importConfig(context, libraryItem.appId, android.net.Uri.fromFile(tmp))
                         SnackbarManager.show(context.getString(R.string.emuready_config_imported))
+                        // Surface the report's notes (they often hold the real DXVK version etc. that
+                        // EmuReady marks as "other") so the user can finish any manual settings.
+                        chosen.notes?.takeIf { it.isNotBlank() }?.let { notesToShow = it }
                     }
                 },
                 onDismiss = { pickerItems = null },

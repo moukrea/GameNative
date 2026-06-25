@@ -99,8 +99,32 @@ object EmuReadyService {
         }.onFailure { Timber.tag(TAG).w(it, "getEmulatorConfigContent failed for %s", listingId) }.getOrNull()
     }
 
-    /** One pickable EmuReady report: its id (to fetch the config) + a human label. */
-    data class RankedListing(val id: String, val label: String)
+    /** One pickable EmuReady report: id (to fetch the config), a human label, and the author's notes. */
+    data class RankedListing(val id: String, val label: String, val notes: String?)
+
+    /**
+     * Sanitises an EmuReady GameNative config so GameNative's import doesn't falsely reject it:
+     * - arm64ec Proton only runs on a BIONIC container, so force containerVariant=bionic when the
+     *   wineVersion is arm64ec (otherwise the manifest is filtered by the wrong variant and the
+     *   available proton — e.g. proton-11.0-1-arm64ec-1 — is wrongly reported "not available").
+     * - EmuReady uses the literal "other" as a placeholder meaning "see the notes"; it is not an
+     *   installable component, so drop those keys (keep the container's current/default) instead of
+     *   blocking the whole import. The real value (e.g. the DXVK version) is in the notes, surfaced
+     *   in the picker so the user can set it manually.
+     */
+    fun sanitizeGameNativeConfig(content: String): String = runCatching {
+        val o = JSONObject(content)
+        if (o.optString("wineVersion").contains("arm64ec", ignoreCase = true)) {
+            o.put("containerVariant", "bionic")
+        }
+        for (k in listOf("dxwrapper", "graphicsDriver", "graphicsDriverVersion")) {
+            if (o.optString(k).equals("other", ignoreCase = true)) o.remove(k)
+        }
+        if (o.optString("dxwrapperConfig").contains("version=other", ignoreCase = true)) {
+            o.remove("dxwrapper"); o.remove("dxwrapperConfig")
+        }
+        o.toString()
+    }.getOrDefault(content)
 
     /**
      * A game's GameNative reports ranked by GPU proximity (EXACT > FAMILY > LOWER > OTHER) then by
@@ -120,7 +144,8 @@ object EmuReadyService {
                     EmuReadyGpuMatch.Tier.LOWER -> "weaker GPU"
                     EmuReadyGpuMatch.Tier.OTHER -> "other GPU"
                 }
-                RankedListing(l.id, "${l.gpuModel ?: "?"} · ${l.performanceLabel} · $tierLabel")
+                val noteHint = l.notes?.let { " · 📝" } ?: ""
+                RankedListing(l.id, "${l.gpuModel ?: "?"} · ${l.performanceLabel} · $tierLabel$noteHint", l.notes)
             }
     }
 
