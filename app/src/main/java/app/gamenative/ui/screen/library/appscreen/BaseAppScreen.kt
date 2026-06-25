@@ -787,46 +787,19 @@ abstract class BaseAppScreen {
     ): AppMenuOption? {
         if (!supportsContainerConfig()) return null
         val scope = rememberCoroutineScope()
-        var pickerItems by remember { mutableStateOf<List<EmuReadyService.RankedListing>?>(null) }
-        var notesToShow by remember { mutableStateOf<String?>(null) }
-
-        notesToShow?.let { notes ->
-            AlertDialog(
-                onDismissRequest = { notesToShow = null },
-                title = { Text(stringResource(R.string.emuready_notes_title)) },
-                text = { Text(notes) },
-                confirmButton = { TextButton(onClick = { notesToShow = null }) { Text(stringResource(R.string.ok)) } },
-            )
+        var browser by remember {
+            mutableStateOf<Pair<String?, List<app.gamenative.ui.component.dialog.ConfigBrowserRow>>?>(null)
         }
 
-        pickerItems?.let { items ->
-            app.gamenative.ui.component.dialog.SingleChoiceDialog(
-                openDialog = true,
-                title = stringResource(R.string.emuready_config_picker_title),
-                items = items.map { it.label },
-                currentItem = -1,
-                onSelected = { idx ->
-                    val chosen = items[idx]
-                    pickerItems = null
-                    scope.launch(Dispatchers.IO) {
-                        val content = EmuReadyService.getEmulatorConfigContent(chosen.id)
-                        if (content.isNullOrBlank()) {
-                            SnackbarManager.show(context.getString(R.string.best_config_known_config_invalid))
-                            return@launch
-                        }
-                        // Sanitise (fix arm64ec variant, drop "other" placeholders so it doesn't falsely
-                        // reject), then reuse the proven import pipeline (write to a temp file ->
-                        // ContainerConfigTransfer.importConfig; EmuReady's keys match ContainerData).
-                        val sanitized = EmuReadyService.sanitizeGameNativeConfig(content)
-                        val tmp = java.io.File(context.cacheDir, "emuready_${libraryItem.appId}.json").apply { writeText(sanitized) }
-                        ContainerConfigTransfer.importConfig(context, libraryItem.appId, android.net.Uri.fromFile(tmp))
-                        SnackbarManager.show(context.getString(R.string.emuready_config_imported))
-                        // Surface the report's notes (they often hold the real DXVK version etc. that
-                        // EmuReady marks as "other") so the user can finish any manual settings.
-                        chosen.notes?.takeIf { it.isNotBlank() }?.let { notesToShow = it }
-                    }
+        browser?.let { (applied, rows) ->
+            app.gamenative.ui.component.dialog.ConfigBrowserDialog(
+                currentApplied = applied,
+                rows = rows,
+                onResetDefaults = {
+                    resetContainerToDefaults(context, libraryItem)
+                    recordAppliedConfig(context, libraryItem.appId, null)
                 },
-                onDismiss = { pickerItems = null },
+                onDismiss = { browser = null },
             )
         }
 
@@ -834,17 +807,68 @@ abstract class BaseAppScreen {
             optionType = AppOptionMenuType.ImportEmuReadyConfig,
             onClick = {
                 scope.launch(Dispatchers.IO) {
+                    val applied = readAppliedConfig(context, libraryItem.appId)
                     val gpu = com.winlator.core.GPUInformation.getRenderer(context)
-                    val rows = EmuReadyService.rankedListings(libraryItem.name, gpu)
-                    if (rows.isEmpty()) {
-                        SnackbarManager.show(context.getString(R.string.emuready_no_configs))
-                    } else {
-                        pickerItems = rows
+                    val rows = mutableListOf<app.gamenative.ui.component.dialog.ConfigBrowserRow>()
+                    // GameNative's own server-recommended config (best match for this game/GPU).
+                    rows.add(
+                        app.gamenative.ui.component.dialog.ConfigBrowserRow(
+                            source = "GameNative",
+                            label = context.getString(R.string.config_browser_gamenative_recommended),
+                            notes = null,
+                            onApply = {
+                                scope.launch(Dispatchers.IO) {
+                                    applyKnownConfigForLibraryItem(context, libraryItem)
+                                    recordAppliedConfig(context, libraryItem.appId, "GameNative")
+                                }
+                            },
+                        ),
+                    )
+                    // EmuReady community reports, ranked closest-hardware-first, with their notes.
+                    EmuReadyService.rankedListings(libraryItem.name, gpu).forEach { l ->
+                        rows.add(
+                            app.gamenative.ui.component.dialog.ConfigBrowserRow(
+                                source = "EmuReady",
+                                label = l.label,
+                                notes = l.notes,
+                                onApply = {
+                                    scope.launch(Dispatchers.IO) {
+                                        val content = EmuReadyService.getEmulatorConfigContent(l.id)
+                                        if (content.isNullOrBlank()) {
+                                            SnackbarManager.show(context.getString(R.string.best_config_known_config_invalid))
+                                            return@launch
+                                        }
+                                        // Sanitise (fix arm64ec variant, drop "other" placeholders), then
+                                        // reuse the proven import pipeline (temp file -> importConfig).
+                                        val sanitized = EmuReadyService.sanitizeGameNativeConfig(content)
+                                        val tmp = java.io.File(context.cacheDir, "emuready_${libraryItem.appId}.json").apply { writeText(sanitized) }
+                                        ContainerConfigTransfer.importConfig(context, libraryItem.appId, android.net.Uri.fromFile(tmp))
+                                        recordAppliedConfig(context, libraryItem.appId, "EmuReady · ${l.label}")
+                                        SnackbarManager.show(context.getString(R.string.emuready_config_imported))
+                                    }
+                                },
+                            ),
+                        )
                     }
+                    browser = applied to rows
                 }
             },
         )
     }
+
+    /** Records which known-config profile was last applied to the container (for the browser's "Applied: …"). */
+    private fun recordAppliedConfig(context: Context, appId: String, label: String?) {
+        runCatching {
+            val c = ContainerUtils.getOrCreateContainer(context, appId)
+            c.putExtra("lastAppliedConfig", label)
+            c.saveData()
+        }
+    }
+
+    private fun readAppliedConfig(context: Context, appId: String): String? =
+        runCatching {
+            ContainerUtils.getOrCreateContainer(context, appId).getExtra("lastAppliedConfig", "").ifBlank { null }
+        }.getOrNull()
 
     /**
      * Shared helper to fetch and apply a "known config" for a given game/library item.
